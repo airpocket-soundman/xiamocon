@@ -1,3 +1,8 @@
+/**
+ * @file input.h
+ * @brief Input handling for XMC library
+ */
+
 #ifndef XMC_INPUT_H
 #define XMC_INPUT_H
 

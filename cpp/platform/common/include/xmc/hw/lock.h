@@ -1,3 +1,8 @@
+/**
+ * @file lock.h
+ * @brief Locking primitives for synchronization
+ */
+
 #ifndef XMC_HW_LOCK_HPP
 #define XMC_HW_LOCK_HPP
 

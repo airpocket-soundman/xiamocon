@@ -1,3 +1,8 @@
+/**
+ * @file ioex.h
+ * @brief IO Expander interface for XMC library
+ */
+
 #ifndef XMC_IOEX_H
 #define XMC_IOEX_H
 

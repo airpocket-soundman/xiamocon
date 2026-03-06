@@ -1,3 +1,8 @@
+/**
+ * @file gpio.h
+ * @brief GPIO hardware interface
+ */
+
 #ifndef XMC_HW_GPIO_H
 #define XMC_HW_GPIO_H
 

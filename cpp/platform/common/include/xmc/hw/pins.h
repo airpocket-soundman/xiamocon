@@ -1,3 +1,8 @@
+/**
+ * @file pins.h
+ * @brief Pin definitions for XMC hardware
+ */
+
 #ifndef XMC_HW_PINS_H
 #define XMC_HW_PINS_H
 

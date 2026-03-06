@@ -1,3 +1,8 @@
+/**
+ * @file display.h
+ * @brief Display interface for XMC library
+ */
+
 #ifndef XMC_DISPLAY_HPP
 #define XMC_DISPLAY_HPP
 

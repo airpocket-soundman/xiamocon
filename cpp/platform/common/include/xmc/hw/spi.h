@@ -1,3 +1,8 @@
+/**
+ * @file spi.h
+ * @brief SPI hardware interface
+ */
+
 #ifndef XMC_HW_SPI_H
 #define XMC_HW_SPI_H
 

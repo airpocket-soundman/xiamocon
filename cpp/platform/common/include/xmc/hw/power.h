@@ -1,3 +1,8 @@
+/**
+ * @file power.h
+ * @brief Power management interface
+ */
+
 #ifndef XMC_HW_POWER_H
 #define XMC_HW_POWER_H
 
@@ -11,7 +16,7 @@ extern "C" {
 
 /** Reset modes for xmc_power_reset. */
 typedef enum {
-    /** Normal reset mode */
+  /** Normal reset mode */
   XMC_RESET_MODE_NORMAL = 0,
 } xmc_reset_mode_t;
 

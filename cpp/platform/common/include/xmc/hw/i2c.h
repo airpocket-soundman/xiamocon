@@ -1,3 +1,8 @@
+/**
+ * @file i2c.h
+ * @brief I2C hardware interface
+ */
+
 #ifndef XMC_HW_I2C_H
 #define XMC_HW_I2C_H
 

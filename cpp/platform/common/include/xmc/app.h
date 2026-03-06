@@ -1,3 +1,8 @@
+/**
+ * @file app.h
+ * @brief User application interface
+ */
+
 #ifndef XMC_APP_H
 #define XMC_APP_H
 

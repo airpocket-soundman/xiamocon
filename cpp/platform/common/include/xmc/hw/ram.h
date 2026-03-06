@@ -1,3 +1,8 @@
+/**
+ * @file ram.h
+ * @brief RAM management interface
+ */
+
 #ifndef XMC_HW_RAM_H
 #define XMC_HW_RAM_H
 

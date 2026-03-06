@@ -22,7 +22,7 @@ struct rect_t {
 
   /** Get the x-coordinate of the right edge of the rectangle */
   inline int right() const { return x + width; }
-  
+
   /** Get the y-coordinate of the bottom edge of the rectangle */
   inline int bottom() const { return y + height; }
 

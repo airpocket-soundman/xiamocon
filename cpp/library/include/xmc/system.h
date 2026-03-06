@@ -1,3 +1,8 @@
+/**
+ * @file system.h
+ * @brief System-level functions for Xiamocon
+ */
+
 #ifndef XMC_SYSTEM_H
 #define XMC_SYSTEM_H
 

@@ -1,3 +1,8 @@
+/**
+ * @file geo_common.hpp
+ * @brief Common geometric utilities
+ */
+
 #ifndef XMC_GEO_GEO_COMMON_HPP
 #define XMC_GEO_GEO_COMMON_HPP
 

@@ -1,3 +1,8 @@
+/**
+ * @file timer.h
+ * @brief Timer hardware interface
+ */
+
 #ifndef XMC_HW_TIMER_HPP
 #define XMC_HW_TIMER_HPP
 
