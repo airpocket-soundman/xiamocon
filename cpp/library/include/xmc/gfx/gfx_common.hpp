@@ -7,7 +7,9 @@
 
 namespace xmc {
 
+/** Pixel formats for sprites and display interfaces. */
 enum class pixel_format_t {
+  /** 12-bit RGB format (4 bits per channel) */
   RGB444,
 };
 

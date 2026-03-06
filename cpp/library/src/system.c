@@ -6,6 +6,7 @@
 #include "xmc/hw/power.h"
 #include "xmc/hw/spi.h"
 #include "xmc/hw/timer.h"
+#include "xmc/input.h"
 #include "xmc/ioex.h"
 
 xmc_status_t xmc_sys_init() {
@@ -35,17 +36,20 @@ xmc_status_t xmc_sys_init() {
 
   xmc_display_init(XMC_DISP_INTF_FORMAT_RGB444, 0);
 
+  xmc_input_init();
+
   return XMC_OK;
 }
 
-xmc_status_t xmc_sys_shutdown() {
+xmc_status_t xmc_sys_request_shutdown() {
+  xmc_display_deinit();
+  xmc_input_deinit();
   xmc_ioex_set_dir(XMC_IOEX_PIN_DISPLAY_RESET, false);
   xmc_ioex_set_dir(XMC_IOEX_PIN_INT_MUTE, false);
   xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, true);
   xmc_ioex_deinit();
   xmc_i2c_deinit();
   xmc_spi_deinit();
-  xmc_i2c_deinit();
   XMC_ERR_RET(xmc_power_deep_sleep());
   XMC_ERR_RET(xmc_power_reset(XMC_RESET_MODE_NORMAL));
   return XMC_OK;

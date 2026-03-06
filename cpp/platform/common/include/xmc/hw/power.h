@@ -5,13 +5,30 @@
 
 #include <stdint.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+/** Reset modes for xmc_power_reset. */
 typedef enum {
-    XMC_RESET_MODE_NORMAL = 0,
+    /** Normal reset mode */
+  XMC_RESET_MODE_NORMAL = 0,
 } xmc_reset_mode_t;
 
+/** Initialize the power management functionality. */
 xmc_status_t xmc_power_init();
+
+/** Service the power management functionality. */
 xmc_status_t xmc_power_service();
+
+/** Enter deep sleep mode. */
 xmc_status_t xmc_power_deep_sleep();
+
+/** Reset entire system. */
 xmc_status_t xmc_power_reset(xmc_reset_mode_t mode);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif

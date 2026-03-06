@@ -8,6 +8,16 @@
 
 namespace xmc {
 
+/**
+ * Base class for sprites. This is a template class that takes a pixel format
+ * and a pixel type as template parameters. The pixel format is used to
+ * determine how the pixel data is stored. The pixel type is used to represent
+ * the color of a pixel in the sprite. The Sprite class provides basic
+ * functionality for managing a sprite, such as setting and getting pixel
+ * values, filling rectangles, and starting a transfer to the display. The
+ * actual implementation of these functions is left to derived classes that
+ * specialize the template for specific pixel formats and types.
+ */
 template <pixel_format_t prm_PIXEL_FORMAT, typename pixel_t>
 class Sprite {
  public:

@@ -5,8 +5,10 @@
 
 namespace xmc {
 
+/** Calculate the stride (in bytes) for a 12-bit RGB444 image */
 static inline uint32_t stride444(int width) { return (width * 12 + 7) / 8; }
 
+/** Sprite class for 12-bit RGB444 images */
 class Sprite444 : public Sprite<pixel_format_t::RGB444, uint16_t> {
  public:
   Sprite444(int width, int height, xmc_ram_cap_t caps = XMC_RAM_CAP_DMA)
