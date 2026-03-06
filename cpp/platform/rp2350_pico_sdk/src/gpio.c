@@ -7,10 +7,9 @@
 extern "C" {
 #endif
 
-xmc_status_t xmc_gpio_set_dir(int pin, bool output) {
+void xmc_gpio_set_dir(int pin, bool output) {
   gpio_init(pin);
   gpio_set_dir(pin, output ? GPIO_OUT : GPIO_IN);
-  return XMC_OK;
 }
 
 void xmc_gpio_write(int pin, bool value) { gpio_put(pin, value ? 1 : 0); }

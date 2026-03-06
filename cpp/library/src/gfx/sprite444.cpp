@@ -1,6 +1,8 @@
 #include "xmc/gfx/sprite444.hpp"
 #include "xmc/display.h"
 
+#include <string.h>
+
 namespace xmc {
 
 void Sprite444::set_pixel(int x, int y, uint16_t color) {
@@ -33,10 +35,24 @@ void Sprite444::on_fill_rect(int x, int y, int width, int height,
                              uint16_t color) {
   if (width <= 0 || height <= 0) return;
 
-  // todo: optimize
-  for (int j = 0; j < height; j++) {
-    for (int i = 0; i < width; i++) {
-      set_pixel(x + i, y + j, color);
+  for (int i = 0; i < width; i++) {
+    set_pixel(x + i, y, color);
+  }
+  int copy_l = (x + 1) & 0xFFFFFFFE;
+  int copy_r = (x + width) & 0xFFFFFFFE;
+  int copy_offset = copy_l * 3 / 2;
+  int copy_bytes = (copy_r - copy_l) * 3 / 2;
+  uint8_t *copy_src = (uint8_t *)line_ptr(y) + copy_offset;
+  for (int j = 1; j < height; j++) {
+    uint8_t *copy_dst = (uint8_t *)line_ptr(y + j) + copy_offset;
+    if (copy_bytes > 0) {
+      memcpy(copy_dst, copy_src, copy_bytes);
+    }
+    if (x & 1) {
+      set_pixel(x, y + j, color);
+    }
+    if (width >= 2 && ((x + width) & 1)) {
+      set_pixel(x + width - 1, y + j, color);
     }
   }
 }
