@@ -17,15 +17,34 @@ extern "C" {
  * Button definitions.
  */
 typedef enum {
+  /** Button A */
   XMC_BUTTON_A = (1 << XMC_IOEX_PIN_BTN_A),
+
+  /** Button B */
   XMC_BUTTON_B = (1 << XMC_IOEX_PIN_BTN_B),
+
+  /** Button X */
   XMC_BUTTON_X = (1 << XMC_IOEX_PIN_BTN_X),
+
+  /** Button Y */
   XMC_BUTTON_Y = (1 << XMC_IOEX_PIN_BTN_Y),
+
+  /** Button Up */
   XMC_BUTTON_UP = (1 << XMC_IOEX_PIN_BTN_UP),
+
+  /** Button Down */
   XMC_BUTTON_DOWN = (1 << XMC_IOEX_PIN_BTN_DOWN),
+
+  /** Button Left */
   XMC_BUTTON_LEFT = (1 << XMC_IOEX_PIN_BTN_LEFT),
+
+  /** Button Right */
   XMC_BUTTON_RIGHT = (1 << XMC_IOEX_PIN_BTN_RIGHT),
+
+  /** Function Button */
   XMC_BUTTON_FUNC = (1 << XMC_IOEX_PIN_BTN_FUNC),
+
+  /** Bitmask for all buttons */
   XMC_BUTTON_ALL = (XMC_BUTTON_A | XMC_BUTTON_B | XMC_BUTTON_X | XMC_BUTTON_Y |
                     XMC_BUTTON_UP | XMC_BUTTON_DOWN | XMC_BUTTON_LEFT |
                     XMC_BUTTON_RIGHT | XMC_BUTTON_FUNC),

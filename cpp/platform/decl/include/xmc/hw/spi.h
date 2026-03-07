@@ -7,6 +7,7 @@
 #define XMC_HW_SPI_H
 
 #include "xmc/hw/hw_common.h"
+#include "xmc/hw/dma.h"
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -137,7 +137,7 @@ xmc_status_t xmc_spi_dma_write_start(const xmc_dma_config_t *cfg, int cs) {
     default: return XMC_ERR_DMA_BAD_ELEMENT_SIZE;
   }
   channel_config_set_transfer_data_size(&dma_cfg, tx_size);
-  channel_config_set_read_increment(&dma_cfg, cfg->increment);
+  channel_config_set_read_increment(&dma_cfg, true);
 
   if (cs >= 0) {
     xmc_gpio_write(cs, 0);

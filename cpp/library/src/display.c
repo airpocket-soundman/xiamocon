@@ -233,7 +233,6 @@ xmc_status_t xmc_display_write_pixels_start(const void *data,
       .ptr = (void *)data,
       .element_size = 1,
       .length = num_bytes,
-      .increment = !repeated,
   };
   xmc_status_t sts = xmc_spi_dma_write_start(&cfg, XMC_PIN_DISPLAY_CS);
   if (sts != XMC_OK) {

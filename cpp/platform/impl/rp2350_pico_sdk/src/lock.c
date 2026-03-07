@@ -11,7 +11,7 @@ typedef struct {
   spin_lock_t *hw_lock;
   uint32_t irqs;
   int id;
-} spin_lock_handle_t;
+} spin_lock_hw_t;
 
 #if defined(__cplusplus)
 extern "C" {
@@ -23,35 +23,34 @@ xmc_status_t xmc_spinlock_init(xmc_spinlock_t *lock) {
     XMC_ERR_RET(XMC_ERR_SPINLOCK_INIT_FAILED);
   }
 
-  spin_lock_handle_t *handle =
-      (spin_lock_handle_t *)malloc(sizeof(spin_lock_handle_t));
-  handle->hw_lock = spin_lock_init(id);
-  handle->id = id;
-  lock->handle = handle;
+  spin_lock_hw_t *hw = (spin_lock_hw_t *)malloc(sizeof(spin_lock_hw_t));
+  hw->hw_lock = spin_lock_init(id);
+  hw->id = id;
+  lock->handle = hw;
   spin_lock_claim(id);
   used_spinlocks |= (1U << id);
   return XMC_OK;
 }
 
 void xmc_spinlock_deinit(xmc_spinlock_t *lock) {
-  spin_lock_handle_t *handle = (spin_lock_handle_t *)(lock->handle);
-  if (!handle) return;
-  spin_lock_unclaim(handle->id);
-  used_spinlocks &= ~(1U << handle->id);
-  free(handle);
+  spin_lock_hw_t *hw = (spin_lock_hw_t *)(lock->handle);
+  if (!hw) return;
+  spin_lock_unclaim(hw->id);
+  used_spinlocks &= ~(1U << hw->id);
+  free(hw);
   lock->handle = NULL;
 }
 
 void xmc_spinlock_get(xmc_spinlock_t *lock) {
-  spin_lock_handle_t *handle = (spin_lock_handle_t *)(lock->handle);
-  if (!handle) return;
-  handle->irqs = spin_lock_blocking(handle->hw_lock);
+  spin_lock_hw_t *hw = (spin_lock_hw_t *)(lock->handle);
+  if (!hw) return;
+  hw->irqs = spin_lock_blocking(hw->hw_lock);
 }
 
 void xmc_spinlock_release(xmc_spinlock_t *lock) {
-  spin_lock_handle_t *handle = (spin_lock_handle_t *)(lock->handle);
-  if (!handle) return;
-  spin_unlock(handle->hw_lock, handle->irqs);
+  spin_lock_hw_t *hw = (spin_lock_hw_t *)(lock->handle);
+  if (!hw) return;
+  spin_unlock(hw->hw_lock, hw->irqs);
 }
 
 xmc_status_t xmc_semaphore_init(xmc_semaphore_t *sem) {

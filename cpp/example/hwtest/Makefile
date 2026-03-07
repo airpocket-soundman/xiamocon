@@ -23,20 +23,20 @@ APP_CPP_LIST = \
 	$(wildcard $(APP_SRC_DIR)/*.cpp) \
 	$(wildcard $(APP_SRC_DIR)/*.c)
 
-PFM_COMMON_INC_DIR = $(REPO_DIR)/cpp/platform/common/include
-PFM_COMMON_SRC_DIR = $(REPO_DIR)/cpp/platform/common/src
-PFM_BOARD_INC_DIR = $(REPO_DIR)/cpp/platform/rp2350_pico_sdk/include
-PFM_BOARD_SRC_DIR = $(REPO_DIR)/cpp/platform/rp2350_pico_sdk/src
+PFM_DECL_INC_DIR = $(REPO_DIR)/cpp/platform/decl/include
+PFM_DECL_SRC_DIR = $(REPO_DIR)/cpp/platform/decl/src
+PFM_IMPL_INC_DIR = $(REPO_DIR)/cpp/platform/impl/rp2350_pico_sdk/include
+PFM_IMPL_SRC_DIR = $(REPO_DIR)/cpp/platform/impl/rp2350_pico_sdk/src
 PFM_HPP_LIST = \
-	$(wildcard $(PFM_COMMON_INC_DIR)/*.hpp) \
-	$(wildcard $(PFM_COMMON_INC_DIR)/*.h) \
-	$(wildcard $(PFM_BOARD_INC_DIR)/*.hpp) \
-	$(wildcard $(PFM_BOARD_INC_DIR)/*.h)
+	$(wildcard $(PFM_DECL_INC_DIR)/*.hpp) \
+	$(wildcard $(PFM_DECL_INC_DIR)/*.h) \
+	$(wildcard $(PFM_IMPL_INC_DIR)/*.hpp) \
+	$(wildcard $(PFM_IMPL_INC_DIR)/*.h)
 PFM_CPP_LIST = \
-	$(wildcard $(PFM_COMMON_SRC_DIR)/*.cpp) \
-	$(wildcard $(PFM_COMMON_SRC_DIR)/*.c) \
-	$(wildcard $(PFM_BOARD_SRC_DIR)/*.cpp) \
-	$(wildcard $(PFM_BOARD_SRC_DIR)/*.c)
+	$(wildcard $(PFM_DECL_SRC_DIR)/*.cpp) \
+	$(wildcard $(PFM_DECL_SRC_DIR)/*.c) \
+	$(wildcard $(PFM_IMPL_SRC_DIR)/*.cpp) \
+	$(wildcard $(PFM_IMPL_SRC_DIR)/*.c)
 
 LIB_INC_DIR = $(REPO_DIR)/cpp/library/include
 LIB_SRC_DIR = $(REPO_DIR)/cpp/library/src
