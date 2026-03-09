@@ -10,6 +10,8 @@
 #include <pico/stdlib.h>
 #include <string.h>
 
+static const uint32_t PDM_MIN_PDM_FREQ_HZ = 3000000;
+
 typedef struct {
   xmc_sdac_config_t cfg;
   xmc_audio_source_port_t *source;
@@ -19,14 +21,17 @@ typedef struct {
   int dma_ch;
   int next_write_bank;
   int next_read_bank;
-  uint8_t *source_buff;
+  uint8_t *src_fmt_buff;
+  int16_t *s16_buff;
   uint32_t *dma_buff;
+  // uint16_t dither_phase;
+  uint32_t extra_oversample;
   int32_t pdm_last_input;
   int32_t pdm_last_qt;
   int32_t pdm_work0;
   int32_t pdm_work1;
-  int32_t pdm_work2;
-  int32_t pdm_work3;
+  // int32_t pdm_work2;
+  // int32_t pdm_work3;
   uint32_t pdm_lfsr;
 } xmc_sdac_hw_t;
 
@@ -74,28 +79,48 @@ xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
   hw->cfg = *cfg;
   hw->pdm_work0 = 0;
   hw->pdm_work1 = 0;
-  hw->pdm_work2 = 0;
-  hw->pdm_work3 = 0;
+  // hw->pdm_work2 = 0;
+  // hw->pdm_work3 = 0;
   hw->pdm_last_input = 0;
   hw->pdm_lfsr = 0xFFFFFFFF;
+
+  uint32_t sys_clk_freq = clock_get_hz(clk_sys);
+  uint32_t pdm_clk_freq = hw->cfg.format.sample_rate_hz * 32;
+  hw->extra_oversample =
+      (PDM_MIN_PDM_FREQ_HZ + pdm_clk_freq - 1) / pdm_clk_freq;
+  if (hw->extra_oversample < 1) hw->extra_oversample = 1;
+  pdm_clk_freq *= hw->extra_oversample;
 
   if ((cfg->format.sample_format & SUPPORTED_FORMATS) == 0) {
     XMC_ERR_RET(XMC_ERR_SPEAKER_UNSUPPORTED_FORMAT);
   }
 
-  int bytes_per_sample =
-      xmc_audio_get_bytes_per_sample(hw->cfg.format.sample_format);
-  hw->source_buff = malloc(hw->cfg.latency_samples * bytes_per_sample);
-  if (!hw->source_buff) {
+  if (cfg->format.sample_format != XMC_SAMPLE_LINEAR_PCM_S16_MONO) {
+    int bytes_per_sample =
+        xmc_audio_get_bytes_per_sample(hw->cfg.format.sample_format);
+    hw->src_fmt_buff = malloc(hw->cfg.latency_samples * bytes_per_sample);
+    if (!hw->src_fmt_buff) {
+      xmc_sdac_deinit(inst);
+      return XMC_ERR_RAM_ALLOC_FAILED;
+    }
+  } else {
+    hw->src_fmt_buff = NULL;
+  }
+
+  hw->s16_buff = malloc(hw->cfg.latency_samples * sizeof(int16_t));
+  if (!hw->s16_buff) {
     xmc_sdac_deinit(inst);
     return XMC_ERR_RAM_ALLOC_FAILED;
   }
-  hw->dma_buff = xmc_malloc(hw->cfg.latency_samples * sizeof(uint32_t) * 2,
-                            XMC_RAM_CAP_DMA);
+
+  uint32_t dma_buff_size =
+      hw->cfg.latency_samples * hw->extra_oversample * sizeof(uint32_t) * 2;
+  hw->dma_buff = xmc_malloc(dma_buff_size, XMC_RAM_CAP_DMA);
   if (!hw->dma_buff) {
     xmc_sdac_deinit(inst);
     return XMC_ERR_RAM_ALLOC_FAILED;
   }
+
   hw->next_write_bank = 0;
   hw->next_read_bank = 0;
 
@@ -106,8 +131,6 @@ xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
   hw->pio_offset = pio_add_program(hw->pio, &pio_program);
   hw->pio_sm = pio_claim_unused_sm(hw->pio, true);
 
-  uint32_t sys_clk_freq = clock_get_hz(clk_sys);
-  uint32_t pdm_clk_freq = hw->cfg.format.sample_rate_hz * 32;
   pio_sm_config pio_cfg = pio_get_default_sm_config();
   sm_config_set_wrap(&pio_cfg, hw->pio_offset + 0, hw->pio_offset + 0);
   sm_config_set_out_pins(&pio_cfg, pin, 1);
@@ -138,7 +161,8 @@ xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
   channel_config_set_write_increment(&dma_cfg, false);
   channel_config_set_dreq(&dma_cfg, pio_get_dreq(hw->pio, hw->pio_sm, true));
   dma_channel_configure(hw->dma_ch, &dma_cfg, &hw->pio->txf[hw->pio_sm],
-                        hw->dma_buff, hw->cfg.latency_samples, false);
+                        hw->dma_buff,
+                        hw->cfg.latency_samples * hw->extra_oversample, false);
 
   fill_buffer(inst);
   fill_buffer(inst);
@@ -158,9 +182,13 @@ xmc_status_t xmc_sdac_deinit(xmc_sdac_inst_t *inst) {
       irq_set_enabled(DMA_IRQ_0, false);
       hw->dma_ch = -1;
     }
-    if (hw->source_buff) {
-      free(hw->source_buff);
-      hw->source_buff = NULL;
+    if (hw->src_fmt_buff) {
+      free(hw->src_fmt_buff);
+      hw->src_fmt_buff = NULL;
+    }
+    if (hw->s16_buff) {
+      free(hw->s16_buff);
+      hw->s16_buff = NULL;
     }
     if (hw->dma_buff) {
       xmc_free(hw->dma_buff);
@@ -205,77 +233,99 @@ static void dma_handler(void *context) {
 static void fill_buffer(xmc_sdac_inst_t *inst) {
   xmc_sdac_hw_t *hw = (xmc_sdac_hw_t *)inst->hw;
 
-  uint32_t *dst =
-      hw->dma_buff + (hw->next_write_bank * hw->cfg.latency_samples);
+  uint32_t dst_samples = hw->cfg.latency_samples * hw->extra_oversample;
+  uint32_t *dst = hw->dma_buff + (hw->next_write_bank * dst_samples);
 
   if (inst->source.request_data) {
     uint32_t buff_size_bytes =
         hw->cfg.latency_samples *
         xmc_audio_get_bytes_per_sample(hw->cfg.format.sample_format);
-    if (hw->cfg.format.sample_format == XMC_SAMPLE_LINEAR_PCM_U8_MONO) {
-      memset(hw->source_buff, 0x80, buff_size_bytes);
-    } else {
-      memset(hw->source_buff, 0x00, buff_size_bytes);
-    }
-    inst->source.request_data(hw->source_buff, hw->cfg.latency_samples,
-                              inst->source.context);
-
     switch (hw->cfg.format.sample_format) {
       default:
-      case XMC_SAMPLE_LINEAR_PCM_U8_MONO: {
+      case XMC_SAMPLE_LINEAR_PCM_S16_MONO:
+        memset(hw->s16_buff, 0x00, buff_size_bytes);
+        inst->source.request_data(hw->s16_buff, hw->cfg.latency_samples,
+                                  inst->source.context);
+        break;
+      case XMC_SAMPLE_LINEAR_PCM_U8_MONO:
+        memset(hw->src_fmt_buff, 0x80, buff_size_bytes);
+        inst->source.request_data(hw->src_fmt_buff, hw->cfg.latency_samples,
+                                  inst->source.context);
         for (int i = 0; i < hw->cfg.latency_samples; i++) {
-          dst[i] = (uint32_t)hw->source_buff[i];
+          hw->s16_buff[i] = ((int16_t)hw->src_fmt_buff[i] - 128) << 8;
         }
-      } break;
-      case XMC_SAMPLE_LINEAR_PCM_S16_MONO: {
-        int16_t *src = (int16_t *)hw->source_buff;
-        int32_t last_input = hw->pdm_last_input;
-        int32_t last_qt = hw->pdm_last_qt;
-        for (int i = 0; i < hw->cfg.latency_samples; i++) {
-          uint32_t pdm_output = 0;
-          int32_t new_input = src[i] * 0x100;
+        break;
+    }
 
-          update_lfsr(&(hw->pdm_lfsr));
-          // update_lfsr(&(hw->pdm_lfsr));
-          // update_lfsr(&(hw->pdm_lfsr));
-          // update_lfsr(&(hw->pdm_lfsr));
-          // uint32_t dither = hw->pdm_lfsr;
-          new_input += (hw->pdm_lfsr & 0x3FFF) - 0x2000;
-          for (int j = 0; j < 32; j++) {
+    int16_t *src = (int16_t *)hw->s16_buff;
+    int32_t last_input = hw->pdm_last_input;
+    int32_t last_qt = hw->pdm_last_qt;
+    for (int isrc = 0; isrc < hw->cfg.latency_samples; isrc++) {
+      int32_t new_input = src[isrc] * 0x100 + 0x1000;
+
+      for (int ieos = 0; ieos < hw->extra_oversample; ieos++) {
+        uint32_t pdm_output = 0;
+        // update_lfsr(&(hw->pdm_lfsr));
+        // update_lfsr(&(hw->pdm_lfsr));
+        // update_lfsr(&(hw->pdm_lfsr));
+        // uint32_t dither = hw->pdm_lfsr;
+        update_lfsr(&(hw->pdm_lfsr));
+        int32_t dither = (int32_t)(hw->pdm_lfsr & 0x4) - 0x2;
+        // uint32_t noise = hw->pdm_lfsr;
+        //  int32_t dither = (hw->pdm_lfsr & 0xF) - 0x8;
+        //  new_input += (noise & 0x2) - 0x1;
 #if 0
             // todo: use interpolator
             int32_t over_sample = (new_input * j + last_input * (32 - j)) / 32;
 #else
-            int32_t over_sample = new_input;
+        int32_t over_sample = new_input ;
 #endif
-            // over_sample += ((dither & 1) * 2 - 1) * 0x800;
-            // dither >>= 1;
-            // int32_t d = ((dither & 1) * 2 - 1) * 0x400;
-            // dither >>= 1;
+        for (int ibit = 0; ibit < 32; ibit++) {
+          // over_sample += ((dither & 1) * 2 - 1) * 0x800;
+          // dither >>= 1;
+          // int32_t dither = ((noise & 1) * 2 - 1) * 0xFF;
+          // noise >>= 1;
 
-            hw->pdm_work0 += over_sample - last_qt;
-            hw->pdm_work1 += hw->pdm_work0 - last_qt;
+          // over_sample += dither;
 
-            // hw->pdm_work2 += hw->pdm_work1 - last_qt;
-            // hw->pdm_work3 += hw->pdm_work2 - last_qt;
-            pdm_output >>= 1;
-            if (hw->pdm_work1 >= 0) {
-              pdm_output |= 0x80000000;
-              last_qt = 0x1000000;
-            } else {
-              last_qt = -0x1000000;
-            }
+          // const int dither_period = 0x80;
+          // const int dither_amp = 4;
+          // hw->dither_phase = (hw->dither_phase + 1) & (dither_period - 1);
+          // int32_t dither = hw->dither_phase;
+          // if (dither >= dither_period / 2) {
+          //   dither = dither_period - dither;
+          // }
+          // dither -= dither_period / 4;
+          // dither *= dither_amp;
+
+          hw->pdm_work0 += over_sample - last_qt;
+          hw->pdm_work1 += hw->pdm_work0 - last_qt;
+
+          // hw->pdm_work1 += dither;
+          // update_lfsr(&(hw->pdm_lfsr));
+          // int32_t dither = (int32_t)(hw->pdm_lfsr & 0xFFFF) - 0x8000;
+
+          // hw->pdm_work2 += hw->pdm_work1 - last_qt;
+          // hw->pdm_work3 += hw->pdm_work2 - last_qt;
+          pdm_output >>= 1;
+          if (hw->pdm_work1 >= 0) {
+            pdm_output |= 0x80000000;
+            last_qt = 0xFEDCBA;
+          } else {
+            last_qt = -0xFEDCBA;
           }
-          last_input = new_input;
-          dst[i] = pdm_output;
         }
-        hw->pdm_last_input = last_input;
-        hw->pdm_last_qt = last_qt;
-      } break;
+        last_input = new_input;
+        dst[isrc * hw->extra_oversample + ieos] = pdm_output;
+        // hw->pdm_work0 -= hw->pdm_work0 / 256;
+        // hw->pdm_work1 -= hw->pdm_work1 / 256;
+      }
+      hw->pdm_last_input = last_input;
+      hw->pdm_last_qt = last_qt;
     }
   } else {
     uint32_t sample = 0x55555555;
-    for (int i = 0; i < hw->cfg.latency_samples; i++) {
+    for (int i = 0; i < dst_samples; i++) {
       dst[i] = sample;
     }
   }
@@ -285,8 +335,8 @@ static void fill_buffer(xmc_sdac_inst_t *inst) {
 static void start_next_dma(xmc_sdac_inst_t *inst) {
   xmc_sdac_hw_t *hw = (xmc_sdac_hw_t *)inst->hw;
 
+  uint32_t dst_samples = hw->cfg.latency_samples * hw->extra_oversample;
   dma_channel_set_read_addr(
-      hw->dma_ch, hw->dma_buff + (hw->next_read_bank * hw->cfg.latency_samples),
-      true);
+      hw->dma_ch, hw->dma_buff + (hw->next_read_bank * dst_samples), true);
   hw->next_read_bank = (hw->next_read_bank + 1) % 2;
 }
