@@ -20,6 +20,9 @@ class Sprite444 : public Sprite<pixel_format_t::RGB444, uint16_t> {
   uint16_t get_pixel(int x, int y) const override;
   void on_fill_rect(int x, int y, int w, int h, uint16_t color) override;
   xmc_status_t start_transfer_to_display(int x, int y) override;
+
+  xmc_status_t draw_image(const Sprite4444& image, int dx, int dy, int w, int h,
+                          int sx, int sy);
 };
 
 }  // namespace xmc

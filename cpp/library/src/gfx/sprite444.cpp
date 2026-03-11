@@ -1,5 +1,7 @@
 #include "xmc/gfx/sprite444.hpp"
 #include "xmc/display.h"
+#include "xmc/geo.hpp"
+#include "xmc/gfx/sprite4444.hpp"
 
 #include <string.h>
 
@@ -60,6 +62,37 @@ void Sprite444::on_fill_rect(int x, int y, int width, int height,
 xmc_status_t Sprite444::start_transfer_to_display(int x, int y) {
   XMC_ERR_RET(xmc_display_set_window(x, y, width, height));
   XMC_ERR_RET(xmc_display_write_pixels_start(data, stride * height, false));
+  return XMC_OK;
+}
+
+xmc_status_t Sprite444::draw_image(const Sprite4444 &image, int dx, int dy,
+                                   int w, int h, int sx, int sy) {
+  rect_t view = {0, 0, width, height};
+  rect_t dst = {dx, dy, w, h};
+  dst = dst.intersect(view);
+  if (dst.width <= 0 || dst.height <= 0) return XMC_OK;
+  sx += dst.x - dx;
+  sy += dst.y - dy;
+  dx = dst.x;
+  dy = dst.y;
+  w = dst.width;
+  h = dst.height;
+  rect_t img = {0, 0, image.width, image.height};
+  rect_t src = {sx, sy, w, h};
+  src = src.intersect(img);
+  if (src.width <= 0 || src.height <= 0) return XMC_OK;
+  dx += src.x - sx;
+  dy += src.y - sy;
+  w = src.width;
+  h = src.height;
+
+  for (int j = 0; j < h; j++) {
+    for (int i = 0; i < w; i++) {
+      uint16_t c = image.get_pixel(sx + i, sy + j);
+      if ((c & 0xF000) == 0) continue;
+      set_pixel(dx + i, dy + j, c);
+    }
+  }
   return XMC_OK;
 }
 

@@ -8,7 +8,7 @@
 static const uint32_t SYS_CLK_FREQ = 250000000;
 
 int main() {
-#if 0
+#if 1
   vreg_set_voltage(VREG_VOLTAGE_1_30);
   sleep_ms(100);
   set_sys_clock_khz(SYS_CLK_FREQ / 1000, true);

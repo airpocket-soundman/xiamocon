@@ -22,6 +22,7 @@ void Tone::init(uint32_t rate_hz) {
   release_ms = 0;
 
   tone_phase_step = 0;
+  noise_lfsr = 0xFFFF;
   tone_phase_counter = 0;
   length_counter = 0;
   envelope_state = EnvelopeState::IDLE;
@@ -116,11 +117,17 @@ void Tone::render(int16_t *buffer, uint32_t num_samples) {
           raw -= 0x8000;
           break;
         case Waveform::SAWTOOTH: raw += p - 0x8000; break;
+        case Waveform::NOISE: raw += (int32_t)noise_lfsr - 0x8000; break;
       }
     }
     raw /= OVERSAMPLING;
 
+    uint16_t last_phase = tone_phase_counter;
     tone_phase_counter += tone_phase_step;
+    if (waveform == Waveform::NOISE &&
+        (last_phase & 0x400) != (tone_phase_counter & 0x400)) {
+      noise_lfsr = (noise_lfsr >> 1) ^ (-(noise_lfsr & 1) & 0xB400);
+    }
 
     uint32_t amp = envelope_amp_curr;
     amp = (amp * amp) / 0x10000;

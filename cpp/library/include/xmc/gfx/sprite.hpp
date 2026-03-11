@@ -100,6 +100,10 @@ class Sprite {
     fill_rect(x + w, y, 1, h - 1, color);
   }
 };
+
+class Sprite444;
+class Sprite4444;
+
 }  // namespace xmc
 
 #endif

@@ -25,6 +25,8 @@ enum class Waveform {
   TRIANGLE,
   /** sawtooth wave */
   SAWTOOTH,
+  /** noise */
+  NOISE,
   /** number of waveforms */
   NUM_WAVEFORMS,
 };
@@ -66,7 +68,9 @@ class Tone {
   uint32_t decay_ms = 0;
   uint16_t sustain_level = 0;
   uint32_t release_ms = 0;
+
   uint16_t tone_phase_counter = 0;
+  uint16_t noise_lfsr = 0xFFFF;
   uint32_t length_counter = 0;
   EnvelopeState envelope_state = EnvelopeState::IDLE;
   uint32_t envelope_counter = 0;
@@ -126,18 +130,21 @@ class Tone {
   /**
    * Sets the frequency sweep of the tone. The frequency sweep allows for
    * effects such as siren-like sounds.
-   * @param delta The amount of frequency change for the sweep. This is a
-   * fixed-point value where 0x10000 represents no change, values less than
-   * 0x10000 represent a decrease in frequency, and values greater than 0x10000
-   * represent an increase in frequency.
+   * @param delta The amount of frequency change for the sweep. This is a signed
+   * fixed-point number with 16-bit fractional part. The valid range is from
+   * -32768 (0.5) to 65536 (2.0). When delta is 0, the sweep function is
+   * disabled. When delta is non-zero, the tone frequency is multiplied by
+   * (1.0 + delta / 65536.0) at each sweep step. For example, setting delta to
+   * 3897 (2 ^ (1.0 / 12.0) - 1) will increase the frequency by a semitone at
+   * each step, resulting in approximately one octave increase after 12 steps.
    * @param period_ms The period of the sweep in milliseconds. This determines
    * how fast the frequency changes over time.
    */
   inline void set_sweep(int32_t delta, uint32_t period_ms) {
-    if (delta < -0x8000) {
-      delta = -0x8000;
-    } else if (delta > 0x8000) {
-      delta = 0x8000;
+    if (delta < -32768) {
+      delta = -32768;
+    } else if (delta > 65536) {
+      delta = 65536;
     }
     sweep_coeff = 0x10000 + delta;
     sweep_period_ms = period_ms;

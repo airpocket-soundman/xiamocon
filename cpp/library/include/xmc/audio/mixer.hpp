@@ -11,6 +11,7 @@
 namespace xmc {
 class Mixer {
  private:
+  const int num_sources;
   xmc_audio_source_port_t **sources;
   xmc_audio_source_port_t output;
 

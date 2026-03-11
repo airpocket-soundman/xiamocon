@@ -146,6 +146,32 @@ xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
   //     writeCommand(Command::MEMORY_ACCESS_CONTROL, 0x28);
   // #endif
 
+  if (1) {
+    uint8_t params0[] = {0xD0, 0x04, 0x0D, 0x11, 0x13, 0x2B, 0x3F,
+                         0x54, 0x4C, 0x18, 0x0D, 0x0B, 0x1F, 0x23};
+    uint8_t params1[] = {0xD0, 0x00, 0x02, 0x07, 0x0A, 0x28, 0x32,
+                         0x44, 0x42, 0x06, 0x0E, 0x12, 0x14, 0x17};
+    uint8_t params[14];
+    for (int i = 0; i < 14; i++) {
+      params[i] = (params0[i] + params1[i]) / 2;
+    }
+    XMC_ERR_RET(xmc_display_write_command(XMC_ST7789_POSITIVE_GAMMA_CORRECTION,
+                                          params, sizeof(params)));
+  }
+
+  if (1) {
+    uint8_t params0[] = {0xD0, 0x04, 0x0C, 0x11, 0x13, 0x2C, 0x3F,
+                         0x44, 0x51, 0x2F, 0x1F, 0x1F, 0x20, 0x23};
+    uint8_t params1[] = {0xD0, 0x00, 0x02, 0x07, 0x0A, 0x28, 0x31,
+                         0x54, 0x47, 0x0E, 0x1C, 0x17, 0x1B, 0x1E};
+    uint8_t params[14];
+    for (int i = 0; i < 14; i++) {
+      params[i] = (params0[i] + params1[i]) / 2;
+    }
+    XMC_ERR_RET(xmc_display_write_command(XMC_ST7789_NEGATIVE_GAMMA_CORRECTION,
+                                          params, sizeof(params)));
+  }
+
   XMC_ERR_RET(xmc_display_write_command_0p(XMC_ST7789_DISP_INVERSION_ON));
 
   XMC_ERR_RET(xmc_display_fill_rect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
@@ -173,7 +199,6 @@ xmc_status_t xmc_display_clear(uint32_t color) {
 
 xmc_status_t xmc_display_fill_rect(int x, int y, int width, int height,
                                    uint32_t color) {
-
   if (x < 0) {
     width += x;
     x = 0;
@@ -196,7 +221,7 @@ xmc_status_t xmc_display_fill_rect(int x, int y, int width, int height,
   int line_bytes;
   switch (current_format) {
     case XMC_DISP_INTF_FORMAT_RGB444:
-      line_bytes = width * 3  / 2;
+      line_bytes = width * 3 / 2;
       for (int i = 0; i < line_bytes; i += 3) {
         line_buffer[i + 0] = (color >> 4) & 0xFF;
         line_buffer[i + 1] = ((color & 0x0F) << 4) | ((color >> 8) & 0x0F);
