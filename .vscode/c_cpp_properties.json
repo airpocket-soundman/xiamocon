@@ -49,7 +49,9 @@
                 "${workspaceFolder}/cpp/platform/impl/rp2350_pico_sdk/include",
                 "${workspaceFolder}/cpp/library/include"
             ],
-            "defines": [],
+            "defines": [
+                "SHAPOFONT_INCLUDE_GFXFONT"
+            ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",

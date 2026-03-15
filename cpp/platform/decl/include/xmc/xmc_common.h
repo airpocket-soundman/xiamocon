@@ -19,6 +19,7 @@ typedef enum {
   XMC_ERR_POWER_RESET_FAILED = XMC_ERR_BASE_POWER + 3,
   XMC_ERR_BASE_GPIO = 0x400,
   XMC_ERR_BASE_TIMER = 0x500,
+  XMC_ERR_TIMER_REPEATING_TIMER_INIT_FAILED = XMC_ERR_BASE_TIMER + 1,
   XMC_ERR_BASE_I2C = 0x600,
   XMC_ERR_I2C_NOT_INITIALIZED = XMC_ERR_BASE_I2C + 1,
   XMC_ERR_I2C_INVALID_BAUDRATE = XMC_ERR_BASE_I2C + 2,
@@ -59,5 +60,10 @@ typedef enum {
     XMC_ERR_LOG(status);                \
     break;                              \
   }
+
+/**
+ * Contents of a tight loop.
+ */
+void xmc_tight_loop_contents();
 
 #endif

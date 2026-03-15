@@ -242,6 +242,21 @@ static inline xmc_status_t xmc_ioex_read(xmc_ioex_pin_t pin, bool *value) {
  */
 xmc_status_t xmc_ioex_read_all(uint16_t *value);
 
+/**
+ * Try to read the state of all pins on the IO expander without blocking. If the
+ * IO expander is currently busy (e.g. due to another ongoing I2C transactionn),
+ * this function will return false and the value parameter will not be modified.
+ * If the IO expander is ready, this function will read the state of all pins
+ * and return true, setting the value parameter to a 16-bit value where each bit
+ * represents the state of a pin (1 for high, 0 for low). Bit 0 corresponds to
+ * pin 0, bit 1 corresponds to pin 1, and so on up to bit 15 for pin 15.
+ * @param value Pointer to a variable that will receive the state of all pins on
+ * the IO expander (1 for high, 0 for low) if the read was successful.
+ * @return true if the pin values were successfully read, false if the IO
+ * expander is currently busy and the read could not be performed.
+ */
+bool xmc_ioex_try_read_all(uint16_t *value);
+
 #if defined(__cplusplus)
 }
 #endif

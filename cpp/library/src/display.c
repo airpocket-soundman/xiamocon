@@ -103,8 +103,10 @@ typedef enum {
 } xmc_st7789_command_t;
 
 static xmc_display_intf_format_t current_format = XMC_DISP_INTF_FORMAT_RGB444;
-static uint8_t
-    line_buffer[XMC_DISPLAY_WIDTH * 3];  // max 3 bytes per pixel for RGB666
+static bool in_transaction = false;
+
+// max 3 bytes per pixel for RGB666
+static uint8_t line_buffer[XMC_DISPLAY_WIDTH * 3];
 
 static xmc_status_t begin_command(uint8_t cmd);
 static void end_command();
@@ -267,7 +269,9 @@ xmc_status_t xmc_display_write_pixels_start(const void *data,
 }
 
 xmc_status_t xmc_display_write_pixels_complete() {
-  return xmc_spi_dma_complete();
+  xmc_status_t sts = xmc_spi_dma_complete();
+  end_command();
+  return sts;
 }
 
 xmc_status_t xmc_display_write_command(const uint8_t cmd, const uint8_t *params,
@@ -282,7 +286,8 @@ xmc_status_t xmc_display_write_command(const uint8_t cmd, const uint8_t *params,
 }
 
 static xmc_status_t begin_command(uint8_t cmd) {
-  XMC_ERR_RET(xmc_spi_begin_transaction());
+  XMC_ERR_RET(xmc_spi_lock());
+  in_transaction = true;
   xmc_spi_set_baudrate(xmc_spi_get_preferred_frequency(XMC_SPI_DEV_DISPLAY));
   xmc_status_t sts = XMC_OK;
   do {
@@ -297,9 +302,11 @@ static xmc_status_t begin_command(uint8_t cmd) {
 }
 
 static void end_command() {
+  if (!in_transaction) return;
+  in_transaction = false;
   xmc_gpio_write(XMC_PIN_DISPLAY_CS, 1);
   xmc_gpio_write(XMC_PIN_DISPLAY_DC, 1);
-  xmc_spi_end_transaction();
+  xmc_spi_unlock();
 }
 
 static xmc_status_t write_data(const uint8_t *data, uint32_t size) {

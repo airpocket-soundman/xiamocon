@@ -9,7 +9,9 @@ extern "C" {
 
 typedef void (*xmc_dma_irq_handler_t)(void *context);
 
-void xmc_dma_register_irq_handler(int dma_ch, xmc_dma_irq_handler_t handler,
+void xmc_dma_register_irq_handler(int dma_ch,
+                                  xmc_dma_irq_handler_t handler_fast,
+                                  xmc_dma_irq_handler_t handler_slow,
                                   void *context);
 void xmc_dma_unregister_irq_handler(int dma_ch);
 

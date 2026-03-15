@@ -47,7 +47,8 @@ static const struct pio_program pio_program = {
 
 static void start_next_dma(xmc_sdac_inst_t *inst);
 static void fill_buffer(xmc_sdac_inst_t *inst);
-static void dma_handler(void *context);
+static void dma_handler_fast(void *context);
+static void dma_handler_slow(void *context);
 
 static inline void update_lfsr(uint32_t *lfsr) {
   uint32_t bit =
@@ -149,7 +150,8 @@ xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
     return XMC_ERR_DMA_INIT_FAILED;
   }
   dma_channel_set_irq0_enabled(hw->dma_ch, true);
-  xmc_dma_register_irq_handler(hw->dma_ch, dma_handler, inst);
+  xmc_dma_register_irq_handler(hw->dma_ch, dma_handler_fast, dma_handler_slow,
+                               inst);
   irq_set_exclusive_handler(DMA_IRQ_0, xmc_dma_irq_handler);
   // irq_add_shared_handler(DMA_IRQ_0, xmc_dma_irq_handler,
   // PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
@@ -225,9 +227,14 @@ xmc_status_t xmc_sdac_service(xmc_sdac_inst_t *inst) {
   return XMC_OK;
 }
 
-static void dma_handler(void *context) {
+static void dma_handler_fast(void *context) {
   xmc_sdac_inst_t *inst = (xmc_sdac_inst_t *)context;
   start_next_dma(inst);
+}
+
+static void dma_handler_slow(void *context) {
+  xmc_sdac_inst_t *inst = (xmc_sdac_inst_t *)context;
+  fill_buffer(inst);
 }
 
 static void fill_buffer(xmc_sdac_inst_t *inst) {
@@ -278,7 +285,7 @@ static void fill_buffer(xmc_sdac_inst_t *inst) {
             // todo: use interpolator
             int32_t over_sample = (new_input * j + last_input * (32 - j)) / 32;
 #else
-        int32_t over_sample = new_input ;
+        int32_t over_sample = new_input;
 #endif
         for (int ibit = 0; ibit < 32; ibit++) {
           // over_sample += ((dither & 1) * 2 - 1) * 0x800;

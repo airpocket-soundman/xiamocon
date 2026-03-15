@@ -1,9 +1,11 @@
 #include "xmc/input.h"
+#include "xmc/hw/timer.h"
 #include "xmc/ioex.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
+static uint64_t next_update_ms = 0;
 static xmc_button_t curr_state = 0;
 static xmc_button_t last_state = 0;
 
@@ -24,10 +26,20 @@ void xmc_input_deinit() {
 }
 
 xmc_status_t xmc_input_service() {
+  uint64_t now_ms = xmc_get_time_ms();
+  if (now_ms < next_update_ms) {
+    return XMC_OK;
+  }
+  next_update_ms += 10;
+  if (next_update_ms < now_ms) {
+    next_update_ms = now_ms + 10;
+  }
+
   uint16_t tmp;
-  XMC_ERR_RET(xmc_ioex_read_all(&tmp));
-  last_state = curr_state;
-  curr_state = ~tmp & XMC_BUTTON_ALL;
+  if (xmc_ioex_try_read_all(&tmp)) {
+    last_state = curr_state;
+    curr_state = ~tmp & XMC_BUTTON_ALL;
+  }
   return XMC_OK;
 }
 

@@ -14,7 +14,7 @@ xmc_status_t xmc_sys_init() {
 
   xmc_i2c_init();
   xmc_spi_init();
-
+  
   xmc_ioex_init();
   xmc_ioex_set_dir_masked(0, 0xFF, 0xFF);
   xmc_ioex_set_dir_masked(1, 0xFF, 0xFF);

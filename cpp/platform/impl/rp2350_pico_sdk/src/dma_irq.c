@@ -4,15 +4,19 @@
 #include <stddef.h>
 
 typedef struct {
-  xmc_dma_irq_handler_t handler;
+  xmc_dma_irq_handler_t handler_fast;
+  xmc_dma_irq_handler_t handler_slow;
   void *context;
 } handler_entry_t;
 
 handler_entry_t contexts[16] = {0};
 
-void xmc_dma_register_irq_handler(int dma_ch, xmc_dma_irq_handler_t handler,
+void xmc_dma_register_irq_handler(int dma_ch,
+                                  xmc_dma_irq_handler_t handler_fast,
+                                  xmc_dma_irq_handler_t handler_slow,
                                   void *context) {
-  contexts[dma_ch].handler = handler;
+  contexts[dma_ch].handler_fast = handler_fast;
+  contexts[dma_ch].handler_slow = handler_slow;
   contexts[dma_ch].context = context;
 }
 
@@ -32,9 +36,23 @@ void xmc_dma_irq_handler(void) {
     }
     tmp &= ~(1u << dma_ch);
 
-    handler_entry_t entry = contexts[dma_ch];
-    if (entry.handler) {
-      entry.handler(entry.context);
+    handler_entry_t *entry = &contexts[dma_ch];
+    if (entry->handler_fast) {
+      entry->handler_fast(entry->context);
+    }
+  } while (tmp);
+
+  tmp = ints0;
+  do {
+    dma_ch = __builtin_ctz(tmp);
+    if (dma_ch >= 16) {
+      break;
+    }
+    tmp &= ~(1u << dma_ch);
+
+    handler_entry_t *entry = &contexts[dma_ch];
+    if (entry->handler_slow) {
+      entry->handler_slow(entry->context);
     }
   } while (tmp);
 

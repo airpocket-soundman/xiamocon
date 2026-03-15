@@ -32,10 +32,16 @@ static int key_to_note[] = {-5, -3, -1, 0, 2, 4, 5, 7};
 
 bool disp_update = false;
 
+xmc_app_config_t xmc_app_get_config() {
+  xmc_app_config_t cfg = xmc_get_default_app_config();
+  cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
+  cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
+  cfg.speaker_latency_samples = 512;
+  return cfg;
+}
+
 void xmc_app_setup() {
   frame_buffer.clear(0);
-  xmc_speaker_init(XMC_SAMPLE_LINEAR_PCM_S16_MONO, SAMPLE_RATE_HZ, 1024,
-                   nullptr);
   for (int i = 0; i < NUM_TONES; i++) {
     tones[i].init(SAMPLE_RATE_HZ);
     mixer.set_source(i, tones[i].get_output_port());
@@ -52,9 +58,6 @@ void xmc_app_setup() {
 }
 
 void xmc_app_loop() {
-  xmc_input_service();
-  xmc_speaker_service();
-
   if (xmc_input_was_pressed(XMC_BUTTON_FUNC)) {
     int n = static_cast<int>(xmc::Waveform::NUM_WAVEFORMS);
     waveform = static_cast<xmc::Waveform>((static_cast<int>(waveform) + 1) % n);

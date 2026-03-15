@@ -6,9 +6,32 @@
 #ifndef XMC_APP_H
 #define XMC_APP_H
 
+#include "xmc/xmc_common.h"
+#include "xmc/audio_common.h"
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+typedef struct {
+  xmc_audio_sample_format_t speaker_sample_format;
+  uint32_t speaker_sample_rate_hz;
+  uint32_t speaker_latency_samples;
+} xmc_app_config_t;
+
+/**
+ * Get the default application configuration.
+ * @return A pointer to a default application configuration struct.
+ */
+xmc_app_config_t xmc_get_default_app_config();
+
+/**
+ * Get application configuration parameters. This function will be called before
+ * xmc_app_setup, and the returned configuration will be used to initialize the
+ * application. You can use this function to specify parameters such as speaker
+ * sample rate, display resolution, etc.
+ */
+xmc_app_config_t xmc_app_get_config();
 
 /**
  * User defined setup function. This will be called once at the beginning of the

@@ -45,19 +45,32 @@ xmc_status_t xmc_spi_init();
  */
 void xmc_spi_deinit();
 
+/** 
+ * Try to begin an SPI transaction without blocking. This will attempt to acquire
+ * the lock for starting an SPI transaction, but will return immediately if the
+ * lock is not available.
+ * @return True if the transaction was successfully started, false otherwise.
+ */
+bool xmc_spi_try_lock();
+
 /**
  * Begin an SPI transaction. This will acquire a lock to prevent other tasks
- * from starting SPI transactions until xmc_spi_end_transaction is called.
+ * from starting SPI transactions until xmc_spi_unlock is called.
  * @return XMC_OK if the transaction was successfully started.
  */
-xmc_status_t xmc_spi_begin_transaction();
+static inline xmc_status_t xmc_spi_lock() {
+  while (!xmc_spi_try_lock()) {
+    xmc_tight_loop_contents();
+  }
+  return XMC_OK;
+}
 
 /**
  * End an SPI transaction. This will release the lock acquired by
- * xmc_spi_begin_transaction.
+ * xmc_spi_lock.
  * @return XMC_OK if the transaction was successfully ended.
  */
-xmc_status_t xmc_spi_end_transaction();
+xmc_status_t xmc_spi_unlock();
 
 /**
  * Set the SPI baud rate.

@@ -7,10 +7,8 @@
 
 namespace xmc {
 
-void Sprite444::set_pixel(int x, int y, uint16_t color) {
-  if (x < 0 || x >= width || y < 0 || y >= height) return;
+void Sprite444::on_set_pixel(int x, int y, uint16_t color) {
   uint8_t *line = (uint8_t *)line_ptr(y);
-
   int i = x / 2 * 3;
   if ((x & 1) == 0) {
     line[i + 0] = (color >> 4) & 0xFF;
@@ -21,10 +19,8 @@ void Sprite444::set_pixel(int x, int y, uint16_t color) {
   }
 }
 
-uint16_t Sprite444::get_pixel(int x, int y) const {
-  if (x < 0 || x >= width || y < 0 || y >= height) return 0;
+uint16_t Sprite444::on_get_pixel(int x, int y) const {
   uint8_t *line = (uint8_t *)line_ptr(y);
-
   int i = x / 2 * 3;
   if ((x & 1) == 0) {
     return ((uint16_t)line[i + 0] << 4) | (line[i + 1] >> 4);
@@ -38,7 +34,7 @@ void Sprite444::on_fill_rect(int x, int y, int width, int height,
   if (width <= 0 || height <= 0) return;
 
   for (int i = 0; i < width; i++) {
-    set_pixel(x + i, y, color);
+    on_set_pixel(x + i, y, color);
   }
   int copy_l = (x + 1) & 0xFFFFFFFE;
   int copy_r = (x + width) & 0xFFFFFFFE;
@@ -51,18 +47,12 @@ void Sprite444::on_fill_rect(int x, int y, int width, int height,
       memcpy(copy_dst, copy_src, copy_bytes);
     }
     if (x & 1) {
-      set_pixel(x, y + j, color);
+      on_set_pixel(x, y + j, color);
     }
-    if (width >= 2 && ((x + width) & 1)) {
-      set_pixel(x + width - 1, y + j, color);
+    if (((x + width) & 1)) {
+      on_set_pixel(x + width - 1, y + j, color);
     }
   }
-}
-
-xmc_status_t Sprite444::start_transfer_to_display(int x, int y) {
-  XMC_ERR_RET(xmc_display_set_window(x, y, width, height));
-  XMC_ERR_RET(xmc_display_write_pixels_start(data, stride * height, false));
-  return XMC_OK;
 }
 
 xmc_status_t Sprite444::draw_image(const Sprite4444 &image, int dx, int dy,
@@ -90,9 +80,17 @@ xmc_status_t Sprite444::draw_image(const Sprite4444 &image, int dx, int dy,
     for (int i = 0; i < w; i++) {
       uint16_t c = image.get_pixel(sx + i, sy + j);
       if ((c & 0xF000) == 0) continue;
-      set_pixel(dx + i, dy + j, c);
+      on_set_pixel(dx + i, dy + j, c);
     }
   }
+  return XMC_OK;
+}
+
+xmc_status_t Sprite444::on_start_transfer_to_display(int dx, int dy, int sy,
+                                                     int h) {
+  XMC_ERR_RET(xmc_display_set_window(dx, dy, width, h));
+  XMC_ERR_RET(xmc_display_write_pixels_start((uint8_t *)data + stride * sy,
+                                             stride * h, false));
   return XMC_OK;
 }
 

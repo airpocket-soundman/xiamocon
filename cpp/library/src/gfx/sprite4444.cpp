@@ -5,14 +5,12 @@
 
 namespace xmc {
 
-void Sprite4444::set_pixel(int x, int y, uint16_t color) {
-  if (x < 0 || x >= width || y < 0 || y >= height) return;
+void Sprite4444::on_set_pixel(int x, int y, uint16_t color) {
   uint16_t *line = (uint16_t *)line_ptr(y);
   line[x] = color;
 }
 
-uint16_t Sprite4444::get_pixel(int x, int y) const {
-  if (x < 0 || x >= width || y < 0 || y >= height) return 0;
+uint16_t Sprite4444::on_get_pixel(int x, int y) const {
   uint16_t *line = (uint16_t *)line_ptr(y);
   return line[x];
 }
@@ -28,10 +26,9 @@ void Sprite4444::on_fill_rect(int x, int y, int width, int height,
   }
 }
 
-xmc_status_t Sprite4444::start_transfer_to_display(int x, int y) {
-  XMC_ERR_RET(xmc_display_set_window(x, y, width, height));
-  XMC_ERR_RET(xmc_display_write_pixels_start(data, stride * height, false));
-  return XMC_OK;
+xmc_status_t Sprite4444::on_start_transfer_to_display(int dx, int dy, int sy,
+                                                      int h) {
+  return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
 }
 
 }  // namespace xmc

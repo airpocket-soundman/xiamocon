@@ -22,19 +22,24 @@ xmc::Tone tone;
 
 xmc::Waveform waveform = xmc::Waveform::SQUARE;
 
-void xmc_app_setup() {
-  frame_buffer.clear(0);
-  xmc_speaker_init(XMC_SAMPLE_LINEAR_PCM_S16_MONO, SAMPLE_RATE_HZ, 512,
-                   nullptr);
-  xmc_speaker_set_muted(false);
-  tone.init(SAMPLE_RATE_HZ);
-  xmc_speaker_set_source_port(tone.get_output_port());
+xmc_app_config_t xmc_app_get_config() {
+  xmc_app_config_t config = xmc_get_default_app_config();
+  config.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
+  return config;
+}
 
+void xmc_app_setup() {
   xmc_gpio_set_dir(XMC_PIN_GPIO_0, true);
+  xmc_gpio_write(XMC_PIN_GPIO_0, 1);
+  frame_buffer.clear(0);
+  xmc_sleep_ms(1);
+  tone.init(SAMPLE_RATE_HZ);
+  xmc_gpio_write(XMC_PIN_GPIO_0, 0);
+  xmc_speaker_set_source_port(tone.get_output_port());
+  xmc_speaker_set_muted(false);
 }
 
 void xmc_app_loop() {
-  xmc_input_service();
 
   xmc_button_t buttons = xmc_input_get_state();
   if (buttons & XMC_BUTTON_LEFT) {
@@ -50,13 +55,13 @@ void xmc_app_loop() {
     dy += 0.1f;
   }
 
-if (xmc_input_was_pressed(XMC_BUTTON_Y)) {
-  int n = static_cast<int>(xmc::Waveform::NUM_WAVEFORMS);
-  waveform = static_cast<xmc::Waveform>((static_cast<int>(waveform) + 1) % n);
-}
+  if (xmc_input_was_pressed(XMC_BUTTON_Y)) {
+    int n = static_cast<int>(xmc::Waveform::NUM_WAVEFORMS);
+    waveform = static_cast<xmc::Waveform>((static_cast<int>(waveform) + 1) % n);
+  }
 
   if (xmc_input_was_pressed(XMC_BUTTON_A)) {
-    //tone.set_waveform(xmc::Waveform::SQUARE);
+    // tone.set_waveform(xmc::Waveform::SQUARE);
     tone.set_waveform(waveform);
     // tone.set_waveform(xmc::Waveform::TRIANGLE);
     tone.set_velocity(127);
@@ -110,6 +115,5 @@ if (xmc_input_was_pressed(XMC_BUTTON_Y)) {
   // immediately and the transfer will happen in the background.
   frame_buffer.start_transfer_to_display(0, 0);
 
-  xmc_speaker_service();
   xmc_sleep_ms(10);
 }

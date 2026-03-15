@@ -12,7 +12,6 @@ static dma_channel_config dma_cfg;
 
 static spi_inst_t *const spibus_inst = spi0;
 static xmc_semaphore_t semaphore;
-static volatile bool in_transaction = false;
 
 static int cs_pin = -1;
 static uint32_t baudrate = 10000000;
@@ -61,7 +60,6 @@ xmc_status_t xmc_spi_init() {
 }
 
 void xmc_spi_deinit() {
-  xmc_spi_end_transaction();
   dma_channel_unclaim(dma_tx);
   spi_deinit(spibus_inst);
 
@@ -84,16 +82,9 @@ void xmc_spi_deinit() {
   xmc_semaphore_deinit(&semaphore);
 }
 
-xmc_status_t xmc_spi_begin_transaction() {
-  if (in_transaction) return XMC_OK;
-  xmc_semaphore_take(&semaphore);
-  in_transaction = true;
-  return XMC_OK;
-}
+bool xmc_spi_try_lock() { return xmc_semaphore_try_take(&semaphore); }
 
-xmc_status_t xmc_spi_end_transaction() {
-  if (!in_transaction) return XMC_OK;
-  in_transaction = false;
+xmc_status_t xmc_spi_unlock() {
   xmc_status_t ret = xmc_spi_dma_complete();
   xmc_semaphore_give(&semaphore);
   return ret;

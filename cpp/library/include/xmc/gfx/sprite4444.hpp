@@ -17,10 +17,12 @@ class Sprite4444 : public Sprite<pixel_format_t::ARGB4444, uint16_t> {
       : Sprite<pixel_format_t::ARGB4444, uint16_t>(
             width, height, width * sizeof(uint16_t), data, auto_free) {}
 
-  void set_pixel(int x, int y, uint16_t color) override;
-  uint16_t get_pixel(int x, int y) const override;
+ protected:
+  void on_set_pixel(int x, int y, uint16_t color) override;
+  uint16_t on_get_pixel(int x, int y) const override;
   void on_fill_rect(int x, int y, int w, int h, uint16_t color) override;
-  xmc_status_t start_transfer_to_display(int x, int y) override;
+  xmc_status_t on_start_transfer_to_display(int dx, int dy, int sy,
+                                            int h) override;
 };
 
 }  // namespace xmc

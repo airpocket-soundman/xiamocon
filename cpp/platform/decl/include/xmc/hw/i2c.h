@@ -45,15 +45,31 @@ xmc_status_t xmc_i2c_init();
 void xmc_i2c_deinit();
 
 /**
+ * Try to start an I2C transaction without blocking. This can be used in
+ * situations where blocking is not acceptable, such as in an interrupt handler
+ * or a critical section. If the transaction cannot be started immediately
+ * because another transaction is in progress, this function will return false.
+ * Otherwise, it will return true and the caller can proceed with I2C
+ * operations.
+ * @return true if the transaction was successfully started, false otherwise.
+ */
+bool xmc_i2c_try_lock();
+
+/**
  * Start an I2C transaction.
  *
  * This function must be called before accessing I2C devices or changing I2C
  * peripheral settings. I2C transactions from other tasks will be blocked until
- * xmc_i2c_end_transaction is called.
+ * xmc_i2c_unlock is called.
  *
  * @return XMC_OK if the transaction was successfully started.
  */
-xmc_status_t xmc_i2c_start_transaction();
+static inline xmc_status_t xmc_i2c_lock() {
+  while (!xmc_i2c_try_lock()) {
+    xmc_tight_loop_contents();
+  }
+  return XMC_OK;
+}
 
 /**
  * End an I2C transaction.
@@ -63,7 +79,7 @@ xmc_status_t xmc_i2c_start_transaction();
  *
  * @return XMC_OK if the transaction was successfully ended.
  */
-xmc_status_t xmc_i2c_end_transaction();
+xmc_status_t xmc_i2c_unlock();
 
 /**
  * Set the I2C baud rate.

@@ -8,7 +8,6 @@
 
 static i2c_inst_t *const i2c_inst = i2c1;
 static xmc_semaphore_t semaphore;
-static bool in_transaction = false;
 
 uint32_t xmc_i2c_get_preferred_frequency(xmc_i2c_device_t device) {
   switch (device) {
@@ -29,23 +28,15 @@ xmc_status_t xmc_i2c_init() {
 }
 
 void xmc_i2c_deinit() {
-  xmc_i2c_end_transaction();
   i2c_deinit(i2c_inst);
   gpio_deinit(XMC_PIN_I2C_SDA);
   gpio_deinit(XMC_PIN_I2C_SCL);
   xmc_semaphore_deinit(&semaphore);
 }
 
-xmc_status_t xmc_i2c_start_transaction() {
-  if (in_transaction) return XMC_OK;
-  xmc_semaphore_take(&semaphore);
-  in_transaction = true;
-  return XMC_OK;
-}
+bool xmc_i2c_try_lock() { return xmc_semaphore_try_take(&semaphore); }
 
-xmc_status_t xmc_i2c_end_transaction() {
-  if (!in_transaction) return XMC_OK;
-  in_transaction = false;
+xmc_status_t xmc_i2c_unlock() {
   xmc_semaphore_give(&semaphore);
   return XMC_OK;
 }

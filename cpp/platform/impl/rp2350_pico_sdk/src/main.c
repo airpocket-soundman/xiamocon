@@ -1,4 +1,7 @@
 #include "xmc/app.h"
+#include "xmc/hw/timer.h"
+#include "xmc/input.h"
+#include "xmc/speaker.h"
 #include "xmc/system.h"
 
 #include <hardware/clocks.h>
@@ -16,8 +19,13 @@ int main() {
                   SYS_CLK_FREQ, SYS_CLK_FREQ);
 #endif
   xmc_sys_init();
+
+  xmc_app_config_t cfg = xmc_app_get_config();
+  xmc_speaker_init(cfg.speaker_sample_format, cfg.speaker_sample_rate_hz,
+                   cfg.speaker_latency_samples, NULL);
   xmc_app_setup();
   while (1) {
+    xmc_input_service();
     xmc_app_loop();
   }
   return 0;

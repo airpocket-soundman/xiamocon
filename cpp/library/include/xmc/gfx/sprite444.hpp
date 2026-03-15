@@ -16,13 +16,15 @@ class Sprite444 : public Sprite<pixel_format_t::RGB444, uint16_t> {
             width, height, stride444(width),
             xmc_malloc(stride444(width) * height, caps), true) {}
 
-  void set_pixel(int x, int y, uint16_t color) override;
-  uint16_t get_pixel(int x, int y) const override;
-  void on_fill_rect(int x, int y, int w, int h, uint16_t color) override;
-  xmc_status_t start_transfer_to_display(int x, int y) override;
 
   xmc_status_t draw_image(const Sprite4444& image, int dx, int dy, int w, int h,
                           int sx, int sy);
+
+ protected:
+  void on_set_pixel(int x, int y, uint16_t color) override;
+  uint16_t on_get_pixel(int x, int y) const override;
+  void on_fill_rect(int x, int y, int w, int h, uint16_t color) override;
+  xmc_status_t on_start_transfer_to_display(int dx, int dy, int sy, int h) override;
 };
 
 }  // namespace xmc
