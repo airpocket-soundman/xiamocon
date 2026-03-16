@@ -256,7 +256,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C114762"
+		(property "LCSC" "C25879"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -269,7 +269,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C114762.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25879.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -847,7 +847,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -860,7 +860,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1194,7 +1194,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1207,7 +1207,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1374,7 +1374,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1387,7 +1387,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1554,7 +1554,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14445"
+		(property "LCSC" "C52923"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1567,7 +1567,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C14445.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C52923.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2583,7 +2583,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2596,7 +2596,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3120,7 +3120,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3133,7 +3133,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4935,7 +4935,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1705"
+		(property "LCSC" "C19666"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4948,7 +4948,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C1705.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C19666.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5115,7 +5115,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106235"
+		(property "LCSC" "C11702"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5128,7 +5128,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106235.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C11702.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5295,7 +5295,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5308,7 +5308,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7884,7 +7884,7 @@
 				)
 			)
 		)
-		(property "Value" "SP0502BAJT"
+		(property "Value" "TPD2E2U06DCKR"
 			(at 0 1.95 0)
 			(layer "F.Fab")
 			(uuid "a268ccdc-03a3-4a94-be45-9a3c848f049e")
@@ -7919,7 +7919,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C207262"
+		(property "LCSC" "C1855726"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7932,7 +7932,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C207262.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C1855726.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8318,7 +8318,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60580"
+		(property "LCSC" "C2128"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8344,7 +8344,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60580.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C2128.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8795,7 +8795,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14442"
+		(property "LCSC" "C1523"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8808,7 +8808,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C14442.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C1523.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8975,7 +8975,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14445"
+		(property "LCSC" "C52923"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8988,7 +8988,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C14445.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C52923.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9155,7 +9155,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1705"
+		(property "LCSC" "C19666"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9168,7 +9168,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C1705.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C19666.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9322,7 +9322,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9335,7 +9335,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9502,7 +9502,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9515,7 +9515,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9682,7 +9682,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9695,7 +9695,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9862,7 +9862,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C14445"
+		(property "LCSC" "C52923"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9875,7 +9875,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C14445.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C52923.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10977,7 +10977,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10990,7 +10990,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12091,7 +12091,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12104,7 +12104,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12271,7 +12271,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106232"
+		(property "LCSC" "C25076"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12284,7 +12284,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106232.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25076.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12403,7 +12403,7 @@
 				)
 			)
 		)
-		(property "Value" "SP0502BAJT"
+		(property "Value" "TPD2E2U06DCKR"
 			(at 0 1.95 0)
 			(layer "F.Fab")
 			(uuid "f2d35c02-59c8-4529-8edd-c768a8257b57")
@@ -12438,7 +12438,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C207262"
+		(property "LCSC" "C1855726"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12451,7 +12451,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C207262.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C1855726.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12822,7 +12822,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -12835,7 +12835,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13002,7 +13002,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13015,7 +13015,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13182,7 +13182,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13195,7 +13195,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13362,7 +13362,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13375,7 +13375,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13529,7 +13529,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13542,7 +13542,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13696,7 +13696,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -13709,7 +13709,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14043,7 +14043,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C105871"
+		(property "LCSC" "C25900"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14056,7 +14056,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C105871.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25900.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14210,7 +14210,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C82868"
+		(property "LCSC" "C25768"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -14223,7 +14223,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C82868.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25768.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -15667,7 +15667,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -15680,7 +15680,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -15847,7 +15847,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -15860,7 +15860,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -16117,7 +16117,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C140782"
+		(property "LCSC" "C15849"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -16130,7 +16130,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C140782.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C15849.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -16286,7 +16286,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C114762"
+		(property "LCSC" "C25879"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -16299,7 +16299,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C114762.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25879.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -17797,7 +17797,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -17810,7 +17810,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -17918,7 +17918,7 @@
 				)
 			)
 		)
-		(property "Value" "SP0502BAJT"
+		(property "Value" "TPD2E2U06DCKR"
 			(at 0 1.95 90)
 			(layer "F.Fab")
 			(uuid "f723d3c4-d30a-4091-b561-f9dae96efffd")
@@ -17953,7 +17953,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C207262"
+		(property "LCSC" "C1855726"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -17966,7 +17966,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C207262.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C1855726.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18289,7 +18289,7 @@
 				)
 			)
 		)
-		(property "Value" "SP0502BAJT"
+		(property "Value" "TPD2E2U06DCKR"
 			(at 0 1.95 90)
 			(layer "F.Fab")
 			(uuid "d5cdfbae-5191-4b2c-a602-e0e3b0aba128")
@@ -18324,7 +18324,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C207262"
+		(property "LCSC" "C1855726"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18337,7 +18337,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C207262.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C1855726.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18695,7 +18695,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18708,7 +18708,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18875,7 +18875,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C1705"
+		(property "LCSC" "C19666"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -18888,7 +18888,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C1705.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C19666.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19534,7 +19534,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C105871"
+		(property "LCSC" "C25900"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19547,7 +19547,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C105871.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25900.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19714,7 +19714,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19727,7 +19727,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19881,7 +19881,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60491"
+		(property "LCSC" "C25741"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -19894,7 +19894,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60491.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25741.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -20353,7 +20353,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -20366,7 +20366,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -20845,7 +20845,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C82868"
+		(property "LCSC" "C25768"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -20858,7 +20858,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C82868.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25768.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21534,7 +21534,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21547,7 +21547,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21714,7 +21714,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C140782"
+		(property "LCSC" "C15849"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21727,7 +21727,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C140782.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C15849.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21894,7 +21894,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21907,7 +21907,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -22074,7 +22074,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C138033"
+		(property "LCSC" "C26083"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -22087,7 +22087,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C138033.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C26083.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -22613,7 +22613,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106232"
+		(property "LCSC" "C25076"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -22626,7 +22626,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106232.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25076.html"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -23330,7 +23330,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -23343,7 +23343,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -23497,7 +23497,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C106231"
+		(property "LCSC" "C17168"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -23510,7 +23510,7 @@
 				)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C106231.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C17168.html"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -24391,7 +24391,7 @@
 				(justify mirror)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -24405,7 +24405,7 @@
 				(justify mirror)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -25075,7 +25075,7 @@
 				(justify mirror)
 			)
 		)
-		(property "LCSC" "C60490"
+		(property "LCSC" "C25744"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "B.Fab")
@@ -25089,7 +25089,7 @@
 				(justify mirror)
 			)
 		)
-		(property "URL" "https://www.lcsc.com/product-detail/C60490.html"
+		(property "URL" "https://www.lcsc.com/product-detail/C25744.html"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "B.Fab")
