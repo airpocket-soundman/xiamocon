@@ -135,6 +135,7 @@ xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
   uint8_t intf_format;
   switch (current_format) {
     case XMC_DISP_INTF_FORMAT_RGB444: intf_format = 0x53; break;
+    case XMC_DISP_INTF_FORMAT_RGB565: intf_format = 0x55; break;
     default: return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
   }
   XMC_ERR_RET(xmc_display_write_command_1p(XMC_ST7789_INTERFACE_PIXEL_FORMAT,
@@ -222,14 +223,21 @@ xmc_status_t xmc_display_fill_rect(int x, int y, int width, int height,
 
   int line_bytes;
   switch (current_format) {
-    case XMC_DISP_INTF_FORMAT_RGB444:
+    case XMC_DISP_INTF_FORMAT_RGB444: {
       line_bytes = width * 3 / 2;
       for (int i = 0; i < line_bytes; i += 3) {
         line_buffer[i + 0] = (color >> 4) & 0xFF;
         line_buffer[i + 1] = ((color & 0x0F) << 4) | ((color >> 8) & 0x0F);
         line_buffer[i + 2] = color & 0xFF;
       }
-      break;
+    } break;
+    case XMC_DISP_INTF_FORMAT_RGB565: {
+      line_bytes = width * 2;
+      uint16_t *line_buffer_565 = (uint16_t *)line_buffer;
+      for (int i = 0; i < width; i++) {
+        line_buffer_565[i] = color;
+      }
+    } break;
     default: return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
   }
 

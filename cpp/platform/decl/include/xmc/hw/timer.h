@@ -19,8 +19,14 @@ extern "C" {
  * that will be called when a timer tick occurs. The callback function will
  * receive a context pointer that can be used to pass user-defined data to the
  * callback function.
+ * @param context A user-defined context pointer that was provided when the
+ * timer was initialized.
+ * @return A boolean value indicating whether the timer should continue running.
+ * If the callback returns true, the timer will continue to run and call
+ * the callback again after the next interval. If the callback returns
+ * false, the timer will be canceled and will not call the callback again.
  */
-typedef void (*xmc_timer_tick_t)(void *context);
+typedef bool (*xmc_timer_tick_t)(void *context);
 
 /**
  * Repeated timer instance structure. This structure represents an instance of a
@@ -77,8 +83,8 @@ void xmc_sleep_us(uint32_t us);
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
 xmc_status_t xmc_timer_add_repeating_ms(xmc_repeating_timer_t *timer,
-                                     uint32_t interval_ms, xmc_timer_tick_t cb,
-                                     void *context);
+                                        uint32_t interval_ms,
+                                        xmc_timer_tick_t cb, void *context);
 
 /**
  * Deinitialize a repeated timer instance. This function will stop the timer and

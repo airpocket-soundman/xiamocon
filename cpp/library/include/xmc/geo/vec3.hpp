@@ -30,6 +30,40 @@ struct vec3 {
     return vec3(x * scalar, y * scalar, z * scalar);
   }
 
+  inline vec3 operator/(float scalar) const {
+    float inv = 1.0f / scalar;
+    return vec3(x * inv, y * inv, z * inv);
+  }
+
+  inline vec3 &operator+=(const vec3 &other) {
+    x += other.x;
+    y += other.y;
+    z += other.z;
+    return *this;
+  }
+
+  inline vec3 &operator-=(const vec3 &other) {
+    x -= other.x;
+    y -= other.y;
+    z -= other.z;
+    return *this;
+  }
+
+  inline vec3 &operator*=(float scalar) {
+    x *= scalar;
+    y *= scalar;
+    z *= scalar;
+    return *this;
+  }
+
+  inline vec3 &operator/=(float scalar) {
+    float inv = 1.0f / scalar;
+    x *= inv;
+    y *= inv;
+    z *= inv;
+    return *this;
+  }
+
   /**
    * @brief Calculate the dot product of this vector with another vector
    * @param other The other vector to dot with

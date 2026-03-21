@@ -10,6 +10,16 @@
 
 namespace xmc {
 
+enum class prim_mode_t {
+  POINTS,
+  LINES,
+  LINE_LOOP,
+  LINE_STRIP,
+  TRIANGLES,
+  TRIANGLE_STRIP,
+  TRIANGLE_FAN,
+};
+
 /**
  * Clip a rectangle to fit within a maximum width and height. The rectangle is
  * defined by its top-left corner (x, y) and its width and height (w, h). The

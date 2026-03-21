@@ -37,10 +37,6 @@ xmc_status_t xmc_sys_init() {
   xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, false);
   xmc_sleep_ms(100);
 
-  xmc_display_init(XMC_DISP_INTF_FORMAT_RGB444, 0);
-
-  xmc_input_init();
-
   return XMC_OK;
 }
 

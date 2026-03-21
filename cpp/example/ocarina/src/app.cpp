@@ -15,7 +15,8 @@ static constexpr int NUM_TONES = 4;
 static constexpr int NUM_KEYS = 8;
 static constexpr uint32_t SAMPLE_RATE_HZ = 44100;
 
-static xmc::Sprite444 frame_buffer(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
+static xmc::Sprite screen =
+    xmc::createSprite444(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
 
 static xmc::Mixer mixer(NUM_TONES);
 static xmc::Tone tones[NUM_TONES];
@@ -34,6 +35,7 @@ bool disp_update = false;
 
 xmc_app_config_t xmc_app_get_config() {
   xmc_app_config_t cfg = xmc_get_default_app_config();
+  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB444;
   cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
   cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
   cfg.speaker_latency_samples = 512;
@@ -41,7 +43,7 @@ xmc_app_config_t xmc_app_get_config() {
 }
 
 void xmc_app_setup() {
-  frame_buffer.clear(0);
+  screen->clear(0);
   for (int i = 0; i < NUM_TONES; i++) {
     tones[i].init(SAMPLE_RATE_HZ);
     mixer.set_source(i, tones[i].get_output_port());
@@ -95,15 +97,15 @@ void xmc_app_loop() {
     // complete the previous frame's transfer if it's still in progress, then
     // fill the frame buffer with the new frame's content. In this case, we just
     // draw a moving box, but you can draw anything you want here.
-    frame_buffer.complete_transfer();
+    screen->complete_transfer();
 
-    frame_buffer.clear(0);
+    screen->clear(0);
     for (int i = 0; i < NUM_KEYS; i++) {
       int x = XMC_DISPLAY_WIDTH * i / NUM_KEYS + 2;
       int y = XMC_DISPLAY_HEIGHT / 4;
       int w = XMC_DISPLAY_WIDTH / NUM_KEYS - 4;
       int h = XMC_DISPLAY_HEIGHT / 2;
-      frame_buffer.fill_rect(x, y, w, h, (key_to_tone[i] < 0) ? 0xFFF : 0x0D6);
+      screen->fill_rect(x, y, w, h, (key_to_tone[i] < 0) ? 0xFFF : 0x0D6);
     }
 
     static const int black_key_x[] = {
@@ -120,11 +122,11 @@ void xmc_app_loop() {
       int y = XMC_DISPLAY_HEIGHT / 4;
       int w = XMC_DISPLAY_WIDTH / 12;
       int h = XMC_DISPLAY_HEIGHT * 3 / 10;
-      frame_buffer.fill_rect(x, y, w, h, 0x000);
+      screen->fill_rect(x, y, w, h, 0x000);
     }
 
     // start transferring the current frame to the display. This will return
     // immediately and the transfer will happen in the background.
-    frame_buffer.start_transfer_to_display(0, 0);
+    screen->start_transfer_to_display(0, 0);
   }
 }

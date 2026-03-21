@@ -43,13 +43,13 @@ LIB_SRC_DIR = $(REPO_DIR)/cpp/library/src
 LIB_HPP_LIST = \
 	$(wildcard $(LIB_INC_DIR)/*.hpp) \
 	$(wildcard $(LIB_INC_DIR)/*.h) \
-	$(wildcard $(LIB_INC_DIR)/**/*.hpp) \
-	$(wildcard $(LIB_INC_DIR)/**/*.h)
+	$(wildcard $(LIB_INC_DIR)/*/*.hpp) \
+	$(wildcard $(LIB_INC_DIR)/*/*.h)
 LIB_CPP_LIST = \
 	$(wildcard $(LIB_SRC_DIR)/*.cpp) \
 	$(wildcard $(LIB_SRC_DIR)/*.c) \
-	$(wildcard $(LIB_SRC_DIR)/**/*.cpp) \
-	$(wildcard $(LIB_SRC_DIR)/**/*.c)
+	$(wildcard $(LIB_SRC_DIR)/*/*.cpp) \
+	$(wildcard $(LIB_SRC_DIR)/*/*.c)
 
 DEPENDENCY_LIST = \
 	$(APP_HPP_LIST) \

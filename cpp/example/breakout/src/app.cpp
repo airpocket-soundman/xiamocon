@@ -58,7 +58,7 @@ enum class GameState {
   GameOver,
 };
 
-xmc::Sprite444 frame_buffer(SCREEN_W, SCREEN_H);
+xmc::Sprite screen = xmc::createSprite444(SCREEN_W, SCREEN_H);
 Brick bricks[BRICK_ROWS][BRICK_COLS];
 xmc::Mixer mixer(NUM_TONES);
 xmc::Tone tones[NUM_TONES];
@@ -270,10 +270,10 @@ void update_ball() {
 }
 
 void draw_scene() {
-  frame_buffer.complete_transfer();
-  frame_buffer.clear(COLOR_BG);
+  screen->complete_transfer();
+  screen->clear(COLOR_BG);
 
-  frame_buffer.fill_rect(0, 0, SCREEN_W, 2, COLOR_WALL);
+  screen->fill_rect(0, 0, SCREEN_W, 2, COLOR_WALL);
 
   for (int row = 0; row < BRICK_ROWS; ++row) {
     for (int col = 0; col < BRICK_COLS; ++col) {
@@ -281,32 +281,33 @@ void draw_scene() {
       if (!brick.alive) {
         continue;
       }
-      frame_buffer.fill_rect(brick.x, brick.y, BRICK_W, BRICK_H, brick.color);
+      screen->fill_rect(brick.x, brick.y, BRICK_W, BRICK_H, brick.color);
     }
   }
 
-  frame_buffer.fill_rect(paddle_x, PADDLE_Y, PADDLE_W, PADDLE_H, COLOR_PADDLE);
-  frame_buffer.fill_rect(static_cast<int>(ball_x), static_cast<int>(ball_y),
-                         BALL_SIZE, BALL_SIZE, COLOR_BALL);
+  screen->fill_rect(paddle_x, PADDLE_Y, PADDLE_W, PADDLE_H, COLOR_PADDLE);
+  screen->fill_rect(static_cast<int>(ball_x), static_cast<int>(ball_y),
+                          BALL_SIZE, BALL_SIZE, COLOR_BALL);
 
   if (game_state == GameState::Serve) {
-    frame_buffer.fill_rect(SCREEN_W / 2 - 40, SCREEN_H / 2 - 8, 80, 16,
-                           COLOR_SERVE);
+    screen->fill_rect(SCREEN_W / 2 - 40, SCREEN_H / 2 - 8, 80, 16,
+                            COLOR_SERVE);
   } else if (game_state == GameState::Clear) {
-    frame_buffer.fill_rect(SCREEN_W / 2 - 52, SCREEN_H / 2 - 12, 104, 24,
-                           COLOR_CLEAR);
+    screen->fill_rect(SCREEN_W / 2 - 52, SCREEN_H / 2 - 12, 104, 24,
+                            COLOR_CLEAR);
   } else if (game_state == GameState::GameOver) {
-    frame_buffer.fill_rect(SCREEN_W / 2 - 52, SCREEN_H / 2 - 12, 104, 24,
-                           COLOR_GAME_OVER);
+    screen->fill_rect(SCREEN_W / 2 - 52, SCREEN_H / 2 - 12, 104, 24,
+                            COLOR_GAME_OVER);
   }
 
-  frame_buffer.start_transfer_to_display(0, 0);
+  screen->start_transfer_to_display(0, 0);
 }
 
 }  // namespace
 
 xmc_app_config_t xmc_app_get_config() {
   xmc_app_config_t cfg = xmc_get_default_app_config();
+  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB444;
   cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
   cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
   cfg.speaker_latency_samples = 512;

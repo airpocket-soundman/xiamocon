@@ -3,5 +3,9 @@
 
 #include "xmc/gfx/sprite444.hpp"
 #include "xmc/gfx/sprite4444.hpp"
+#include "xmc/gfx/sprite565.hpp"
+#include "xmc/gfx/mesh.hpp"
+#include "xmc/gfx/rasterizer.hpp"
+#include "xmc/gfx/colorf.hpp"
 
 #endif

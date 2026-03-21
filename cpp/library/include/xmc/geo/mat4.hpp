@@ -36,6 +36,12 @@ struct mat4 {
   }
 
   /**
+   * @brief Load the identity matrix into this matrix
+   * After calling this function, this matrix will be an identity matrix
+   */
+  inline void load_identity() { *this = identity(); }
+
+  /**
    * @brief Create a rotation matrix from a quaternion
    * @param q The quaternion representing the rotation
    * @return A 4x4 rotation matrix
@@ -96,7 +102,7 @@ struct mat4 {
    * @note If the w component after transformation is close to zero, returns
    * (0, 0, 0) to avoid division by zero
    */
-  vec3 transform_point(const vec3 &v) const {
+  inline vec3 transform(const vec3 &v) const {
     float rx = m[0] * v.x + m[4] * v.y + m[8] * v.z + m[12];
     float ry = m[1] * v.x + m[5] * v.y + m[9] * v.z + m[13];
     float rz = m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14];
@@ -106,6 +112,40 @@ struct mat4 {
     }
     float inv_w = 1.0f / rw;
     return vec3(rx * inv_w, ry * inv_w, rz * inv_w);
+  }
+
+  inline void translate(const vec3 &t) {
+    m[12] += t.x;
+    m[13] += t.y;
+    m[14] += t.z;
+  }
+
+  inline void translate(float x, float y, float z) {
+    m[12] += x;
+    m[13] += y;
+    m[14] += z;
+  }
+
+  inline void rotate(const quat &q) { *this = from_quat(q) * (*this); }
+
+  inline void rotate(float pitch, float roll, float yaw) {
+    rotate(quat::from_euler(pitch, roll, yaw));
+  }
+
+  inline void rotate(const vec3 &axis, float angle) {
+    rotate(quat::from_axis_angle(axis, angle));
+  }
+
+  inline void scale(const vec3 &s) {
+    m[0] *= s.x;
+    m[5] *= s.y;
+    m[10] *= s.z;
+  }
+
+  inline void scale(float s) {
+    m[0] *= s;
+    m[5] *= s;
+    m[10] *= s;
   }
 };
 
