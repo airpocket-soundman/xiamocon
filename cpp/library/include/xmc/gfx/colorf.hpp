@@ -12,7 +12,8 @@ struct colorf {
   colorf(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
 
   static colorf from4444(color4444 c) {
-    return colorf(c.r / 15.0f, c.g / 15.0f, c.b / 15.0f, c.a / 15.0f);
+    return colorf(c.r * (1.0f / 15.0f), c.g * (1.0f / 15.0f),
+                  c.b * (1.0f / 15.0f), c.a * (1.0f / 15.0f));
   }
 
   inline uint16_t to565() const {
@@ -59,6 +60,38 @@ struct colorf {
     g += other.g;
     b += other.b;
     a += other.a;
+    return *this;
+  }
+
+  inline colorf &operator-=(const colorf &other) {
+    r -= other.r;
+    g -= other.g;
+    b -= other.b;
+    a -= other.a;
+    return *this;
+  }
+
+  inline colorf &operator*=(float scalar) {
+    r *= scalar;
+    g *= scalar;
+    b *= scalar;
+    a *= scalar;
+    return *this;
+  }
+
+  inline colorf &operator*=(const colorf &other) {
+    r *= other.r;
+    g *= other.g;
+    b *= other.b;
+    a *= other.a;
+    return *this;
+  }
+
+  inline colorf &operator/=(float scalar) {
+    r /= scalar;
+    g /= scalar;
+    b /= scalar;
+    a /= scalar;
     return *this;
   }
 };

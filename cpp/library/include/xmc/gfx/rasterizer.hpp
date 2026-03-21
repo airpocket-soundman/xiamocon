@@ -13,13 +13,14 @@ using depth_t = uint8_t;
 struct baked_vertex_t {
   vec3 pos;
   colorf color;
+  vec2 uv;
 };
 
 class RasterizerClass;
 using Rasterizer = std::shared_ptr<RasterizerClass>;
 
-static inline Rasterizer createRasterizer(int width, int height,
-                                          uint32_t stack_size = 16) {
+static inline Rasterizer create_rasterizer(int width, int height,
+                                           uint32_t stack_size = 16) {
   return std::make_shared<RasterizerClass>(width, height, stack_size);
 }
 
@@ -45,6 +46,8 @@ class RasterizerClass {
 
   vec3 parallel_light_dir = vec3(0.5f, 0.5f, 1.0f).normalized();
   colorf parallel_light_color = {0.8f, 0.8f, 0.8f, 1.0f};
+
+  Material material;
 
  public:
   RasterizerClass(int w, int h, uint32_t stack_size)
@@ -124,14 +127,20 @@ class RasterizerClass {
     z_far = far;
   }
 
+  inline void set_material(const Material &mat) { material = mat; }
+
   void clear_depth(depth_t value = 0xFF);
 
   void render_mesh(const Mesh &mesh);
 
-  void render_primitive(const Primitive &prim);
+  inline void render_primitive(const Primitive &prim) {
+    render_primitive(prim, material);
+  }
+
+  void render_primitive(const Primitive &prim, const Material &mat);
 
   void render_triangle(const baked_vertex_t &v0, const baked_vertex_t &v1,
-                       const baked_vertex_t &v2);
+                       const baked_vertex_t &v2, const Material &mat);
 };
 
 }  // namespace xmc

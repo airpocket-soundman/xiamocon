@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 
+#include "bmp_earth.hpp"
 #include "lsm6dsv16x.hpp"
 #include "xmc/font/ShapoSansP_s08c07.h"
 
@@ -16,10 +17,13 @@ static lsm6dsv16x::SensorI2C imu;
 static xmc::quat imu_pos;
 
 static xmc::Sprite screen =
-    xmc::createSprite565(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
-static xmc::Mesh cube = xmc::createColoredCube();
+    xmc::create_sprite565(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
+static xmc::Mesh cube = xmc::create_colored_cube();
+static xmc::Mesh sphere = xmc::create_sphere(1.0f, 18, 9);
+static xmc::Sprite earth_texture =
+    xmc::createSprite4444(256, 128, 0, (void *)bmp_earth_data);
 static xmc::Rasterizer rasterizer =
-    xmc::createRasterizer(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
+    xmc::create_rasterizer(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
 static uint32_t frame_count = 0;
 static uint64_t last_imu_update_us = 0;
 static xmc_status_t last_error = XMC_OK;
@@ -30,6 +34,7 @@ static void create_projection_matrix(xmc::mat4 *M, const xmc::quat *Q,
                                      int sw, int sh);
 
 float yaw = 0, pitch = 0;
+float vyaw = 0, vpitch = 0;
 
 xmc_app_config_t xmc_app_get_config() {
   auto cfg = xmc_get_default_app_config();
@@ -40,8 +45,9 @@ xmc_app_config_t xmc_app_get_config() {
 void xmc_app_setup() {
   screen->clear(0);
   imu.init();
-
   imu_pos = {1, 0, 0, 0};
+  sphere->material = xmc::create_material();
+  sphere->material->color_texture = earth_texture;
 }
 
 void xmc_app_loop() {
@@ -64,15 +70,19 @@ void xmc_app_loop() {
   }
 
   if (xmc_input_is_pressed(XMC_BUTTON_LEFT)) {
-    yaw -= dt;
+    vyaw += dt;
   } else if (xmc_input_is_pressed(XMC_BUTTON_RIGHT)) {
-    yaw += dt;
+    vyaw -= dt;
   }
   if (xmc_input_is_pressed(XMC_BUTTON_UP)) {
-    pitch += dt;
+    vpitch -= dt;
   } else if (xmc_input_is_pressed(XMC_BUTTON_DOWN)) {
-    pitch -= dt;
+    vpitch += dt;
   }
+  vyaw *= 0.98f;
+  vpitch *= 0.98f;
+  yaw += vyaw * dt;
+  pitch += vpitch * dt;
 
   // complete the previous frame's transfer if it's still in progress, then
   // fill the frame buffer with the new frame's content. In this case, we just
@@ -236,11 +246,11 @@ void xmc_app_loop() {
 
     rasterizer->set_target(screen);
     rasterizer->clear_depth();
-    rasterizer->set_depth_range(-0.5f, 0.5f);
+    rasterizer->set_depth_range(-1.0f, 1.0f);
 
     xmc::vec3 light_dir = {0, 0.5f, 1.0f};
     light_dir = imu_pos.conjugate().rotate(light_dir);
-    rasterizer->set_parallel_light(light_dir, xmc::colorf(1, 1, 1, 1));
+    rasterizer->set_parallel_light(light_dir, xmc::colorf(1.5f, 1.5f, 1.5f, 1));
 
     rasterizer->set_projection(proj);
     rasterizer->load_identity();
@@ -258,22 +268,29 @@ void xmc_app_loop() {
     //   }
     // }
 
-    int n = 2;
-    for (int i = 0; i < n; i++) {
-      float tx = -t + i * t * 2 / (n - 1);
-      for (int j = 0; j < n; j++) {
-        float ty = -t + j * t * 2 / (n - 1);
-        for (int k = 0; k < n; k++) {
-          float tz = -t + k * t * 2 / (n - 1);
-          rasterizer->push_matrix();
-          rasterizer->scale(t / n * 1.5f);
-          rasterizer->translate(tx, ty, tz);
-          rasterizer->rotate(pitch, 0, yaw);
-          rasterizer->render_mesh(cube);
-          rasterizer->pop_matrix();
-        }
-      }
-    }
+    // int n = 2;
+    // for (int i = 0; i < n; i++) {
+    //   float tx = -t + i * t * 2 / (n - 1);
+    //   for (int j = 0; j < n; j++) {
+    //     float ty = -t + j * t * 2 / (n - 1);
+    //     for (int k = 0; k < n; k++) {
+    //       float tz = -t + k * t * 2 / (n - 1);
+    //       rasterizer->push_matrix();
+    //       rasterizer->scale(t / n * 1.5f);
+    //       rasterizer->translate(tx, ty, tz);
+    //       rasterizer->rotate(pitch, 0, yaw);
+    //       rasterizer->render_mesh(cube);
+    //       rasterizer->pop_matrix();
+    //     }
+    //   }
+    // }
+
+    rasterizer->push_matrix();
+    rasterizer->scale(0.009f);
+    rasterizer->rotate(0, M_PI / 2, 0);
+    rasterizer->rotate(pitch, 0, yaw);
+    rasterizer->render_mesh(sphere);
+    rasterizer->pop_matrix();
 
     // rasterizer->push_matrix();
     // rasterizer->rotate(a, 0, 0);
