@@ -15,11 +15,11 @@ static const int XIAO_PIN_BAT_ADC_EN = 19;
 static const int XIAO_PIN_NEO_PWR = 23;
 static const int XIAO_PIN_LED_Y = 25;
 
-xmc_status_t xmc_power_init() { return XMC_OK; }
+XmcStatus xmc_powerInit() { return XMC_OK; }
 
-xmc_status_t xmc_power_service() { return XMC_OK; }
+XmcStatus xmc_powerService() { return XMC_OK; }
 
-xmc_status_t xmc_power_deep_sleep() {
+XmcStatus xmc_powerDeepSleep() {
   multicore_reset_core1();
 
   stdio_flush();
@@ -70,7 +70,7 @@ xmc_status_t xmc_power_deep_sleep() {
   return XMC_OK;
 }
 
-xmc_status_t xmc_power_reset(xmc_reset_mode_t mode) {
+XmcStatus xmc_powerReset(xmc_reset_mode_t mode) {
   watchdog_reboot(0, 0, 0);
   while (true) {
     tight_loop_contents();

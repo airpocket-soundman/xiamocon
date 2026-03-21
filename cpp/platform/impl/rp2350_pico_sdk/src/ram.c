@@ -2,5 +2,5 @@
 
 #include <pico/stdlib.h>
 
-void *xmc_malloc(size_t size, xmc_ram_cap_t caps) { return malloc(size); }
-void xmc_free(void *ptr) { free(ptr); }
+void *xmcMalloc(size_t size, xmc_ram_cap_t caps) { return malloc(size); }
+void xmcFree(void *ptr) { free(ptr); }

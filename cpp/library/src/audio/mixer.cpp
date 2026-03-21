@@ -2,31 +2,31 @@
 
 namespace xmc {
 
-static void xmc_mixer_request_data(void *buffer, uint32_t num_samples,
+static void xmc_mixerRequestData(void *buffer, uint32_t numSamples,
                                    void *context);
 
-Mixer::Mixer(int num_sources) : num_sources(num_sources) {
-  sources = new xmc_audio_source_port_t *[num_sources];
-  for (int i = 0; i < num_sources; i++) {
+Mixer::Mixer(int numSources) : numSources(numSources) {
+  sources = new xmc_audio_source_port_t *[numSources];
+  for (int i = 0; i < numSources; i++) {
     sources[i] = nullptr;
   }
-  output.request_data = xmc_mixer_request_data;
+  output.requestData = xmc_mixerRequestData;
   output.context = this;
 }
 
 Mixer::~Mixer() { delete[] sources; }
 
-void Mixer::render(int16_t *buffer, uint32_t num_samples) {
-  for (int i = 0; i < num_sources; i++) {
+void Mixer::render(int16_t *buffer, uint32_t numSamples) {
+  for (int i = 0; i < numSources; i++) {
     if (sources[i]) {
-      sources[i]->request_data(buffer, num_samples, sources[i]->context);
+      sources[i]->requestData(buffer, numSamples, sources[i]->context);
     }
   }
 }
 
-static void xmc_mixer_request_data(void *buffer, uint32_t num_samples,
+static void xmc_mixerRequestData(void *buffer, uint32_t numSamples,
                                    void *context) {
-  ((Mixer *)context)->render((int16_t *)buffer, num_samples);
+  ((Mixer *)context)->render((int16_t *)buffer, numSamples);
 }
 
 }  // namespace xmc

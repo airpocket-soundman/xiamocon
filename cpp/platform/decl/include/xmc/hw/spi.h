@@ -30,20 +30,20 @@ extern "C" {
  * @param device The SPI device identifier.
  * @return The preferred SPI frequency in Hz.
  */
-uint32_t xmc_spi_get_preferred_frequency(xmc_spi_device_t device);
+uint32_t xmc_spiGetPreferredFrequency(xmc_spi_device_t device);
 
 /**
  * Initialize the SPI peripheral and configure the GPIO pins for SPI
  * functionality. This must be called before any other SPI functions except
- * xmc_spi_get_preferred_frequency.
+ * xmc_spiGetPreferredFrequency.
  * @return XMC_OK if the SPI peripheral was successfully initialized.
  */
-xmc_status_t xmc_spi_init();
+XmcStatus xmc_spiInit();
 
 /**
  * Deinitialize the SPI peripheral and release any resources.
  */
-void xmc_spi_deinit();
+void xmc_spiDeinit();
 
 /** 
  * Try to begin an SPI transaction without blocking. This will attempt to acquire
@@ -51,16 +51,16 @@ void xmc_spi_deinit();
  * lock is not available.
  * @return True if the transaction was successfully started, false otherwise.
  */
-bool xmc_spi_try_lock();
+bool xmc_spiTryLock();
 
 /**
  * Begin an SPI transaction. This will acquire a lock to prevent other tasks
- * from starting SPI transactions until xmc_spi_unlock is called.
+ * from starting SPI transactions until xmc_spiUnlock is called.
  * @return XMC_OK if the transaction was successfully started.
  */
-static inline xmc_status_t xmc_spi_lock() {
-  while (!xmc_spi_try_lock()) {
-    xmc_tight_loop_contents();
+static inline XmcStatus xmc_spi_lock() {
+  while (!xmc_spiTryLock()) {
+    xmc_tightLoopContents();
   }
   return XMC_OK;
 }
@@ -70,20 +70,20 @@ static inline xmc_status_t xmc_spi_lock() {
  * xmc_spi_lock.
  * @return XMC_OK if the transaction was successfully ended.
  */
-xmc_status_t xmc_spi_unlock();
+XmcStatus xmc_spiUnlock();
 
 /**
  * Set the SPI baud rate.
  * @param baudrate The desired SPI baud rate in Hz.
  */
-xmc_status_t xmc_spi_set_baudrate(uint32_t baudrate);
+XmcStatus xmc_spiSetBaudrate(uint32_t baudrate);
 
 /**
  * Write data to the SPI bus in a blocking manner.
  * @param data Pointer to the data buffer to be sent.
  * @param size The number of bytes to write from the data buffer.
  */
-xmc_status_t xmc_spi_write_blocking(const uint8_t *data, uint32_t size);
+XmcStatus xmc_spiWriteBlocking(const uint8_t *data, uint32_t size);
 
 /**
  * Read data from the SPI bus in a blocking manner. The master will send the
@@ -92,36 +92,36 @@ xmc_status_t xmc_spi_write_blocking(const uint8_t *data, uint32_t size);
  * @param data Pointer to the data buffer to store the received data.
  * @param size The number of bytes to read into the data buffer.
  */
-xmc_status_t xmc_spi_read_blocking(uint8_t repeated_byte, uint8_t *data,
+XmcStatus xmc_spiReadBlocking(uint8_t repeated_byte, uint8_t *data,
                                    uint32_t size);
 
 /**
  * Start a DMA-based SPI write operation. This will return immediately after
- * starting the DMA transfer, and the caller must call xmc_spi_dma_complete() to
+ * starting the DMA transfer, and the caller must call xmc_spiDmaComplete() to
  * wait for the transfer to finish.
  * @param cfg Pointer to the DMA configuration for the transfer.
- * @param cs_pin The GPIO pin number to use for the chip select (CS) line during
+ * @param csPin The GPIO pin number to use for the chip select (CS) line during
  * the transfer, or -1 to not control any CS line. If a valid pin number is
  * provided, the CS line will be pulled low at the start of the transfer and
  * pulled high when the transfer is complete.
  * @return XMC_OK if the DMA transfer was successfully started, or an error code
  * if there was a problem with the configuration.
  */
-xmc_status_t xmc_spi_dma_write_start(const xmc_dma_config_t *cfg, int cs_pin);
+XmcStatus xmc_spiDmaWriteStart(const xmc_dma_config_t *cfg, int csPin);
 
 /**
  * Wait for any ongoing DMA-based SPI transfer to complete. If a CS pin was
- * specified in xmc_spi_dma_write_start, it will be released (set high) after
+ * specified in xmc_spiDmaWriteStart, it will be released (set high) after
  * the transfer is complete.
  * @return XMC_OK if the transfer completed successfully.
  */
-xmc_status_t xmc_spi_dma_complete();
+XmcStatus xmc_spiDmaComplete();
 
 /**
  * Check if a DMA-based SPI transfer is currently in progress.
  * @return True if a DMA-based SPI transfer is in progress, false otherwise.
  */
-bool xmc_spi_dma_is_busy();
+bool xmc_spiDmaIsBusy();
 
 #if defined(__cplusplus)
 }

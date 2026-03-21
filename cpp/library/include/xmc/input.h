@@ -54,12 +54,12 @@ typedef enum {
  * Initialize the input system. This will configure the IO expander pins for
  * reading button states and initialize any necessary data structures.
  */
-void xmc_input_init();
+void xmc_inputInit();
 
 /**
  * Deinitialize the input system.
  */
-void xmc_input_deinit();
+void xmc_inputDeinit();
 
 /**
  * Service the input system. This should be called periodically (e.g. once per
@@ -70,7 +70,7 @@ void xmc_input_deinit();
  * using the other input functions.
  * @return XMC_OK if the input state was successfully updated.
  */
-xmc_status_t xmc_input_service();
+XmcStatus xmc_inputService();
 
 /**
  * Get the current state of all buttons. The return value is a bitmask where
@@ -78,12 +78,12 @@ xmc_status_t xmc_input_service();
  * buttons are defined in the xmc_button_t enum, so you can check if a specific
  * button is pressed by performing a bitwise AND with the corresponding button
  * mask. For example, to check if the A button is pressed, you can do:
- * if (xmc_input_get_state() & XMC_BUTTON_A) { ... }
+ * if (xmc_inputGetState() & XMC_BUTTON_A) { ... }
  * @return A bitmask representing the current state of all buttons. Each bit
  * corresponds to a button (1 for pressed, 0 for not pressed). The buttons are
  * defined in the xmc_button_t enum.
  */
-xmc_button_t xmc_input_get_state();
+xmc_button_t xmc_inputGetState();
 
 /**
  * Check if a specific button is currently pressed. This is a convenience
@@ -92,7 +92,7 @@ xmc_button_t xmc_input_get_state();
  * @param button The button to check (use the xmc_button_t enum values).
  * @return true if the specified button is currently pressed, false otherwise.
  */
-bool xmc_input_is_pressed(xmc_button_t button);
+bool xmc_inputIsPressed(xmc_button_t button);
 
 /**
  * Check if a specific button was just pressed. This returns true if the button
@@ -102,7 +102,7 @@ bool xmc_input_is_pressed(xmc_button_t button);
  * @param button The button to check (use the xmc_button_t enum values).
  * @return true if the specified button was just pressed, false otherwise.
  */
-bool xmc_input_was_pressed(xmc_button_t button);
+bool xmc_inputWasPressed(xmc_button_t button);
 
 /**
  * Check if a specific button was just released. This returns true if the button
@@ -111,7 +111,7 @@ bool xmc_input_was_pressed(xmc_button_t button);
  * @param button The button to check (use the xmc_button_t enum values).
  * @return true if the specified button was just released, false otherwise.
  */
-bool xmc_input_was_released(xmc_button_t button);
+bool xmc_inputWasReleased(xmc_button_t button);
 
 #if defined(__cplusplus)
 }

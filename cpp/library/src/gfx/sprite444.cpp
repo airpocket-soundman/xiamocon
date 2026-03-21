@@ -8,8 +8,8 @@
 
 namespace xmc {
 
-void Sprite444Class::on_set_pixel(int x, int y, uint16_t color) {
-  uint8_t *line = (uint8_t *)line_ptr(y);
+void Sprite444Class::onSetPixel(int x, int y, uint16_t color) {
+  uint8_t *line = (uint8_t *)linePtr(y);
   int i = x / 2 * 3;
   if ((x & 1) == 0) {
     line[i + 0] = (color >> 4) & 0xFF;
@@ -20,8 +20,8 @@ void Sprite444Class::on_set_pixel(int x, int y, uint16_t color) {
   }
 }
 
-uint16_t Sprite444Class::on_get_pixel(int x, int y) const {
-  uint8_t *line = (uint8_t *)line_ptr(y);
+uint16_t Sprite444Class::onGetPixel(int x, int y) const {
+  uint8_t *line = (uint8_t *)linePtr(y);
   int i = x / 2 * 3;
   if ((x & 1) == 0) {
     return ((uint16_t)line[i + 0] << 4) | (line[i + 1] >> 4);
@@ -30,42 +30,42 @@ uint16_t Sprite444Class::on_get_pixel(int x, int y) const {
   }
 }
 
-void Sprite444Class::on_fill_rect(int x, int y, int width, int height,
-                                  uint16_t color) {
+void Sprite444Class::onFillRect(int x, int y, int width, int height,
+                                uint16_t color) {
   if (width <= 0 || height <= 0) return;
 
   for (int i = 0; i < width; i++) {
-    on_set_pixel(x + i, y, color);
+    onSetPixel(x + i, y, color);
   }
-  int copy_l = (x + 1) & 0xFFFFFFFE;
-  int copy_r = (x + width) & 0xFFFFFFFE;
-  int copy_offset = copy_l * 3 / 2;
-  int copy_bytes = (copy_r - copy_l) * 3 / 2;
-  uint8_t *copy_src = (uint8_t *)line_ptr(y) + copy_offset;
+  int copyL = (x + 1) & 0xFFFFFFFE;
+  int copyR = (x + width) & 0xFFFFFFFE;
+  int copyOffset = copyL * 3 / 2;
+  int copyBytes = (copyR - copyL) * 3 / 2;
+  uint8_t *copySrc = (uint8_t *)linePtr(y) + copyOffset;
   for (int j = 1; j < height; j++) {
-    uint8_t *copy_dst = (uint8_t *)line_ptr(y + j) + copy_offset;
-    if (copy_bytes > 0) {
-      memcpy(copy_dst, copy_src, copy_bytes);
+    uint8_t *copyDst = (uint8_t *)linePtr(y + j) + copyOffset;
+    if (copyBytes > 0) {
+      memcpy(copyDst, copySrc, copyBytes);
     }
     if (x & 1) {
-      on_set_pixel(x, y + j, color);
+      onSetPixel(x, y + j, color);
     }
     if (((x + width) & 1)) {
-      on_set_pixel(x + width - 1, y + j, color);
+      onSetPixel(x + width - 1, y + j, color);
     }
   }
 }
 
-void Sprite444Class::on_draw_image(const Sprite &image, int dx, int dy, int w,
-                                   int h, int sx, int sy) {
-  switch (image->format()) {
+void Sprite444Class::onDrawImage(const Sprite &image, int dx, int dy, int w,
+                                 int h, int sx, int sy) {
+  switch (image->format) {
     case pixel_format_t::ARGB4444:
       // todo: optimize
       for (int j = 0; j < h; j++) {
         for (int i = 0; i < w; i++) {
           uint16_t c = image->get_pixel(sx + i, sy + j);
           if ((c & 0xF000) == 0) continue;
-          on_set_pixel(dx + i, dy + j, c);
+          onSetPixel(dx + i, dy + j, c);
         }
       }
       break;
@@ -76,10 +76,10 @@ void Sprite444Class::on_draw_image(const Sprite &image, int dx, int dy, int w,
   }
 }
 
-xmc_status_t Sprite444Class::on_start_transfer_to_display(int dx, int dy,
+XmcStatus Sprite444Class::on_start_transfer_to_display(int dx, int dy,
                                                           int sy, int h) {
-  XMC_ERR_RET(xmc_display_set_window(dx, dy, width_, h));
-  XMC_ERR_RET(xmc_display_write_pixels_start(line_ptr(sy), stride_ * h, false));
+  XMC_ERR_RET(xmc_displaySetWindow(dx, dy, width, h));
+  XMC_ERR_RET(xmc_displayWritePixelsStart(linePtr(sy), stride * h, false));
   return XMC_OK;
 }
 

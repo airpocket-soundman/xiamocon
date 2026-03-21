@@ -6,102 +6,102 @@ static void xmc_tone_request_data(void *buffer, uint32_t size_bytes,
                                   void *context);
 
 Tone::Tone() {
-  output_port.request_data = xmc_tone_request_data;
-  output_port.context = this;
+  outputPort.requestData = xmc_tone_request_data;
+  outputPort.context = this;
 }
 
 void Tone::init(uint32_t rate_hz) {
-  sample_rate_hz = rate_hz;
-  tick_phase_step = 0x10000UL * 1000 / sample_rate_hz;
+  sampleRateHz = rate_hz;
+  tickPhaseStep = 0x10000UL * 1000 / sampleRateHz;
 
   waveform = Waveform::SQUARE;
   velocity = 64;
-  attack_ms = 0;
-  decay_ms = 0;
-  sustain_level = 256;
-  release_ms = 0;
+  attackMs = 0;
+  decayMs = 0;
+  sustainLevel = 256;
+  releaseMs = 0;
 
-  tone_phase_step = 0;
-  noise_lfsr = 0xFFFF;
-  tone_phase_counter = 0;
-  length_counter = 0;
-  envelope_state = EnvelopeState::IDLE;
-  envelope_counter = 0;
-  envelope_amp_init = 0;
-  envelope_amp_curr = 0;
-  tick_phase_counter = 0;
+  tonePhaseStep = 0;
+  noiseLfsr = 0xFFFF;
+  tonePhaseCounter = 0;
+  lengthCounter = 0;
+  envelopeState = EnvelopeState::IDLE;
+  envelopeCounter = 0;
+  envelopeAmpInit = 0;
+  envelopeAmpCurr = 0;
+  tickPhaseCounter = 0;
 }
 
-void Tone::note_on(uint8_t midi_note, uint32_t len_ms) {
+void Tone::noteOn(uint8_t note, uint32_t lenMs) {
   // todo: optimize
-  uint32_t freq = 440 * pow(2, (midi_note - 69) / 12.0);
-  note_on_with_freq(freq, len_ms);
+  uint32_t freq = 440 * pow(2, (note - 69) / 12.0);
+  noteOnWithFreq(freq, lenMs);
 }
 
-void Tone::note_on_with_freq(uint32_t freq, uint32_t len_ms) {
+void Tone::noteOnWithFreq(uint32_t freq, uint32_t lenMs) {
   if (freq == 0) {
     mute();
     return;
   }
 
-  tone_phase_step = (uint64_t)freq * 0x10000 / sample_rate_hz;
-  length_counter = len_ms;
-  tick_phase_counter = 0;
-  tone_phase_counter = 0;
+  tonePhaseStep = (uint64_t)freq * 0x10000 / sampleRateHz;
+  lengthCounter = lenMs;
+  tickPhaseCounter = 0;
+  tonePhaseCounter = 0;
 
-  if (attack_ms > 0) {
-    envelope_state = EnvelopeState::ATTACK;
-    envelope_counter = 0;
-    envelope_amp_init = 0;
-    envelope_amp_curr = 0;
+  if (attackMs > 0) {
+    envelopeState = EnvelopeState::ATTACK;
+    envelopeCounter = 0;
+    envelopeAmpInit = 0;
+    envelopeAmpCurr = 0;
   } else {
-    if (len_ms == 0) {
-      envelope_state = EnvelopeState::RELEASE;
-    } else if (decay_ms > 0) {
-      envelope_state = EnvelopeState::DECAY;
+    if (lenMs == 0) {
+      envelopeState = EnvelopeState::RELEASE;
+    } else if (decayMs > 0) {
+      envelopeState = EnvelopeState::DECAY;
     } else {
-      envelope_state = EnvelopeState::SUSTAIN;
+      envelopeState = EnvelopeState::SUSTAIN;
     }
-    envelope_counter = 0;
-    envelope_amp_init = (uint32_t)velocity * (0x10000 / 128);
-    envelope_amp_curr = envelope_amp_init;
+    envelopeCounter = 0;
+    envelopeAmpInit = (uint32_t)velocity * (0x10000 / 128);
+    envelopeAmpCurr = envelopeAmpInit;
   }
 }
 
-void Tone::note_off() {
-  if (envelope_state != EnvelopeState::IDLE &&
-      envelope_state != EnvelopeState::RELEASE) {
-    if (release_ms > 0) {
-      envelope_state = EnvelopeState::RELEASE;
-      envelope_counter = 0;
-      envelope_amp_init = envelope_amp_curr;
+void Tone::noteOff() {
+  if (envelopeState != EnvelopeState::IDLE &&
+      envelopeState != EnvelopeState::RELEASE) {
+    if (releaseMs > 0) {
+      envelopeState = EnvelopeState::RELEASE;
+      envelopeCounter = 0;
+      envelopeAmpInit = envelopeAmpCurr;
     } else {
-      envelope_state = EnvelopeState::IDLE;
+      envelopeState = EnvelopeState::IDLE;
     }
   }
 }
 
 void Tone::mute() {
-  envelope_state = EnvelopeState::IDLE;
-  length_counter = 0;
+  envelopeState = EnvelopeState::IDLE;
+  lengthCounter = 0;
 }
 
-void Tone::render(int16_t *buffer, uint32_t num_samples) {
-  if (envelope_state == EnvelopeState::IDLE) {
+void Tone::render(int16_t *buffer, uint32_t numSamples) {
+  if (envelopeState == EnvelopeState::IDLE) {
     return;
   }
 
-  for (uint32_t i = 0; i < num_samples; i++) {
-    tick_phase_counter += tick_phase_step;
-    if (tick_phase_counter >= 0x10000) {
-      tick_phase_counter -= 0x10000;
+  for (uint32_t i = 0; i < numSamples; i++) {
+    tickPhaseCounter += tickPhaseStep;
+    if (tickPhaseCounter >= 0x10000) {
+      tickPhaseCounter -= 0x10000;
       tick();
     }
 
     const int OVERSAMPLING = 1;
     int32_t raw = 0;
     for (int i = 0; i < OVERSAMPLING; i++) {
-      uint32_t p = tone_phase_counter + i * tone_phase_step / OVERSAMPLING;
+      uint32_t p = tonePhaseCounter + i * tonePhaseStep / OVERSAMPLING;
       switch (waveform) {
         default:
         case Waveform::SQUARE: raw += (p < 0x8000) ? 0x8000 : -0x8000; break;
@@ -117,89 +117,89 @@ void Tone::render(int16_t *buffer, uint32_t num_samples) {
           raw -= 0x8000;
           break;
         case Waveform::SAWTOOTH: raw += p - 0x8000; break;
-        case Waveform::NOISE: raw += (int32_t)noise_lfsr - 0x8000; break;
+        case Waveform::NOISE: raw += (int32_t)noiseLfsr - 0x8000; break;
       }
     }
     raw /= OVERSAMPLING;
 
-    uint16_t last_phase = tone_phase_counter;
-    tone_phase_counter += tone_phase_step;
+    uint16_t last_phase = tonePhaseCounter;
+    tonePhaseCounter += tonePhaseStep;
     if (waveform == Waveform::NOISE &&
-        (last_phase & 0x400) != (tone_phase_counter & 0x400)) {
-      noise_lfsr = (noise_lfsr >> 1) ^ (-(noise_lfsr & 1) & 0xB400);
+        (last_phase & 0x400) != (tonePhaseCounter & 0x400)) {
+      noiseLfsr = (noiseLfsr >> 1) ^ (-(noiseLfsr & 1) & 0xB400);
     }
 
-    uint32_t amp = envelope_amp_curr;
+    uint32_t amp = envelopeAmpCurr;
     amp = (amp * amp) / 0x10000;
     buffer[i] += (raw * amp / 0x10000);
   }
 }
 
 void Tone::tick() {
-  if (length_counter != TONE_LENGTH_INFINITE && length_counter > 0) {
-    length_counter--;
-    if (length_counter == 0) {
-      note_off();
+  if (lengthCounter != TONE_LENGTH_INFINITE && lengthCounter > 0) {
+    lengthCounter--;
+    if (lengthCounter == 0) {
+      noteOff();
     }
   }
 
-  switch (envelope_state) {
+  switch (envelopeState) {
     case EnvelopeState::IDLE: break;
 
     case EnvelopeState::ATTACK:
-      envelope_counter++;
-      if (envelope_counter < attack_ms) {
-        envelope_amp_curr =
-            (uint32_t)velocity * (0x10000 / 128) * envelope_counter / attack_ms;
+      envelopeCounter++;
+      if (envelopeCounter < attackMs) {
+        envelopeAmpCurr =
+            (uint32_t)velocity * (0x10000 / 128) * envelopeCounter / attackMs;
       } else {
-        envelope_state =
-            decay_ms > 0 ? EnvelopeState::DECAY : EnvelopeState::SUSTAIN;
-        envelope_counter = 0;
-        envelope_amp_curr = (uint32_t)velocity * (0x10000 / 128);
+        envelopeState =
+            decayMs > 0 ? EnvelopeState::DECAY : EnvelopeState::SUSTAIN;
+        envelopeCounter = 0;
+        envelopeAmpCurr = (uint32_t)velocity * (0x10000 / 128);
       }
       break;
 
     case EnvelopeState::DECAY: {
-      envelope_counter++;
+      envelopeCounter++;
       uint32_t start = (uint32_t)velocity * (0x10000 / 128);
-      uint32_t goal = start * sustain_level / 256;
-      if (envelope_counter < decay_ms) {
-        envelope_amp_curr =
-            start - ((start - goal) * envelope_counter / decay_ms);
+      uint32_t goal = start * sustainLevel / 256;
+      if (envelopeCounter < decayMs) {
+        envelopeAmpCurr =
+            start - ((start - goal) * envelopeCounter / decayMs);
       } else {
-        envelope_state = EnvelopeState::SUSTAIN;
-        envelope_counter = 0;
-        envelope_amp_curr = goal;
+        envelopeState = EnvelopeState::SUSTAIN;
+        envelopeCounter = 0;
+        envelopeAmpCurr = goal;
       }
     } break;
 
     case EnvelopeState::SUSTAIN: break;
 
     case EnvelopeState::RELEASE:
-      envelope_counter++;
-      if (envelope_counter < release_ms) {
-        envelope_amp_curr = envelope_amp_init -
-                            (envelope_amp_init * envelope_counter / release_ms);
+      envelopeCounter++;
+      if (envelopeCounter < releaseMs) {
+        envelopeAmpCurr = envelopeAmpInit -
+                            (envelopeAmpInit * envelopeCounter / releaseMs);
       } else {
-        envelope_state = EnvelopeState::IDLE;
-        envelope_counter = 0;
-        envelope_amp_curr = 0;
+        envelopeState = EnvelopeState::IDLE;
+        envelopeCounter = 0;
+        envelopeAmpCurr = 0;
       }
       break;
   }
 
-  if (sweep_period_ms > 0) {
-    sweep_counter++;
-    if (sweep_counter >= sweep_period_ms) {
-      sweep_counter = 0;
-      tone_phase_step = (uint64_t)tone_phase_step * sweep_coeff / 0x10000;
+  if (sweepPeriodMs > 0) {
+    sweepCounter++;
+    if (sweepCounter >= sweepPeriodMs) {
+      sweepCounter = 0;
+      tonePhaseStep = (uint64_t)tonePhaseStep * sweepCoeff / 0x10000;
     }
   }
 }
 
-static void xmc_tone_request_data(void *buffer, uint32_t num_samples,
+static void xmc_tone_request_data(void *buffer, uint32_t numSamples,
                                   void *context) {
-  ((Tone *)context)->render((int16_t *)buffer, num_samples);
+  ((Tone *)context)->render((int16_t *)buffer, numSamples);
 }
 
 }  // namespace xmc

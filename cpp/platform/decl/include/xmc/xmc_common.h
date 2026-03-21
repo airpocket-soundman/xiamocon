@@ -40,7 +40,7 @@ typedef enum {
   XMC_ERR_SPEAKER_UNSUPPORTED_FORMAT = XMC_ERR_BASE_SPEAKER + 1,
   XMC_ERR_BASE_USER = 0x8000,
   XMC_USER_GENERIC_ERROR = XMC_ERR_BASE_USER + 1,
-} xmc_status_t;
+} XmcStatus;
 
 #define XMC_ERR_LOG(status) \
   do {                      \
@@ -70,7 +70,7 @@ extern "C" {
 /**
  * Contents of a tight loop.
  */
-void xmc_tight_loop_contents();
+void xmc_tightLoopContents();
 
 #ifdef __cplusplus
 }

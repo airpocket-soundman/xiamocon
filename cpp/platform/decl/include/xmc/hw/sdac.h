@@ -22,7 +22,7 @@ typedef struct {
   void *hw;
   int pin;
   xmc_audio_source_port_t source;
-} xmc_sdac_inst_t;
+} SdacInst;
 
 /**
  * SDAC configuration structure. This structure defines the configuration
@@ -31,14 +31,14 @@ typedef struct {
  */
 typedef struct {
   xmc_audio_format_t format;
-  uint32_t latency_samples;
-} xmc_sdac_config_t;
+  uint32_t latencySamples;
+} SdacConfig;
 
 /**
  * Returns the supported audio sample formats for the SDAC.
  * @return A bitmask of supported audio sample formats.
  */
-xmc_audio_sample_format_t xmc_sdac_get_supported_formats(void);
+xmc_audio_sample_format_t xmc_sdacGetSupportedFormats(void);
 
 /**
  * Initializes the SDAC instance with the given configuration. This function
@@ -47,13 +47,13 @@ xmc_audio_sample_format_t xmc_sdac_get_supported_formats(void);
  * @param inst The SDAC instance to initialize.
  * @param pin The GPIO pin to use for the SDAC output.
  * @param cfg The configuration parameters for the SDAC instance.
- * @param actual_rate_hz A pointer to a variable that will receive the actual
+ * @param actualRateHz A pointer to a variable that will receive the actual
  * sample rate in Hz that the SDAC will use. This may be different from the
  * requested sample rate in the configuration due to hardware limitations.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
-                           const xmc_sdac_config_t *cfg, float *actual_rate_hz);
+XmcStatus xmc_sdac_init(SdacInst *inst, int pin,
+                           const SdacConfig *cfg, float *actualRateHz);
 
 /**
  * Deinitializes the SDAC instance. This function will free any resources
@@ -61,7 +61,7 @@ xmc_status_t xmc_sdac_init(xmc_sdac_inst_t *inst, int pin,
  * @param inst The SDAC instance to deinitialize.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-xmc_status_t xmc_sdac_deinit(xmc_sdac_inst_t *inst);
+XmcStatus xmc_sdacDeinit(SdacInst *inst);
 
 /**
  * Sets the audio source for the SDAC instance. The audio source is defined by
@@ -75,7 +75,7 @@ xmc_status_t xmc_sdac_deinit(xmc_sdac_inst_t *inst);
  * the SDAC instance.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-xmc_status_t xmc_sdac_set_source(xmc_sdac_inst_t *inst,
+XmcStatus xmc_sdac_set_source(SdacInst *inst,
                                  xmc_audio_source_port_t *src);
 
 /**
@@ -85,7 +85,7 @@ xmc_status_t xmc_sdac_set_source(xmc_sdac_inst_t *inst,
  * @param inst The SDAC instance to service.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-xmc_status_t xmc_sdac_service(xmc_sdac_inst_t *inst);
+XmcStatus xmc_sdac_service(SdacInst *inst);
 
 #if defined(__cplusplus)
 }

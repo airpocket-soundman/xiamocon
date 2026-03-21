@@ -1,3 +1,8 @@
+/**
+ * @file random.h
+ * @brief Random number generation for XMC library
+ */
+
 #ifndef XMC_RANDOM_H
 #define XMC_RANDOM_H
 
@@ -7,7 +12,11 @@
 extern "C" {
 #endif
 
-uint32_t xmc_random_next_u32();
+/**
+ * Get the next random 32-bit unsigned integer.
+ * @return A random 32-bit unsigned integer.
+ */
+uint32_t xmc_randomNextU32();
 
 #ifdef __cplusplus
 }

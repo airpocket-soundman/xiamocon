@@ -7,16 +7,16 @@
 extern "C" {
 #endif
 
-void xmc_gpio_set_dir(int pin, bool output) {
+void xmc_gpioSetDir(int pin, bool output) {
   gpio_init(pin);
   gpio_set_dir(pin, output ? GPIO_OUT : GPIO_IN);
 }
 
-void xmc_gpio_write(int pin, bool value) { gpio_put(pin, value ? 1 : 0); }
+void xmc_gpioWrite(int pin, bool value) { gpio_put(pin, value ? 1 : 0); }
 
-bool xmc_gpio_read(int pin) { return gpio_get(pin) != 0; }
+bool xmc_gpioRead(int pin) { return gpio_get(pin) != 0; }
 
-void xmc_gpio_set_pullup(int pin, bool enable) {
+void xmc_gpioSetPullup(int pin, bool enable) {
   gpio_set_pulls(pin, enable, false);
 }
 

@@ -4,55 +4,55 @@
 #include <stddef.h>
 
 typedef struct {
-  xmc_dma_irq_handler_t handler_fast;
-  xmc_dma_irq_handler_t handler_slow;
+  DmaIrqHandlerCb handlerFast;
+  DmaIrqHandlerCb handlerSlow;
   void *context;
-} handler_entry_t;
+} DmaHandlerEntry;
 
-handler_entry_t contexts[16] = {0};
+DmaHandlerEntry contexts[16] = {0};
 
-void xmc_dma_register_irq_handler(int dma_ch,
-                                  xmc_dma_irq_handler_t handler_fast,
-                                  xmc_dma_irq_handler_t handler_slow,
+void xmc_dmaRegisterIrqHandler(int dmaCh,
+                                  DmaIrqHandlerCb handlerFast,
+                                  DmaIrqHandlerCb handlerSlow,
                                   void *context) {
-  contexts[dma_ch].handler_fast = handler_fast;
-  contexts[dma_ch].handler_slow = handler_slow;
-  contexts[dma_ch].context = context;
+  contexts[dmaCh].handlerFast = handlerFast;
+  contexts[dmaCh].handlerSlow = handlerSlow;
+  contexts[dmaCh].context = context;
 }
 
-void xmc_dma_unregister_irq_handler(int dma_ch) {
-  contexts[dma_ch] = (handler_entry_t){0};
+void xmc_dmaUnregisterIrqHandler(int dmaCh) {
+  contexts[dmaCh] = (DmaHandlerEntry){0};
 }
 
-void xmc_dma_irq_handler(void) {
+void xmc_dmaIrqHandler(void) {
   uint32_t ints0 = dma_hw->ints0;
   uint32_t tmp = ints0;
 
-  int dma_ch;
+  int dmaCh;
   do {
-    dma_ch = __builtin_ctz(tmp);
-    if (dma_ch >= 16) {
+    dmaCh = __builtin_ctz(tmp);
+    if (dmaCh >= 16) {
       break;
     }
-    tmp &= ~(1u << dma_ch);
+    tmp &= ~(1u << dmaCh);
 
-    handler_entry_t *entry = &contexts[dma_ch];
-    if (entry->handler_fast) {
-      entry->handler_fast(entry->context);
+    DmaHandlerEntry *entry = &contexts[dmaCh];
+    if (entry->handlerFast) {
+      entry->handlerFast(entry->context);
     }
   } while (tmp);
 
   tmp = ints0;
   do {
-    dma_ch = __builtin_ctz(tmp);
-    if (dma_ch >= 16) {
+    dmaCh = __builtin_ctz(tmp);
+    if (dmaCh >= 16) {
       break;
     }
-    tmp &= ~(1u << dma_ch);
+    tmp &= ~(1u << dmaCh);
 
-    handler_entry_t *entry = &contexts[dma_ch];
-    if (entry->handler_slow) {
-      entry->handler_slow(entry->context);
+    DmaHandlerEntry *entry = &contexts[dmaCh];
+    if (entry->handlerSlow) {
+      entry->handlerSlow(entry->context);
     }
   } while (tmp);
 

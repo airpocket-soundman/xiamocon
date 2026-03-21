@@ -25,89 +25,85 @@ using Sprite = std::shared_ptr<SpriteClass>;
  * specialize the template for specific pixel formats and types.
  */
 class SpriteClass {
- protected:
-  pixel_format_t format_;
-  int width_;
-  int height_;
-  uint32_t stride_;
-  void *data_;
-  bool auto_free_;
+ public:
+  const pixel_format_t format;
+  const int width;
+  const int height;
+  const uint32_t stride;
+  void *data;
+  const bool autoFree;
 
+ protected:
   const GFXfont *font = nullptr;
-  int font_size = 1;
-  uint16_t text_color = 0;
-  int cursor_x = 0;
-  int cursor_y = 0;
+  int fontSize = 1;
+  uint16_t textColor = 0;
+  int cursorX = 0;
+  int cursorY = 0;
 
  public:
   SpriteClass(pixel_format_t format, int width, int height, uint32_t stride,
               void *data, bool auto_free)
-      : format_(format),
-        width_(width),
-        height_(height),
-        stride_(stride),
-        data_(data),
-        auto_free_(auto_free) {}
+      : format(format),
+        width(width),
+        height(height),
+        stride(stride),
+        data(data),
+        autoFree(auto_free) {}
 
   ~SpriteClass() {
-    if (auto_free_ && data_) {
-      xmc_free(data_);
-      data_ = nullptr;
+    if (autoFree && data) {
+      xmcFree(data);
+      data = nullptr;
     }
   }
 
-  inline pixel_format_t format() const { return format_; }
-  inline int width() const { return width_; }
-  inline int height() const { return height_; }
-  inline uint32_t stride() const { return stride_; }
-
-  inline void *line_ptr(int y) const {
-    if (y < 0 || y >= height_) return nullptr;
-    return (uint8_t *)data_ + stride_ * y;
+  inline void *linePtr(int y) const {
+    if (y < 0 || y >= height) return nullptr;
+    return (uint8_t *)data + stride * y;
   }
 
   void set_pixel(int x, int y, raw_color color) {
-    if (x < 0 || x >= width_ || y < 0 || y >= height_) return;
-    on_set_pixel(x, y, color);
+    if (x < 0 || x >= width || y < 0 || y >= height) return;
+    onSetPixel(x, y, color);
   }
   raw_color get_pixel(int x, int y) const {
-    if (x < 0 || x >= width_ || y < 0 || y >= height_) return 0;
-    return on_get_pixel(x, y);
+    if (x < 0 || x >= width || y < 0 || y >= height) return 0;
+    return onGetPixel(x, y);
   }
 
   void set_font(const GFXfont *font, int size = 1) {
     this->font = font;
-    this->font_size = size;
+    this->fontSize = size;
   }
   void set_cursor(int x, int y) {
-    this->cursor_x = x;
-    this->cursor_y = y;
+    this->cursorX = x;
+    this->cursorY = y;
   }
-  void set_text_color(raw_color color) { this->text_color = color; }
+  void set_text_color(raw_color color) { this->textColor = color; }
 
   void draw_string(const char *str) {
     if (!font || !str) return;
-    int x = cursor_x;
+    int x = cursorX;
     for (const char *p = str; *p; p++) {
       if (*p == '\n') {
-        x = cursor_x;
-        cursor_y += font->yAdvance * font_size;
+        x = cursorX;
+        cursorY += font->yAdvance * fontSize;
       } else {
-        x += on_draw_char(x, cursor_y, *p);
+        x += on_draw_char(x, cursorY, *p);
       }
     }
-    cursor_x = x;
+    cursorX = x;
   }
 
-  xmc_status_t start_transfer_to_display(int dx, int dy) {
-    return on_start_transfer_to_display(dx, dy, 0, height_);
+  XmcStatus start_transfer_to_display(int dx, int dy) {
+    return on_start_transfer_to_display(dx, dy, 0, height);
   }
 
-  xmc_status_t complete_transfer() {
-    return xmc_display_write_pixels_complete();
+  XmcStatus complete_transfer() {
+    return xmc_displayWritePixelsComplete();
   }
 
-  void clear(raw_color color) { on_fill_rect(0, 0, width_, height_, color); }
+  void clear(raw_color color) { onFillRect(0, 0, width, height, color); }
 
   void fill_rect(int x, int y, int w, int h, raw_color color) {
     if (w < 0) {
@@ -118,9 +114,9 @@ class SpriteClass {
       y += h;
       h = -h;
     }
-    clip_rect(&x, &y, &w, &h, width_, height_);
+    clipRect(&x, &y, &w, &h, width, height);
     if (w <= 0 || h <= 0) return;
-    on_fill_rect(x, y, w, h, color);
+    onFillRect(x, y, w, h, color);
   }
 
   void draw_rect(int x, int y, int w, int h, raw_color color) {
@@ -175,7 +171,7 @@ class SpriteClass {
     int iy_min = (int)ceilf(y0);
     int iy_max = (int)floorf(y2);
     if (iy_min < 0) iy_min = 0;
-    if (iy_max >= height_) iy_max = height_ - 1;
+    if (iy_max >= height) iy_max = height - 1;
 
     for (int iy = iy_min; iy <= iy_max; iy++) {
       float y = (float)iy;
@@ -194,14 +190,14 @@ class SpriteClass {
       int ix_min = (int)ceilf(xa);
       int ix_max = (int)floorf(xb);
       if (ix_min < 0) ix_min = 0;
-      if (ix_max >= width_) ix_max = width_ - 1;
-      on_fill_rect(ix_min, iy, ix_max - ix_min + 1, 1, color);
+      if (ix_max >= width) ix_max = width - 1;
+      onFillRect(ix_min, iy, ix_max - ix_min + 1, 1, color);
     }
   }
 
   inline void draw_image(const Sprite &image, int dx, int dy, int w, int h,
                          int sx, int sy) {
-    rect_t view = {0, 0, width_, height_};
+    rect_t view = {0, 0, width, height};
     rect_t dst = {dx, dy, w, h};
     dst = dst.intersect(view);
     if (dst.width <= 0 || dst.height <= 0) return;
@@ -211,7 +207,7 @@ class SpriteClass {
     dy = dst.y;
     w = dst.width;
     h = dst.height;
-    rect_t img = {0, 0, image->width(), image->height()};
+    rect_t img = {0, 0, image->width, image->height};
     rect_t src = {sx, sy, w, h};
     src = src.intersect(img);
     if (src.width <= 0 || src.height <= 0) return;
@@ -219,25 +215,25 @@ class SpriteClass {
     dy += src.y - sy;
     w = src.width;
     h = src.height;
-    on_draw_image(image, dx, dy, w, h, sx, sy);
+    onDrawImage(image, dx, dy, w, h, sx, sy);
   }
 
  protected:
-  virtual void on_set_pixel(int x, int y, raw_color color) = 0;
-  virtual raw_color on_get_pixel(int x, int y) const = 0;
-  virtual void on_fill_rect(int x, int y, int w, int h, raw_color color) = 0;
-  virtual void on_draw_image(const Sprite &image, int dx, int dy, int w, int h,
+  virtual void onSetPixel(int x, int y, raw_color color) = 0;
+  virtual raw_color onGetPixel(int x, int y) const = 0;
+  virtual void onFillRect(int x, int y, int w, int h, raw_color color) = 0;
+  virtual void onDrawImage(const Sprite &image, int dx, int dy, int w, int h,
                              int sx, int sy) = 0;
-  virtual xmc_status_t on_start_transfer_to_display(int dx, int dy, int sy,
+  virtual XmcStatus on_start_transfer_to_display(int dx, int dy, int sy,
                                                     int h) = 0;
   virtual int on_draw_char(int x, int y, char c) {
     if (!font) return 0;
     if (c < font->first || c > font->last) return 0;
     GFXglyph *glyph = &font->glyph[c - font->first];
-    int x0 = x + glyph->xOffset * font_size;
-    int y0 = y + glyph->yOffset * font_size;
-    int w = glyph->width * font_size;
-    int h = glyph->height * font_size;
+    int x0 = x + glyph->xOffset * fontSize;
+    int y0 = y + glyph->yOffset * fontSize;
+    int w = glyph->width * fontSize;
+    int h = glyph->height * fontSize;
     uint8_t *bitmap = font->bitmap + glyph->bitmapOffset;
     uint8_t byte = 0;
     int ibit = 0;
@@ -247,18 +243,18 @@ class SpriteClass {
           byte = *bitmap++;
         }
         if (byte & 0x80) {
-          if (font_size == 1) {
-            set_pixel(x0 + i, y0 + j, text_color);
+          if (fontSize == 1) {
+            set_pixel(x0 + i, y0 + j, textColor);
           } else {
-            fill_rect(x0 + i * font_size, y0 + j * font_size, font_size,
-                      font_size, text_color);
+            fill_rect(x0 + i * fontSize, y0 + j * fontSize, fontSize, fontSize,
+                      textColor);
           }
         }
         byte <<= 1;
         ibit = (ibit + 1) % 8;
       }
     }
-    return glyph->xAdvance * font_size;
+    return glyph->xAdvance * fontSize;
   }
 };
 

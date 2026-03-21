@@ -10,53 +10,53 @@
 #include "xmc/ioex.h"
 #include "xmc/battery.h"
 
-xmc_status_t xmc_sys_init() {
-  xmc_gpio_set_dir(XMC_PIN_POWER_BUTTON, false);
+XmcStatus xmc_sysInit() {
+  xmc_gpioSetDir(XMC_PIN_POWER_BUTTON, false);
 
-  xmc_i2c_init();
-  xmc_spi_init();
+  xmc_i2cInit();
+  xmc_spiInit();
   
-  xmc_ioex_init();
-  xmc_ioex_set_dir_masked(0, 0xFF, 0xFF);
-  xmc_ioex_set_dir_masked(1, 0xFF, 0xFF);
+  xmc_ioexInit();
+  xmc_ioexSetDirMasked(0, 0xFF, 0xFF);
+  xmc_ioexSetDirMasked(1, 0xFF, 0xFF);
 
-  xmc_battery_init();
+  xmc_batteryInit();
 
   // Mute speaker during initialization to avoid noise
-  xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioex_set_dir(XMC_IOEX_PIN_SPEAKER_MUTE, true);
+  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
+  xmc_ioexSetDir(XMC_IOEX_PIN_SPEAKER_MUTE, true);
 
   // Reset LCD
-  xmc_ioex_write(XMC_IOEX_PIN_DISPLAY_RESET, false);
-  xmc_ioex_set_dir(XMC_IOEX_PIN_DISPLAY_RESET, true);
+  xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, false);
+  xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, true);
 
   // Power on peripherals
-  xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioex_set_dir(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_sleep_ms(100);
-  xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, false);
-  xmc_sleep_ms(100);
+  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
+  xmc_ioexSetDir(XMC_IOEX_PIN_PERI_EN, true);
+  xmc_sleepMs(100);
+  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, false);
+  xmc_sleepMs(100);
 
   return XMC_OK;
 }
 
-xmc_status_t xmc_sys_service() {
-  xmc_battery_service();
-  xmc_input_service();
+XmcStatus xmc_sysService() {
+  xmc_batteryService();
+  xmc_inputService();
   return XMC_OK;
 }
 
-xmc_status_t xmc_sys_request_shutdown() {
-  xmc_display_deinit();
-  xmc_input_deinit();
-  xmc_battery_deinit();
-  xmc_ioex_set_dir(XMC_IOEX_PIN_DISPLAY_RESET, false);
-  xmc_ioex_set_dir(XMC_IOEX_PIN_SPEAKER_MUTE, false);
-  xmc_ioex_write(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioex_deinit();
-  xmc_i2c_deinit();
-  xmc_spi_deinit();
-  XMC_ERR_RET(xmc_power_deep_sleep());
-  XMC_ERR_RET(xmc_power_reset(XMC_RESET_MODE_NORMAL));
+XmcStatus xmc_sysRequestShutdown() {
+  xmc_displayDeinit();
+  xmc_inputDeinit();
+  xmc_batteryDeinit();
+  xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, false);
+  xmc_ioexSetDir(XMC_IOEX_PIN_SPEAKER_MUTE, false);
+  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
+  xmc_ioexDeinit();
+  xmc_i2cDeinit();
+  xmc_spiDeinit();
+  XMC_ERR_RET(xmc_powerDeepSleep());
+  XMC_ERR_RET(xmc_powerReset(XMC_RESET_MODE_NORMAL));
   return XMC_OK;
 }

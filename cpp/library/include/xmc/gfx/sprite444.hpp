@@ -17,21 +17,21 @@ static inline uint32_t stride444(int width) { return (width * 12 + 7) / 8; }
 class Sprite444Class : public SpriteClass {
  public:
   Sprite444Class(int width, int height, uint32_t stride, void *data,
-                 bool auto_free = false)
+                 bool autoFree = false)
       : SpriteClass(pixel_format_t::RGB444, width, height, stride444(width),
-                        data, auto_free) {}
+                        data, autoFree) {}
 
   Sprite444Class(int width, int height, xmc_ram_cap_t caps = XMC_RAM_CAP_DMA)
       : SpriteClass(pixel_format_t::RGB444, width, height, stride444(width),
-                        xmc_malloc(stride444(width) * height, caps), true) {}
+                        xmcMalloc(stride444(width) * height, caps), true) {}
 
  protected:
-  void on_set_pixel(int x, int y, uint16_t color) override;
-  uint16_t on_get_pixel(int x, int y) const override;
-  void on_fill_rect(int x, int y, int w, int h, uint16_t color) override;
-  void on_draw_image(const Sprite &image, int dx, int dy, int w, int h,
+  void onSetPixel(int x, int y, uint16_t color) override;
+  uint16_t onGetPixel(int x, int y) const override;
+  void onFillRect(int x, int y, int w, int h, uint16_t color) override;
+  void onDrawImage(const Sprite &image, int dx, int dy, int w, int h,
                      int sx, int sy) override;
-  xmc_status_t on_start_transfer_to_display(int dx, int dy, int sy,
+  XmcStatus on_start_transfer_to_display(int dx, int dy, int sy,
                                             int h) override;
 };
 
@@ -41,8 +41,8 @@ static inline Sprite createSprite444(int width, int height,
 }
 
 static inline Sprite createSprite444(int width, int height, uint32_t stride,
-                                     void *data, bool auto_free = false) {
-  return std::make_shared<Sprite444Class>(width, height, stride, data, auto_free);
+                                     void *data, bool autoFree = false) {
+  return std::make_shared<Sprite444Class>(width, height, stride, data, autoFree);
 }
 
 }  // namespace xmc

@@ -2,7 +2,7 @@
 
 namespace xmc {
 
-Mesh create_colored_cube(float s) {
+Mesh createColoredCube(float s) {
   vec3 v0 = {-s, -s, -s};
   vec3 v1 = {s, -s, -s};
   vec3 v2 = {-s, s, -s};
@@ -42,18 +42,18 @@ Mesh create_colored_cube(float s) {
       12, 13, 14, 14, 13, 15, 16, 17, 18, 18, 17, 19, 20, 21, 22, 22, 21, 23,
   };
 
-  return create_mesh({create_primitive(
-      prim_mode_t::TRIANGLES, create_vec3_buffer(poses, 24, true),
-      create_vec3_buffer(norms, 24, true), create_color_buffer(cols, 24, true),
-      nullptr, nullptr, create_index_buffer(idxs, 36, true))});
+  return createMesh({createPrimitive(
+      PrimitiveMode::TRIANGLES, createVec3Buffer(poses, 24, true),
+      createVec3Buffer(norms, 24, true), createColorBuffer(cols, 24, true),
+      nullptr, nullptr, createIndexBuffer(idxs, 36, true))});
 }
 
-Mesh create_sphere(float radius, int segments, int rings, colorf col) {
-  Vec3Buffer poses = create_vec3_buffer((segments + 1) * (rings + 1));
-  Vec3Buffer norms = create_vec3_buffer((segments + 1) * (rings + 1));
-  ColorBuffer cols = create_color_buffer((segments + 1) * (rings + 1));
-  Vec2Buffer uvs = create_vec2_buffer((segments + 1) * (rings + 1));
-  IndexBuffer idxs = create_index_buffer(segments * rings * 6);
+Mesh createSphere(float radius, int segments, int rings, colorf col) {
+  Vec3Buffer poses = createVec3Buffer((segments + 1) * (rings + 1));
+  Vec3Buffer norms = createVec3Buffer((segments + 1) * (rings + 1));
+  ColorBuffer cols = createColorBuffer((segments + 1) * (rings + 1));
+  Vec2Buffer uvs = createVec2Buffer((segments + 1) * (rings + 1));
+  IndexBuffer idxs = createIndexBuffer(segments * rings * 6);
 
   for (int i = 0; i <= rings; i++) {
     float v = (float)i / rings;
@@ -86,8 +86,8 @@ Mesh create_sphere(float radius, int segments, int rings, colorf col) {
     }
   }
 
-  return create_mesh({create_primitive(
-      prim_mode_t::TRIANGLES, std::move(poses), std::move(norms),
+  return createMesh({createPrimitive(
+      PrimitiveMode::TRIANGLES, std::move(poses), std::move(norms),
       std::move(cols), std::move(uvs), nullptr, std::move(idxs))});
 }
 

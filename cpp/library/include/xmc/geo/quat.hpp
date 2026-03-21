@@ -33,7 +33,7 @@ struct quat {
    * @param yaw Rotation around the z-axis in radians
    * @return A quaternion representing the combined rotation
    */
-  static quat from_euler(float pitch, float roll, float yaw) {
+  static quat fromEuler(float pitch, float roll, float yaw) {
     float cy = cosf(yaw * 0.5f);
     float sy = sinf(yaw * 0.5f);
     float cp = cosf(pitch * 0.5f);
@@ -50,7 +50,7 @@ struct quat {
    * @param roll Output parameter for rotation around the y-axis in radians
    * @param yaw Output parameter for rotation around the z-axis in radians
    */
-  void to_euler(float *pitch, float *roll, float *yaw) const {
+  void toEuler(float *pitch, float *roll, float *yaw) const {
     // pitch (x-axis rotation)
     float sinp = 2.0f * (w * x + y * z);
     if (fabsf(sinp) >= 1.0f) {
@@ -60,14 +60,14 @@ struct quat {
     }
 
     // roll (y-axis rotation)
-    float sinr_cosp = 2.0f * (w * y - z * x);
-    float cosr_cosp = 1.0f - 2.0f * (x * x + y * y);
-    *roll = atan2f(sinr_cosp, cosr_cosp);
+    float sinrCosp = 2.0f * (w * y - z * x);
+    float cosrCosp = 1.0f - 2.0f * (x * x + y * y);
+    *roll = atan2f(sinrCosp, cosrCosp);
 
     // yaw (z-axis rotation)
-    float siny_cosp = 2.0f * (w * z + x * y);
-    float cosy_cosp = 1.0f - 2.0f * (y * y + z * z);
-    *yaw = atan2f(siny_cosp, cosy_cosp);
+    float sinyCosp = 2.0f * (w * z + x * y);
+    float cosyCosp = 1.0f - 2.0f * (y * y + z * z);
+    *yaw = atan2f(sinyCosp, cosyCosp);
   }
 
   /**
@@ -76,7 +76,7 @@ struct quat {
    * @param angle The angle of rotation in radians
    * @return A quaternion representing the rotation around the given axis by the specified angle
    */
-  static quat from_axis_angle(const vec3 &axis, float angle) {
+  static quat fromAxisAngle(const vec3 &axis, float angle) {
     float half = angle * 0.5f;
     float s = sinf(half);
     return quat(cosf(half), axis.x * s, axis.y * s, axis.z * s);

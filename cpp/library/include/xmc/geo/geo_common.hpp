@@ -10,7 +10,7 @@
 
 namespace xmc {
 
-enum class prim_mode_t {
+enum class PrimitiveMode {
   POINTS,
   LINES,
   LINE_LOOP,
@@ -23,12 +23,12 @@ enum class prim_mode_t {
 /**
  * Clip a rectangle to fit within a maximum width and height. The rectangle is
  * defined by its top-left corner (x, y) and its width and height (w, h). The
- * maximum width and height are defined by max_w and max_h. The function
+ * maximum width and height are defined by maxW and maxH. The function
  * modifies the rectangle in place to ensure that it fits within the specified
  * bounds. If the rectangle is completely outside the bounds, it will be clipped
  * to a zero-size rectangle.
  */
-void clip_rect(int *x, int *y, int *w, int *h, int max_w, int max_h);
+void clipRect(int *x, int *y, int *w, int *h, int maxW, int maxH);
 
 }  // namespace xmc
 

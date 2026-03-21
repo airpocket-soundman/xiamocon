@@ -26,7 +26,7 @@ extern "C" {
  * the callback again after the next interval. If the callback returns
  * false, the timer will be canceled and will not call the callback again.
  */
-typedef bool (*xmc_timer_tick_t)(void *context);
+typedef bool (*TimerTickCb)(void *context);
 
 /**
  * Repeated timer instance structure. This structure represents an instance of a
@@ -38,36 +38,36 @@ typedef struct {
   /** Hardware-specific handle for the timer instance */
   void *handle;
   /** Timer tick callback function */
-  xmc_timer_tick_t tick;
+  TimerTickCb tick;
   /** User-defined context pointer */
   void *context;
-} xmc_repeating_timer_t;
+} RepeatingTimer;
 
 /**
  * Get the current time in milliseconds since an arbitrary epoch. The epoch and
  * resolution are implementation-defined, but the value will always be
  * increasing and will wrap around on overflow.
  */
-uint64_t xmc_get_time_ms();
+uint64_t xmc_getTimeMs();
 
 /**
  * Get the current time in microseconds since an arbitrary epoch. The epoch and
  * resolution are implementation-defined, but the value will always be
  * increasing and will wrap around on overflow.
  */
-uint64_t xmc_get_time_us();
+uint64_t xmc_getTimeUs();
 
 /**
  * Sleep for the specified number of milliseconds.
  * @param ms The number of milliseconds to sleep.
  */
-void xmc_sleep_ms(uint32_t ms);
+void xmc_sleepMs(uint32_t ms);
 
 /**
  * Sleep for the specified number of microseconds.
  * @param us The number of microseconds to sleep.
  */
-void xmc_sleep_us(uint32_t us);
+void xmc_sleepUs(uint32_t us);
 
 /**
  * Initialize a repeated timer instance. This function will set up a timer that
@@ -82,9 +82,9 @@ void xmc_sleep_us(uint32_t us);
  * callback function.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-xmc_status_t xmc_timer_add_repeating_ms(xmc_repeating_timer_t *timer,
+XmcStatus xmc_timerAddRepeatingMs(RepeatingTimer *timer,
                                         uint32_t interval_ms,
-                                        xmc_timer_tick_t cb, void *context);
+                                        TimerTickCb cb, void *context);
 
 /**
  * Deinitialize a repeated timer instance. This function will stop the timer and
@@ -93,7 +93,7 @@ xmc_status_t xmc_timer_add_repeating_ms(xmc_repeating_timer_t *timer,
  * @param timer The repeated timer instance to deinitialize.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-void xmc_timer_cancel_repeating(xmc_repeating_timer_t *timer);
+void xmc_timerCancelRepeating(RepeatingTimer *timer);
 
 #if defined(__cplusplus)
 }

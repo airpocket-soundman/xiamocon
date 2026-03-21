@@ -18,15 +18,15 @@ static xmc::quat imu_pos;
 
 static xmc::Sprite screen =
     xmc::create_sprite565(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
-static xmc::Mesh cube = xmc::create_colored_cube();
-static xmc::Mesh sphere = xmc::create_sphere(1.0f, 18, 9);
+static xmc::Mesh cube = xmc::createColoredCube();
+static xmc::Mesh sphere = xmc::createSphere(1.0f, 18, 9);
 static xmc::Sprite earth_texture =
     xmc::createSprite4444(256, 128, 0, (void *)bmp_earth_data);
 static xmc::Rasterizer rasterizer =
-    xmc::create_rasterizer(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
+    xmc::createRasterizer(XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
 static uint32_t frame_count = 0;
 static uint64_t last_imu_update_us = 0;
-static xmc_status_t last_error = XMC_OK;
+static XmcStatus last_error = XMC_OK;
 
 static void update_imu_position(xmc::quat *p, float *imu_values, float dt);
 static void create_projection_matrix(xmc::mat4 *M, const xmc::quat *Q,
@@ -36,30 +36,30 @@ static void create_projection_matrix(xmc::mat4 *M, const xmc::quat *Q,
 float yaw = 0, pitch = 0;
 float vyaw = 0, vpitch = 0;
 
-xmc_app_config_t xmc_app_get_config() {
-  auto cfg = xmc_get_default_app_config();
-  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB565;
+AppConfig xmc_appGetConfig() {
+  auto cfg = xmcGetDefaultAppConfig();
+  cfg.displayPixelFormat = XMC_DISP_INTF_FORMAT_RGB565;
   return cfg;
 }
 
-void xmc_app_setup() {
+void xmc_appSetup() {
   screen->clear(0);
   imu.init();
   imu_pos = {1, 0, 0, 0};
-  sphere->material = xmc::create_material();
-  sphere->material->color_texture = earth_texture;
+  sphere->material = xmc::createMaterial();
+  sphere->material->colorTexture = earth_texture;
 }
 
-void xmc_app_loop() {
+void xmc_appLoop() {
   float values[7] = {0};
-  uint64_t now_us = xmc_get_time_us();
+  uint64_t now_us = xmc_getTimeUs();
   float dt = 0.0f;
   if (last_imu_update_us != 0) {
     dt = (float)(now_us - last_imu_update_us) * 1e-6f;
   }
   last_imu_update_us = now_us;
 
-  xmc_status_t sts = imu.read_sensor(values);
+  XmcStatus sts = imu.read_sensor(values);
   if (sts != XMC_OK) {
     last_error = sts;
   } else if (dt > 0) {
@@ -69,14 +69,14 @@ void xmc_app_loop() {
     update_imu_position(&imu_pos, values, dt);
   }
 
-  if (xmc_input_is_pressed(XMC_BUTTON_LEFT)) {
+  if (xmc_inputIsPressed(XMC_BUTTON_LEFT)) {
     vyaw += dt;
-  } else if (xmc_input_is_pressed(XMC_BUTTON_RIGHT)) {
+  } else if (xmc_inputIsPressed(XMC_BUTTON_RIGHT)) {
     vyaw -= dt;
   }
-  if (xmc_input_is_pressed(XMC_BUTTON_UP)) {
+  if (xmc_inputIsPressed(XMC_BUTTON_UP)) {
     vpitch -= dt;
-  } else if (xmc_input_is_pressed(XMC_BUTTON_DOWN)) {
+  } else if (xmc_inputIsPressed(XMC_BUTTON_DOWN)) {
     vpitch += dt;
   }
   vyaw *= 0.98f;
@@ -110,7 +110,7 @@ void xmc_app_loop() {
              values[5], values[6]);
     screen->draw_string(buf);
     float roll, pitch, yaw;
-    imu_pos.to_euler(&pitch, &roll, &yaw);
+    imu_pos.toEuler(&pitch, &roll, &yaw);
     roll *= 180.0f / M_PI;
     pitch *= 180.0f / M_PI;
     yaw *= 180.0f / M_PI;
@@ -238,22 +238,22 @@ void xmc_app_loop() {
     xmc::vec3 eye_pos = {0, 0.1f, 0.15f};
     create_projection_matrix(&proj, &imu_pos, &eye_pos, 0.03f, 0.03f,
                              XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT);
-    // proj.load_identity();
+    // proj.loadIdentity();
     // proj.scale(10);
     // proj.translate(120, 120, 0);
     float a = (float)now_us * 0.0000005f;
     float t = 0.004f;
 
-    rasterizer->set_target(screen);
-    rasterizer->clear_depth();
-    rasterizer->set_depth_range(-1.0f, 1.0f);
+    rasterizer->setTarget(screen);
+    rasterizer->clearDepth();
+    rasterizer->setDepthRange(-1.0f, 1.0f);
 
     xmc::vec3 light_dir = {0, 0.5f, 1.0f};
     light_dir = imu_pos.conjugate().rotate(light_dir);
-    rasterizer->set_parallel_light(light_dir, xmc::colorf(1.5f, 1.5f, 1.5f, 1));
+    rasterizer->setParallelLight(light_dir, xmc::colorf(1.5f, 1.5f, 1.5f, 1));
 
-    rasterizer->set_projection(proj);
-    rasterizer->load_identity();
+    rasterizer->setProjection(proj);
+    rasterizer->loadIdentity();
 
     // int n = 5;
     // for (int i = 0; i < n; i++) {
@@ -261,10 +261,10 @@ void xmc_app_loop() {
     //   for (int j = 0; j < n; j++) {
     //     float ty = -t + j * t * 2 / (n - 1);
     //     float tz = sinf(sqrt(tx * tx + ty * ty) * 256 + now_us * 0.000005f) *
-    //     0.003f; rasterizer->push_matrix(); rasterizer->rotate(i * M_PI / 2, j
+    //     0.003f; rasterizer->pushMatrix(); rasterizer->rotate(i * M_PI / 2, j
     //     * M_PI / 2, 0); rasterizer->translate(tx, ty, tz);
-    //     rasterizer->render_mesh(cube);
-    //     rasterizer->pop_matrix();
+    //     rasterizer->renderMesh(cube);
+    //     rasterizer->popMatrix();
     //   }
     // }
 
@@ -275,46 +275,46 @@ void xmc_app_loop() {
     //     float ty = -t + j * t * 2 / (n - 1);
     //     for (int k = 0; k < n; k++) {
     //       float tz = -t + k * t * 2 / (n - 1);
-    //       rasterizer->push_matrix();
+    //       rasterizer->pushMatrix();
     //       rasterizer->scale(t / n * 1.5f);
     //       rasterizer->translate(tx, ty, tz);
     //       rasterizer->rotate(pitch, 0, yaw);
-    //       rasterizer->render_mesh(cube);
-    //       rasterizer->pop_matrix();
+    //       rasterizer->renderMesh(cube);
+    //       rasterizer->popMatrix();
     //     }
     //   }
     // }
 
-    rasterizer->push_matrix();
+    rasterizer->pushMatrix();
     rasterizer->scale(0.009f);
     rasterizer->rotate(0, M_PI / 2, 0);
     rasterizer->rotate(pitch, 0, yaw);
-    rasterizer->render_mesh(sphere);
-    rasterizer->pop_matrix();
+    rasterizer->renderMesh(sphere);
+    rasterizer->popMatrix();
 
-    // rasterizer->push_matrix();
+    // rasterizer->pushMatrix();
     // rasterizer->rotate(a, 0, 0);
     // rasterizer->translate(-t, -t, 0);
-    // rasterizer->render_mesh(cube);
-    // rasterizer->pop_matrix();
+    // rasterizer->renderMesh(cube);
+    // rasterizer->popMatrix();
     //
-    // rasterizer->push_matrix();
+    // rasterizer->pushMatrix();
     // rasterizer->rotate(0, a, 0);
     // rasterizer->translate(t, -t, 0);
-    // rasterizer->render_mesh(cube);
-    // rasterizer->pop_matrix();
+    // rasterizer->renderMesh(cube);
+    // rasterizer->popMatrix();
     //
-    // rasterizer->push_matrix();
+    // rasterizer->pushMatrix();
     // rasterizer->rotate(0, 0, a);
     // rasterizer->translate(-t, t, 0);
-    // rasterizer->render_mesh(cube);
-    // rasterizer->pop_matrix();
+    // rasterizer->renderMesh(cube);
+    // rasterizer->popMatrix();
     //
-    // rasterizer->push_matrix();
+    // rasterizer->pushMatrix();
     // rasterizer->rotate(a, a, a);
     // rasterizer->translate(t, t, 0);
-    // rasterizer->render_mesh(cube);
-    // rasterizer->pop_matrix();
+    // rasterizer->renderMesh(cube);
+    // rasterizer->popMatrix();
   }
 
   // start transferring the current frame to the display. This will return
@@ -362,7 +362,7 @@ static void update_imu_position(xmc::quat *p, float *imu_values, float dt) {
     if (cross_len > 1e-6f) {
       float err_angle = atan2f(cross_len, dot);
       constexpr float ALPHA = 0.02f;
-      xmc::quat q_corr = xmc::quat::from_axis_angle(cross * (1.0f / cross_len),
+      xmc::quat q_corr = xmc::quat::fromAxisAngle(cross * (1.0f / cross_len),
                                                     err_angle * ALPHA);
       *p = (q_corr * (*p)).normalized();
     }

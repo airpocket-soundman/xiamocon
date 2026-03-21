@@ -24,28 +24,28 @@ xmc::Tone tone;
 
 xmc::Waveform waveform = xmc::Waveform::SQUARE;
 
-xmc_app_config_t xmc_app_get_config() {
-  xmc_app_config_t cfg = xmc_get_default_app_config();
-  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB444;
-  cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
-  cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
+AppConfig xmc_appGetConfig() {
+  AppConfig cfg = xmcGetDefaultAppConfig();
+  cfg.displayPixelFormat = XMC_DISP_INTF_FORMAT_RGB444;
+  cfg.speakerSampleFormat = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
+  cfg.speakerSampleRateHz = SAMPLE_RATE_HZ;
   return cfg;
 }
 
-void xmc_app_setup() {
+void xmc_appSetup() {
   frame_buffer->clear(0);
-  xmc_sleep_ms(1);
+  xmc_sleepMs(1);
   tone.init(SAMPLE_RATE_HZ);
-  xmc_speaker_set_source_port(tone.get_output_port());
-  xmc_speaker_set_muted(false);
+  xmc_speakerSetSourcePort(tone.getOutputPort());
+  xmc_speakerSetMuted(false);
 }
 
-void xmc_app_loop() {
-  uint16_t battery_mv = xmc_battery_get_voltage_mv();
+void xmc_appLoop() {
+  uint16_t battery_mv = xmc_batteryGetVoltageMv();
   char buf[32];
   snprintf(buf, sizeof(buf), "Battery: %d mV", battery_mv);
 
-  xmc_button_t buttons = xmc_input_get_state();
+  xmc_button_t buttons = xmc_inputGetState();
   if (buttons & XMC_BUTTON_LEFT) {
     dx -= 0.1f;
   }
@@ -59,23 +59,23 @@ void xmc_app_loop() {
     dy += 0.1f;
   }
 
-  if (xmc_input_was_pressed(XMC_BUTTON_Y)) {
+  if (xmc_inputWasPressed(XMC_BUTTON_Y)) {
     int n = static_cast<int>(xmc::Waveform::NUM_WAVEFORMS);
     waveform = static_cast<xmc::Waveform>((static_cast<int>(waveform) + 1) % n);
   }
 
-  if (xmc_input_was_pressed(XMC_BUTTON_A)) {
-    // tone.set_waveform(xmc::Waveform::SQUARE);
-    tone.set_waveform(waveform);
-    // tone.set_waveform(xmc::Waveform::TRIANGLE);
-    tone.set_velocity(127);
-    tone.set_envelope(0, 2000, 0, 500);
-    // tone.set_sweep(1600, 10);
-    tone.note_on(64 + 12);
+  if (xmc_inputWasPressed(XMC_BUTTON_A)) {
+    // tone.setWaveform(xmc::Waveform::SQUARE);
+    tone.setWaveform(waveform);
+    // tone.setWaveform(xmc::Waveform::TRIANGLE);
+    tone.setVelocity(127);
+    tone.setEnvelope(0, 2000, 0, 500);
+    // tone.setSweep(1600, 10);
+    tone.noteOn(64 + 12);
     dx += 1;
   }
-  if (xmc_input_was_released(XMC_BUTTON_A)) {
-    tone.note_off();
+  if (xmc_inputWasReleased(XMC_BUTTON_A)) {
+    tone.noteOff();
   }
 
   dy += 0.1f;
@@ -123,5 +123,5 @@ void xmc_app_loop() {
   // immediately and the transfer will happen in the background.
   frame_buffer->start_transfer_to_display(0, 0);
 
-  xmc_sleep_ms(10);
+  xmc_sleepMs(10);
 }

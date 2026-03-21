@@ -58,52 +58,52 @@ static constexpr uint32_t TONE_LENGTH_INFINITE = 0xFFFFFFFF;
  */
 class Tone {
  private:
-  uint32_t sample_rate_hz = 44100;
-  uint32_t tick_phase_step = 0;
+  uint32_t sampleRateHz = 44100;
+  uint32_t tickPhaseStep = 0;
 
   Waveform waveform = Waveform::SQUARE;
   uint8_t velocity = 0;
-  uint32_t tone_phase_step = 0;
-  uint32_t attack_ms = 0;
-  uint32_t decay_ms = 0;
-  uint16_t sustain_level = 0;
-  uint32_t release_ms = 0;
+  uint32_t tonePhaseStep = 0;
+  uint32_t attackMs = 0;
+  uint32_t decayMs = 0;
+  uint16_t sustainLevel = 0;
+  uint32_t releaseMs = 0;
 
-  uint16_t tone_phase_counter = 0;
-  uint16_t noise_lfsr = 0xFFFF;
-  uint32_t length_counter = 0;
-  EnvelopeState envelope_state = EnvelopeState::IDLE;
-  uint32_t envelope_counter = 0;
-  uint16_t envelope_amp_init = 0;
-  uint16_t envelope_amp_curr = 0;
-  uint32_t tick_phase_counter = 0;
-  uint32_t sweep_coeff = 0x10000;
-  uint32_t sweep_period_ms = 0;
-  uint32_t sweep_counter = 0;
+  uint16_t tonePhaseCounter = 0;
+  uint16_t noiseLfsr = 0xFFFF;
+  uint32_t lengthCounter = 0;
+  EnvelopeState envelopeState = EnvelopeState::IDLE;
+  uint32_t envelopeCounter = 0;
+  uint16_t envelopeAmpInit = 0;
+  uint16_t envelopeAmpCurr = 0;
+  uint32_t tickPhaseCounter = 0;
+  uint32_t sweepCoeff = 0x10000;
+  uint32_t sweepPeriodMs = 0;
+  uint32_t sweepCounter = 0;
 
-  xmc_audio_source_port_t output_port;
+  xmc_audio_source_port_t outputPort;
 
  public:
   Tone();
 
   /**
    * Initializes the tone generator with the given sample rate.
-   * @param sample_rate_hz The sample rate in Hz.
+   * @param sampleRateHz The sample rate in Hz.
    */
-  void init(uint32_t sample_rate_hz);
+  void init(uint32_t sampleRateHz);
 
   /**
    * Sets the waveform of the tone.
    * @param wf The waveform to set. This determines the shape of the sound wave
    * and thus the timbre of the sound.
    */
-  inline void set_waveform(Waveform wf) { waveform = wf; }
+  inline void setWaveform(Waveform wf) { waveform = wf; }
 
   /**
    * Sets the velocity (volume) of the tone.
    * @param velo The velocity to set. The velocity must be between 0 and 127.
    */
-  inline void set_velocity(uint8_t velo) {
+  inline void setVelocity(uint8_t velo) {
     if (velo > 127) {
       velo = 127;
     }
@@ -114,17 +114,17 @@ class Tone {
    * Sets the envelope of the tone. The envelope controls the amplitude of the
    * tone over time, allowing for more natural-sounding tones with attack,
    * decay, sustain, and release phases.
-   * @param attack_ms The duration of the attack phase in milliseconds.
-   * @param decay_ms The duration of the decay phase in milliseconds.
-   * @param sustain_level The sustain level as a value between 0 and 256.
-   * @param release_ms The duration of the release phase in milliseconds.
+   * @param attackMs The duration of the attack phase in milliseconds.
+   * @param decayMs The duration of the decay phase in milliseconds.
+   * @param sustainLevel The sustain level as a value between 0 and 256.
+   * @param releaseMs The duration of the release phase in milliseconds.
    */
-  inline void set_envelope(uint16_t attack_ms, uint16_t decay_ms,
-                           uint16_t sustain_level, uint16_t release_ms) {
-    this->attack_ms = attack_ms;
-    this->decay_ms = decay_ms;
-    this->sustain_level = sustain_level;
-    this->release_ms = release_ms;
+  inline void setEnvelope(uint16_t attackMs, uint16_t decayMs,
+                           uint16_t sustainLevel, uint16_t releaseMs) {
+    this->attackMs = attackMs;
+    this->decayMs = decayMs;
+    this->sustainLevel = sustainLevel;
+    this->releaseMs = releaseMs;
   }
 
   /**
@@ -140,15 +140,15 @@ class Tone {
    * @param period_ms The period of the sweep in milliseconds. This determines
    * how fast the frequency changes over time.
    */
-  inline void set_sweep(int32_t delta, uint32_t period_ms) {
+  inline void setSweep(int32_t delta, uint32_t period_ms) {
     if (delta < -32768) {
       delta = -32768;
     } else if (delta > 65536) {
       delta = 65536;
     }
-    sweep_coeff = 0x10000 + delta;
-    sweep_period_ms = period_ms;
-    sweep_counter = 0;
+    sweepCoeff = 0x10000 + delta;
+    sweepPeriodMs = period_ms;
+    sweepCounter = 0;
   }
 
   /**
@@ -156,28 +156,28 @@ class Tone {
    * note number determines the frequency of the tone, with 69 representing A4
    * (440 Hz). The length determines how long the note will play before it is
    * automatically turned off. If the length is set to TONE_LENGTH_INFINITE, the
-   * note will play indefinitely until it is manually turned off with note_off()
+   * note will play indefinitely until it is manually turned off with noteOff()
    * or muted with mute().
-   * @param midi_note The MIDI note number to play. The MIDI note number must be
+   * @param note The MIDI note number to play. The MIDI note number must be
    * between 0 and 127, where 69 represents A4 (440 Hz).
-   * @param len_ms The length of the note in milliseconds. If set to
+   * @param lenMs The length of the note in milliseconds. If set to
    * TONE_LENGTH_INFINITE, the note will play indefinitely until it is manually
-   * turned off with note_off() or muted with mute().
+   * turned off with noteOff() or muted with mute().
    */
-  void note_on(uint8_t midi_note, uint32_t len_ms = TONE_LENGTH_INFINITE);
+  void noteOn(uint8_t note, uint32_t lenMs = TONE_LENGTH_INFINITE);
 
   /**
    * Starts playing a note with the given frequency and length. The frequency is
    * specified in Hz. The length determines how long the note will play before
    * it is automatically turned off. If the length is set to
    * TONE_LENGTH_INFINITE, the note will play indefinitely until it is manually
-   * turned off with note_off() or muted with mute().
+   * turned off with noteOff() or muted with mute().
    * @param freq The frequency of the note to play in Hz.
-   * @param len_ms The length of the note in milliseconds. If set to
+   * @param lenMs The length of the note in milliseconds. If set to
    * TONE_LENGTH_INFINITE, the note will play indefinitely until it is manually
-   * turned off with note_off() or muted with mute().
+   * turned off with noteOff() or muted with mute().
    */
-  void note_on_with_freq(uint32_t freq, uint32_t len_ms = TONE_LENGTH_INFINITE);
+  void noteOnWithFreq(uint32_t freq, uint32_t lenMs = TONE_LENGTH_INFINITE);
 
   /**
    * Stops playing the current note. This will trigger the release phase of the
@@ -186,7 +186,7 @@ class Tone {
    * sustain phase, it will transition to the release phase. If the note is
    * already in the release phase or idle, this function will have no effect.
    */
-  void note_off();
+  void noteOff();
 
   /**
    * Mutes the tone immediately. This will stop all sound output from the tone
@@ -197,19 +197,19 @@ class Tone {
   /**
    * Renders the audio samples for the current state of the tone into the
    * provided buffer. The number of samples to render is determined by the
-   * num_samples parameter, and the samples will be written to the buffer as
+   * numSamples parameter, and the samples will be written to the buffer as
    * 16-bit signed integers.
    * @param buffer The buffer to write the audio samples to.
-   * @param num_samples The number of audio samples to render into the buffer.
+   * @param numSamples The number of audio samples to render into the buffer.
    */
-  void render(int16_t *buffer, uint32_t num_samples);
+  void render(int16_t *buffer, uint32_t numSamples);
 
   /**
    * Returns a pointer to the output port of the tone. The output port can be
    * connected to the speaker or to a mixer for further processing.
    * @return A pointer to the output port of the tone.
    */
-  xmc_audio_source_port_t *get_output_port() { return &output_port; }
+  xmc_audio_source_port_t *getOutputPort() { return &outputPort; }
 
  private:
   void tick();

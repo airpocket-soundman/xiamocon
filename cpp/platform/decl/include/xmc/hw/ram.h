@@ -27,13 +27,13 @@ typedef enum {
  * @param caps The RAM capabilities required for the allocation.
  * @return A pointer to the allocated memory, or NULL if the allocation fails.
  */
-void *xmc_malloc(size_t size, xmc_ram_cap_t caps);
+void *xmcMalloc(size_t size, xmc_ram_cap_t caps);
 
 /**
- * Free memory allocated with xmc_malloc.
+ * Free memory allocated with xmcMalloc.
  * @param ptr A pointer to the memory block to free.
  */
-void xmc_free(void *ptr);
+void xmcFree(void *ptr);
 
 #if defined(__cplusplus)
 }

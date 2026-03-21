@@ -108,29 +108,29 @@ static bool in_transaction = false;
 // max 3 bytes per pixel for RGB666
 static uint8_t line_buffer[XMC_DISPLAY_WIDTH * 3];
 
-static xmc_status_t begin_command(uint8_t cmd);
+static XmcStatus begin_command(uint8_t cmd);
 static void end_command();
-static xmc_status_t write_data(const uint8_t *data, uint32_t size);
+static XmcStatus write_data(const uint8_t *data, uint32_t size);
 
-xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
+XmcStatus xmc_displayInit(xmc_display_intf_format_t format, int rotation) {
   current_format = format;
 
-  xmc_gpio_set_dir(XMC_PIN_DISPLAY_CS, true);
-  xmc_gpio_set_dir(XMC_PIN_DISPLAY_DC, true);
-  xmc_gpio_write(XMC_PIN_DISPLAY_CS, 1);
-  xmc_gpio_write(XMC_PIN_DISPLAY_DC, 1);
+  xmc_gpioSetDir(XMC_PIN_DISPLAY_CS, true);
+  xmc_gpioSetDir(XMC_PIN_DISPLAY_DC, true);
+  xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 1);
+  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
 
-  XMC_ERR_RET(xmc_ioex_set_dir(XMC_IOEX_PIN_DISPLAY_RESET, true));
-  XMC_ERR_RET(xmc_ioex_write(XMC_IOEX_PIN_DISPLAY_RESET, 0));
-  xmc_sleep_ms(100);
-  XMC_ERR_RET(xmc_ioex_write(XMC_IOEX_PIN_DISPLAY_RESET, 1));
-  xmc_sleep_ms(100);
+  XMC_ERR_RET(xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, true));
+  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 0));
+  xmc_sleepMs(100);
+  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 1));
+  xmc_sleepMs(100);
 
-  XMC_ERR_RET(xmc_display_write_command_0p(XMC_ST7789_SOFTWARE_RESET));
-  xmc_sleep_ms(200);
+  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_SOFTWARE_RESET));
+  xmc_sleepMs(200);
 
-  XMC_ERR_RET(xmc_display_write_command_0p(XMC_ST7789_SLEEP_OUT));
-  xmc_sleep_ms(200);
+  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_SLEEP_OUT));
+  xmc_sleepMs(200);
 
   uint8_t intf_format;
   switch (current_format) {
@@ -138,7 +138,7 @@ xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
     case XMC_DISP_INTF_FORMAT_RGB565: intf_format = 0x55; break;
     default: return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
   }
-  XMC_ERR_RET(xmc_display_write_command_1p(XMC_ST7789_INTERFACE_PIXEL_FORMAT,
+  XMC_ERR_RET(xmc_displayWriteCommand1Param(XMC_ST7789_INTERFACE_PIXEL_FORMAT,
                                            intf_format));
 
   // todo: support rotation
@@ -158,7 +158,7 @@ xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
     for (int i = 0; i < 14; i++) {
       params[i] = (params0[i] + params1[i]) / 2;
     }
-    XMC_ERR_RET(xmc_display_write_command(XMC_ST7789_POSITIVE_GAMMA_CORRECTION,
+    XMC_ERR_RET(xmc_displayWriteCommand(XMC_ST7789_POSITIVE_GAMMA_CORRECTION,
                                           params, sizeof(params)));
   }
 
@@ -171,36 +171,36 @@ xmc_status_t xmc_display_init(xmc_display_intf_format_t format, int rotation) {
     for (int i = 0; i < 14; i++) {
       params[i] = (params0[i] + params1[i]) / 2;
     }
-    XMC_ERR_RET(xmc_display_write_command(XMC_ST7789_NEGATIVE_GAMMA_CORRECTION,
+    XMC_ERR_RET(xmc_displayWriteCommand(XMC_ST7789_NEGATIVE_GAMMA_CORRECTION,
                                           params, sizeof(params)));
   }
 
-  XMC_ERR_RET(xmc_display_write_command_0p(XMC_ST7789_DISP_INVERSION_ON));
+  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_DISP_INVERSION_ON));
 
-  XMC_ERR_RET(xmc_display_fill_rect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
+  XMC_ERR_RET(xmc_displayFillRect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
                                     0x0000));
 
-  XMC_ERR_RET(xmc_display_write_command_0p(XMC_ST7789_DISPLAY_ON));
-  xmc_sleep_ms(25);
+  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_DISPLAY_ON));
+  xmc_sleepMs(25);
   return XMC_OK;
 }
 
-xmc_status_t xmc_display_deinit() {
-  xmc_gpio_set_pullup(XMC_PIN_DISPLAY_CS, true);
-  xmc_gpio_set_pullup(XMC_PIN_DISPLAY_DC, true);
-  xmc_gpio_set_dir(XMC_PIN_DISPLAY_CS, false);
-  xmc_gpio_set_dir(XMC_PIN_DISPLAY_DC, false);
-  XMC_ERR_RET(xmc_ioex_write(XMC_IOEX_PIN_DISPLAY_RESET, 0));
+XmcStatus xmc_displayDeinit() {
+  xmc_gpioSetPullup(XMC_PIN_DISPLAY_CS, true);
+  xmc_gpioSetPullup(XMC_PIN_DISPLAY_DC, true);
+  xmc_gpioSetDir(XMC_PIN_DISPLAY_CS, false);
+  xmc_gpioSetDir(XMC_PIN_DISPLAY_DC, false);
+  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 0));
   return XMC_OK;
 }
 
-xmc_status_t xmc_display_clear(uint32_t color) {
-  XMC_ERR_RET(xmc_display_fill_rect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
+XmcStatus xmc_displayClear(uint32_t color) {
+  XMC_ERR_RET(xmc_displayFillRect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
                                     color));
   return XMC_OK;
 }
 
-xmc_status_t xmc_display_fill_rect(int x, int y, int width, int height,
+XmcStatus xmc_displayFillRect(int x, int y, int width, int height,
                                    uint32_t color) {
   if (x < 0) {
     width += x;
@@ -242,50 +242,50 @@ xmc_status_t xmc_display_fill_rect(int x, int y, int width, int height,
   }
 
   for (int i = 0; i < height; i++) {
-    XMC_ERR_RET(xmc_display_set_window(x, y + i, width, 1));
-    XMC_ERR_RET(xmc_display_write_pixels_start(line_buffer, line_bytes, false));
-    XMC_ERR_RET(xmc_display_write_pixels_complete());
+    XMC_ERR_RET(xmc_displaySetWindow(x, y + i, width, 1));
+    XMC_ERR_RET(xmc_displayWritePixelsStart(line_buffer, line_bytes, false));
+    XMC_ERR_RET(xmc_displayWritePixelsComplete());
   }
   return XMC_OK;
 }
 
-xmc_status_t xmc_display_set_window(int x, int y, int width, int height) {
+XmcStatus xmc_displaySetWindow(int x, int y, int width, int height) {
   int x_end = x + width - 1;
   int y_end = y + height - 1;
-  XMC_ERR_RET(xmc_display_write_command_4p(XMC_ST7789_COLUMN_ADDRESS_SET,
+  XMC_ERR_RET(xmc_displayWriteCommand4Params(XMC_ST7789_COLUMN_ADDRESS_SET,
                                            x >> 8, x & 0xFF, x_end >> 8,
                                            x_end & 0xFF));
-  XMC_ERR_RET(xmc_display_write_command_4p(XMC_ST7789_PAGE_ADDRESS_SET, y >> 8,
+  XMC_ERR_RET(xmc_displayWriteCommand4Params(XMC_ST7789_PAGE_ADDRESS_SET, y >> 8,
                                            y & 0xFF, y_end >> 8, y_end & 0xFF));
   return XMC_OK;
 }
 
-xmc_status_t xmc_display_write_pixels_start(const void *data,
+XmcStatus xmc_displayWritePixelsStart(const void *data,
                                             uint32_t num_bytes, bool repeated) {
   XMC_ERR_RET(begin_command(XMC_ST7789_MEMORY_WRITE));
-  xmc_gpio_write(XMC_PIN_DISPLAY_DC, 1);
+  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
   xmc_dma_config_t cfg = {
       .ptr = (void *)data,
       .element_size = 1,
       .length = num_bytes,
   };
-  xmc_status_t sts = xmc_spi_dma_write_start(&cfg, XMC_PIN_DISPLAY_CS);
+  XmcStatus sts = xmc_spiDmaWriteStart(&cfg, XMC_PIN_DISPLAY_CS);
   if (sts != XMC_OK) {
     end_command();
   }
   return sts;
 }
 
-xmc_status_t xmc_display_write_pixels_complete() {
-  xmc_status_t sts = xmc_spi_dma_complete();
+XmcStatus xmc_displayWritePixelsComplete() {
+  XmcStatus sts = xmc_spiDmaComplete();
   end_command();
   return sts;
 }
 
-xmc_status_t xmc_display_write_command(const uint8_t cmd, const uint8_t *params,
+XmcStatus xmc_displayWriteCommand(const uint8_t cmd, const uint8_t *params,
                                        uint32_t num_params) {
   XMC_ERR_RET(begin_command(cmd));
-  xmc_status_t sts = XMC_OK;
+  XmcStatus sts = XMC_OK;
   if (num_params > 0) {
     sts = write_data(params, num_params);
   }
@@ -293,15 +293,15 @@ xmc_status_t xmc_display_write_command(const uint8_t cmd, const uint8_t *params,
   return sts;
 }
 
-static xmc_status_t begin_command(uint8_t cmd) {
+static XmcStatus begin_command(uint8_t cmd) {
   XMC_ERR_RET(xmc_spi_lock());
   in_transaction = true;
-  xmc_spi_set_baudrate(xmc_spi_get_preferred_frequency(XMC_SPI_DEV_DISPLAY));
-  xmc_status_t sts = XMC_OK;
+  xmc_spiSetBaudrate(xmc_spiGetPreferredFrequency(XMC_SPI_DEV_DISPLAY));
+  XmcStatus sts = XMC_OK;
   do {
-    xmc_gpio_write(XMC_PIN_DISPLAY_DC, 0);
-    xmc_gpio_write(XMC_PIN_DISPLAY_CS, 0);
-    XMC_ERR_BRK(sts, xmc_spi_write_blocking(&cmd, 1));
+    xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 0);
+    xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 0);
+    XMC_ERR_BRK(sts, xmc_spiWriteBlocking(&cmd, 1));
   } while (0);
   if (sts != XMC_OK) {
     end_command();
@@ -312,12 +312,12 @@ static xmc_status_t begin_command(uint8_t cmd) {
 static void end_command() {
   if (!in_transaction) return;
   in_transaction = false;
-  xmc_gpio_write(XMC_PIN_DISPLAY_CS, 1);
-  xmc_gpio_write(XMC_PIN_DISPLAY_DC, 1);
-  xmc_spi_unlock();
+  xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 1);
+  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
+  xmc_spiUnlock();
 }
 
-static xmc_status_t write_data(const uint8_t *data, uint32_t size) {
-  xmc_gpio_write(XMC_PIN_DISPLAY_DC, 1);
-  return xmc_spi_write_blocking(data, size);
+static XmcStatus write_data(const uint8_t *data, uint32_t size) {
+  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
+  return xmc_spiWriteBlocking(data, size);
 }

@@ -21,7 +21,7 @@ extern "C" {
  * @return XMC_OK if the system was successfully initialized, or an appropriate
  * error code if initialization failed.
  */
-xmc_status_t xmc_sys_init();
+XmcStatus xmc_sysInit();
 
 /**
  * Perform periodic system tasks.
@@ -32,7 +32,7 @@ xmc_status_t xmc_sys_init();
  * @return XMC_OK if the system service was successfully performed, or an
  * appropriate error code if there was a problem.
  */
-xmc_status_t xmc_sys_service();
+XmcStatus xmc_sysService();
 
 /**
  * Request a system shutdown. This will attempt to gracefully shut down the
@@ -41,7 +41,7 @@ xmc_status_t xmc_sys_service();
  * @return XMC_OK if the system was successfully shut down, or an appropriate
  * error code if shutdown failed.
  */
-xmc_status_t xmc_sys_request_shutdown();
+XmcStatus xmc_sysRequestShutdown();
 
 #if defined(__cplusplus)
 }

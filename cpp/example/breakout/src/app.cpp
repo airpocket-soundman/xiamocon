@@ -75,18 +75,18 @@ float ball_vy = 0.0f;
 
 int bricks_left = 0;
 
-void play_tone(uint8_t note, uint32_t len_ms, xmc::Waveform waveform,
-               uint8_t velocity, uint16_t attack_ms, uint16_t decay_ms,
-               uint16_t sustain, uint16_t release_ms, int32_t sweep_delta,
-               uint32_t sweep_period_ms) {
+void play_tone(uint8_t note, uint32_t lenMs, xmc::Waveform waveform,
+               uint8_t velocity, uint16_t attackMs, uint16_t decayMs,
+               uint16_t sustain, uint16_t releaseMs, int32_t sweep_delta,
+               uint32_t sweepPeriodMs) {
   xmc::Tone &tone = tones[next_tone_index];
   next_tone_index = (next_tone_index + 1) % NUM_TONES;
 
-  tone.set_waveform(waveform);
-  tone.set_velocity(velocity);
-  tone.set_envelope(attack_ms, decay_ms, sustain, release_ms);
-  tone.set_sweep(sweep_delta, sweep_period_ms);
-  tone.note_on(note, len_ms);
+  tone.setWaveform(waveform);
+  tone.setVelocity(velocity);
+  tone.setEnvelope(attackMs, decayMs, sustain, releaseMs);
+  tone.setSweep(sweep_delta, sweepPeriodMs);
+  tone.noteOn(note, lenMs);
 }
 
 void sfx_launch() {
@@ -305,28 +305,28 @@ void draw_scene() {
 
 }  // namespace
 
-xmc_app_config_t xmc_app_get_config() {
-  xmc_app_config_t cfg = xmc_get_default_app_config();
-  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB444;
-  cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
-  cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
-  cfg.speaker_latency_samples = 512;
+AppConfig xmc_appGetConfig() {
+  AppConfig cfg = xmcGetDefaultAppConfig();
+  cfg.displayPixelFormat = XMC_DISP_INTF_FORMAT_RGB444;
+  cfg.speakerSampleFormat = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
+  cfg.speakerSampleRateHz = SAMPLE_RATE_HZ;
+  cfg.speakerLatencySamples = 512;
   return cfg;
 }
 
-void xmc_app_setup() {
+void xmc_appSetup() {
   for (int i = 0; i < NUM_TONES; ++i) {
     tones[i].init(SAMPLE_RATE_HZ);
-    mixer.set_source(i, tones[i].get_output_port());
+    mixer.setSource(i, tones[i].getOutputPort());
   }
-  xmc_speaker_set_source_port(mixer.get_output_port());
-  xmc_speaker_set_muted(false);
+  xmc_speakerSetSourcePort(mixer.getOutputPort());
+  xmc_speakerSetMuted(false);
 
   reset_game();
 }
 
-void xmc_app_loop() {
-  const xmc_button_t buttons = xmc_input_get_state();
+void xmc_appLoop() {
+  const xmc_button_t buttons = xmc_inputGetState();
 
   move_paddle(buttons);
 
@@ -346,5 +346,5 @@ void xmc_app_loop() {
   }
 
   draw_scene();
-  xmc_sleep_ms(16);
+  xmc_sleepMs(16);
 }

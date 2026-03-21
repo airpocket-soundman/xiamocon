@@ -7,15 +7,15 @@
 extern "C" {
 #endif
 
-typedef void (*xmc_dma_irq_handler_t)(void *context);
+typedef void (*DmaIrqHandlerCb)(void *context);
 
-void xmc_dma_register_irq_handler(int dma_ch,
-                                  xmc_dma_irq_handler_t handler_fast,
-                                  xmc_dma_irq_handler_t handler_slow,
+void xmc_dmaRegisterIrqHandler(int dmaCh,
+                                  DmaIrqHandlerCb handlerFast,
+                                  DmaIrqHandlerCb handlerSlow,
                                   void *context);
-void xmc_dma_unregister_irq_handler(int dma_ch);
+void xmc_dmaUnregisterIrqHandler(int dmaCh);
 
-void xmc_dma_irq_handler(void);
+void xmc_dmaIrqHandler(void);
 
 #if defined(__cplusplus)
 }

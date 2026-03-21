@@ -33,58 +33,58 @@ static int key_to_note[] = {-5, -3, -1, 0, 2, 4, 5, 7};
 
 bool disp_update = false;
 
-xmc_app_config_t xmc_app_get_config() {
-  xmc_app_config_t cfg = xmc_get_default_app_config();
-  cfg.display_pixel_format = XMC_DISP_INTF_FORMAT_RGB444;
-  cfg.speaker_sample_format = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
-  cfg.speaker_sample_rate_hz = SAMPLE_RATE_HZ;
-  cfg.speaker_latency_samples = 512;
+AppConfig xmc_appGetConfig() {
+  AppConfig cfg = xmcGetDefaultAppConfig();
+  cfg.displayPixelFormat = XMC_DISP_INTF_FORMAT_RGB444;
+  cfg.speakerSampleFormat = XMC_SAMPLE_LINEAR_PCM_S16_MONO;
+  cfg.speakerSampleRateHz = SAMPLE_RATE_HZ;
+  cfg.speakerLatencySamples = 512;
   return cfg;
 }
 
-void xmc_app_setup() {
+void xmc_appSetup() {
   screen->clear(0);
   for (int i = 0; i < NUM_TONES; i++) {
     tones[i].init(SAMPLE_RATE_HZ);
-    mixer.set_source(i, tones[i].get_output_port());
+    mixer.setSource(i, tones[i].getOutputPort());
   }
   for (int i = 0; i < NUM_KEYS; i++) {
     key_to_tone[i] = -1;
   }
 
-  xmc_speaker_set_source_port(mixer.get_output_port());
-  xmc_gpio_set_dir(XMC_PIN_GPIO_0, true);
-  xmc_speaker_set_muted(false);
+  xmc_speakerSetSourcePort(mixer.getOutputPort());
+  xmc_gpioSetDir(XMC_PIN_GPIO_0, true);
+  xmc_speakerSetMuted(false);
 
   disp_update = true;
 }
 
-void xmc_app_loop() {
-  if (xmc_input_was_pressed(XMC_BUTTON_FUNC)) {
+void xmc_appLoop() {
+  if (xmc_inputWasPressed(XMC_BUTTON_FUNC)) {
     int n = static_cast<int>(xmc::Waveform::NUM_WAVEFORMS);
     waveform = static_cast<xmc::Waveform>((static_cast<int>(waveform) + 1) % n);
   }
 
   for (int ikey = 0; ikey < NUM_KEYS; ikey++) {
-    if (xmc_input_was_pressed(keys[ikey])) {
+    if (xmc_inputWasPressed(keys[ikey])) {
       if (key_to_tone[ikey] >= 0) {
         // this key is already playing a tone, so stop it first
-        tones[key_to_tone[ikey]].note_off();
+        tones[key_to_tone[ikey]].noteOff();
       }
 
       key_to_tone[ikey] = next_tone_index;
       next_tone_index = (next_tone_index + 1) % NUM_TONES;
 
-      tones[key_to_tone[ikey]].set_waveform(waveform);
-      tones[key_to_tone[ikey]].set_velocity(64);
-      tones[key_to_tone[ikey]].set_envelope(0, 1000, 192, 500);
-      tones[key_to_tone[ikey]].note_on(64 + key_to_note[ikey]);
+      tones[key_to_tone[ikey]].setWaveform(waveform);
+      tones[key_to_tone[ikey]].setVelocity(64);
+      tones[key_to_tone[ikey]].setEnvelope(0, 1000, 192, 500);
+      tones[key_to_tone[ikey]].noteOn(64 + key_to_note[ikey]);
 
       disp_update = true;
     }
-    if (xmc_input_was_released(keys[ikey])) {
+    if (xmc_inputWasReleased(keys[ikey])) {
       if (key_to_tone[ikey] >= 0) {
-        tones[key_to_tone[ikey]].note_off();
+        tones[key_to_tone[ikey]].noteOff();
         key_to_tone[ikey] = -1;
       }
       disp_update = true;

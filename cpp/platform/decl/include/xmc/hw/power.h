@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-/** Reset modes for xmc_power_reset. */
+/** Reset modes for xmc_powerReset. */
 typedef enum {
   /** Normal reset mode */
   XMC_RESET_MODE_NORMAL = 0,
@@ -26,7 +26,7 @@ typedef enum {
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-xmc_status_t xmc_power_init();
+XmcStatus xmc_powerInit();
 
 /**
  * Service the power management functionality.
@@ -34,21 +34,21 @@ xmc_status_t xmc_power_init();
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-xmc_status_t xmc_power_service();
+XmcStatus xmc_powerService();
 
 /** Enter deep sleep mode.
  *
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-xmc_status_t xmc_power_deep_sleep();
+XmcStatus xmc_powerDeepSleep();
 
 /** Reset entire system.
  *
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-xmc_status_t xmc_power_reset(xmc_reset_mode_t mode);
+XmcStatus xmc_powerReset(xmc_reset_mode_t mode);
 
 #if defined(__cplusplus)
 }

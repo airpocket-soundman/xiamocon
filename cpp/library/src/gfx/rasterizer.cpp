@@ -4,7 +4,7 @@
 
 namespace xmc {
 
-static inline void get_uv_mask(int size, uint32_t *mask, uint32_t *shift) {
+static inline void getUvMask(int size, uint32_t *mask, uint32_t *shift) {
   // todo: optimize
   if (size >= 256) {
     *mask = 0xFF;
@@ -36,178 +36,178 @@ static inline void get_uv_mask(int size, uint32_t *mask, uint32_t *shift) {
   }
 }
 
-void RasterizerClass::clear_depth(depth_t value) {
-  int pixel_count = width * height;
+void RasterizerClass::clearDepth(depth_t value) {
+  int pixelCount = width * height;
   if (value == 0 || value == 0xFF) {
-    memset(depth_buff, value, sizeof(depth_t) * pixel_count);
+    memset(depthBuff, value, sizeof(depth_t) * pixelCount);
   } else {
-    for (int i = 0; i < pixel_count; i++) {
-      depth_buff[i] = value;
+    for (int i = 0; i < pixelCount; i++) {
+      depthBuff[i] = value;
     }
   }
 }
 
-void RasterizerClass::render_mesh(const Mesh &mesh) {
+void RasterizerClass::renderMesh(const Mesh &mesh) {
   for (const Primitive &prim : mesh->primitives) {
-    render_primitive(prim, mesh->material);
+    renderPrimitive(prim, mesh->material);
   }
 }
 
-void RasterizerClass::render_primitive(const Primitive &prim,
-                                       const Material &mat) {
-  const Vec3Buffer &prim_pos = prim->position;
-  const Vec3Buffer &prim_norm = prim->normal;
-  const ColorBuffer &prim_col = prim->color;
-  const Vec2Buffer &prim_uv = prim->uv;
-  const IndexBuffer &prim_idx = prim->indexes;
+void RasterizerClass::renderPrimitive(const Primitive &prim,
+                                      const Material &mat) {
+  const Vec3Buffer &primPos = prim->position;
+  const Vec3Buffer &primNorm = prim->normal;
+  const ColorBuffer &primCol = prim->color;
+  const Vec2Buffer &primUv = prim->uv;
+  const IndexBuffer &primIdx = prim->indexes;
 
-  if (!prim_pos) return;
+  if (!primPos) return;
 
-  int idx_offset[3];
-  int idx_data[3];
+  int idxOffset[3];
+  int idxData[3];
 
-  const mat4 &tfx_matrix = matrix_stack[matrix_stack_top];
-  int num_verts = prim->num_verts();
-  int num_elems = prim->num_elements();
+  const mat4 &tfxMatrix = matrixStack[matrixStackTop];
+  int numVertices = prim->numVertices();
+  int numElems = prim->numElements();
 
-  baked_vertex_t baked_verts[3];
+  BakedVertex bakedVerts[3];
 
-  for (int i = 0; i < num_elems; i++) {
+  for (int i = 0; i < numElems; i++) {
     bool reverse = false;
-    uint32_t shift_flags = 0;
-    uint32_t fetch_flags = 0;
+    uint32_t shiftFlags = 0;
+    uint32_t fetchFlags = 0;
     switch (prim->mode) {
-      case prim_mode_t::POINTS:
-        idx_offset[0] = i;
-        shift_flags = 0b000;
-        fetch_flags = 0b001;
+      case PrimitiveMode::POINTS:
+        idxOffset[0] = i;
+        shiftFlags = 0b000;
+        fetchFlags = 0b001;
         break;
-      case prim_mode_t::LINES:
-        idx_offset[0] = i * 2 + 0;
-        idx_offset[1] = i * 2 + 1;
-        shift_flags = 0b000;
-        fetch_flags = 0b011;
+      case PrimitiveMode::LINES:
+        idxOffset[0] = i * 2 + 0;
+        idxOffset[1] = i * 2 + 1;
+        shiftFlags = 0b000;
+        fetchFlags = 0b011;
         break;
-      case prim_mode_t::LINE_LOOP:
-      case prim_mode_t::LINE_STRIP:
-        idx_offset[0] = i;
-        idx_offset[1] = (i + 1) % num_verts;
+      case PrimitiveMode::LINE_LOOP:
+      case PrimitiveMode::LINE_STRIP:
+        idxOffset[0] = i;
+        idxOffset[1] = (i + 1) % numVertices;
         if (i == 0) {
-          shift_flags = 0b000;
-          fetch_flags = 0b011;
+          shiftFlags = 0b000;
+          fetchFlags = 0b011;
         } else {
-          shift_flags = 0b001;
-          fetch_flags = 0b010;
+          shiftFlags = 0b001;
+          fetchFlags = 0b010;
         }
         break;
-      case prim_mode_t::TRIANGLES:
-        idx_offset[0] = i * 3 + 0;
-        idx_offset[1] = i * 3 + 1;
-        idx_offset[2] = i * 3 + 2;
-        shift_flags = 0b000;
-        fetch_flags = 0b111;
+      case PrimitiveMode::TRIANGLES:
+        idxOffset[0] = i * 3 + 0;
+        idxOffset[1] = i * 3 + 1;
+        idxOffset[2] = i * 3 + 2;
+        shiftFlags = 0b000;
+        fetchFlags = 0b111;
         break;
-      case prim_mode_t::TRIANGLE_STRIP:
-        idx_offset[0] = i + 0;
-        idx_offset[1] = i + 1;
-        idx_offset[2] = i + 2;
+      case PrimitiveMode::TRIANGLE_STRIP:
+        idxOffset[0] = i + 0;
+        idxOffset[1] = i + 1;
+        idxOffset[2] = i + 2;
         if (i == 0) {
-          shift_flags = 0b000;
-          fetch_flags = 0b111;
+          shiftFlags = 0b000;
+          fetchFlags = 0b111;
         } else {
-          shift_flags = 0b011;
-          fetch_flags = 0b100;
+          shiftFlags = 0b011;
+          fetchFlags = 0b100;
         }
         reverse = (i % 2 == 1);
         break;
-      case prim_mode_t::TRIANGLE_FAN:
-        idx_offset[0] = 0;
-        idx_offset[1] = i + 1;
-        idx_offset[2] = i + 2;
+      case PrimitiveMode::TRIANGLE_FAN:
+        idxOffset[0] = 0;
+        idxOffset[1] = i + 1;
+        idxOffset[2] = i + 2;
         if (i == 0) {
-          shift_flags = 0b000;
-          fetch_flags = 0b111;
+          shiftFlags = 0b000;
+          fetchFlags = 0b111;
         } else {
-          shift_flags = 0b010;
-          fetch_flags = 0b100;
+          shiftFlags = 0b010;
+          fetchFlags = 0b100;
         }
         break;
       default: return;
     }
 
-    if (prim_idx) {
-      idx_data[0] = prim_idx->data[idx_offset[0]];
-      idx_data[1] = prim_idx->data[idx_offset[1]];
-      idx_data[2] = prim_idx->data[idx_offset[2]];
+    if (primIdx) {
+      idxData[0] = primIdx->data[idxOffset[0]];
+      idxData[1] = primIdx->data[idxOffset[1]];
+      idxData[2] = primIdx->data[idxOffset[2]];
     } else {
-      idx_data[0] = idx_offset[0];
-      idx_data[1] = idx_offset[1];
-      idx_data[2] = idx_offset[2];
+      idxData[0] = idxOffset[0];
+      idxData[1] = idxOffset[1];
+      idxData[2] = idxOffset[2];
     }
 
     for (int j = 0; j < 2; j++) {
-      if (shift_flags & (1 << j)) {
-        baked_verts[j] = baked_verts[j + 1];
+      if (shiftFlags & (1 << j)) {
+        bakedVerts[j] = bakedVerts[j + 1];
       }
     }
 
     for (int j = 0; j < 3; j++) {
-      if (fetch_flags & (1 << j)) {
+      if (fetchFlags & (1 << j)) {
         // fetch attributes
-        vec3 pos = prim_pos->data[idx_data[j]];
-        vec3 norm = prim_norm ? prim_norm->data[idx_data[j]] : vec3(0, 0, 1);
-        colorf col = prim_col ? prim_col->data[idx_data[j]]
-                              : colorf(1.0f, 1.0f, 1.0f, 1.0f);
-        vec2 uv = prim_uv ? prim_uv->data[idx_data[j]] : vec2(0, 0);
+        vec3 pos = primPos->data[idxData[j]];
+        vec3 norm = primNorm ? primNorm->data[idxData[j]] : vec3(0, 0, 1);
+        colorf col = primCol ? primCol->data[idxData[j]]
+                             : colorf(1.0f, 1.0f, 1.0f, 1.0f);
+        vec2 uv = primUv ? primUv->data[idxData[j]] : vec2(0, 0);
 
         // transform
         norm += pos;
-        norm = tfx_matrix.transform(norm);
-        pos = tfx_matrix.transform(pos);
+        norm = tfxMatrix.transform(norm);
+        pos = tfxMatrix.transform(pos);
         norm -= pos;
         norm = norm.normalized();
 
         // shading
-        baked_vertex_t &out = baked_verts[j];
-        out.pos = projection_matrix.transform(pos);
+        BakedVertex &out = bakedVerts[j];
+        out.pos = projectionMatrix.transform(pos);
         colorf vert_color = col;
         if (mat) {
-          vert_color *= mat->base_color;
+          vert_color *= mat->baseColor;
         }
-        vert_color *= (env_light + parallel_light_color *
-                                       fmaxf(0, norm.dot(parallel_light_dir)));
+        vert_color *= (envLight + parallelLightColor *
+                                      fmaxf(0, norm.dot(parallelLightDir)));
         out.color = vert_color;
         out.uv = uv;
       }
     }
 
     switch (prim->mode) {
-      case prim_mode_t::POINTS:
+      case PrimitiveMode::POINTS:
         // todo: implement
         break;
-      case prim_mode_t::LINES:
-      case prim_mode_t::LINE_LOOP:
-      case prim_mode_t::LINE_STRIP:
+      case PrimitiveMode::LINES:
+      case PrimitiveMode::LINE_LOOP:
+      case PrimitiveMode::LINE_STRIP:
         // todo: implement
         break;
-      case prim_mode_t::TRIANGLES:
-      case prim_mode_t::TRIANGLE_STRIP:
-      case prim_mode_t::TRIANGLE_FAN:
+      case PrimitiveMode::TRIANGLES:
+      case PrimitiveMode::TRIANGLE_STRIP:
+      case PrimitiveMode::TRIANGLE_FAN:
         if (reverse) {
-          render_triangle(baked_verts[0], baked_verts[2], baked_verts[1], mat);
+          renderTriangle(bakedVerts[0], bakedVerts[2], bakedVerts[1], mat);
         } else {
-          render_triangle(baked_verts[0], baked_verts[1], baked_verts[2], mat);
+          renderTriangle(bakedVerts[0], bakedVerts[1], bakedVerts[2], mat);
         }
         break;
     }
   }
 }
 
-void RasterizerClass::render_triangle(const baked_vertex_t &v0,
-                                      const baked_vertex_t &v1,
-                                      const baked_vertex_t &v2,
-                                      const Material &mat) {
-  const baked_vertex_t *tri[] = {&v0, &v1, &v2};
+void RasterizerClass::renderTriangle(const BakedVertex &v0,
+                                     const BakedVertex &v1,
+                                     const BakedVertex &v2,
+                                     const Material &mat) {
+  const BakedVertex *tri[] = {&v0, &v1, &v2};
 
   int i0 = 0;
   int i1 = 1;
@@ -243,9 +243,9 @@ void RasterizerClass::render_triangle(const baked_vertex_t &v0,
   float y1to2inv = (y2 - y1) > 1e-8f ? 1.0f / (y2 - y1) : 0.0f;
   float y0to2inv = (y2 - y0) > 1e-8f ? 1.0f / (y2 - y0) : 0.0f;
 
-  float z0 = 255.0f * (tri[i0]->pos.z - z_near) / (z_far - z_near);
-  float z1 = 255.0f * (tri[i1]->pos.z - z_near) / (z_far - z_near);
-  float z2 = 255.0f * (tri[i2]->pos.z - z_near) / (z_far - z_near);
+  float z0 = 255.0f * (tri[i0]->pos.z - zNear) / (zFar - zNear);
+  float z1 = 255.0f * (tri[i1]->pos.z - zNear) / (zFar - zNear);
+  float z2 = 255.0f * (tri[i2]->pos.z - zNear) / (zFar - zNear);
 
   colorf c0 = tri[i0]->color;
   colorf c1 = tri[i1]->color;
@@ -268,14 +268,14 @@ void RasterizerClass::render_triangle(const baked_vertex_t &v0,
 
   const uint16_t *tex_data = nullptr;
   uint32_t tex_stride = 0;
-  uint32_t tex_u_mask = 0, tex_v_mask = 0;
-  uint32_t tex_u_shift = 0, tex_v_shift = 0;
-  if (mat && mat->color_texture) {
-    const auto &tex = mat->color_texture;
-    tex_data = (const uint16_t *)tex->line_ptr(0);
-    tex_stride = tex->stride() / sizeof(uint16_t);
-    get_uv_mask(tex->width(), &tex_u_mask, &tex_u_shift);
-    get_uv_mask(tex->height(), &tex_v_mask, &tex_v_shift);
+  uint32_t texMaskU = 0, texMaskV = 0;
+  uint32_t texShiftU = 0, texShiftV = 0;
+  if (mat && mat->colorTexture) {
+    const auto &tex = mat->colorTexture;
+    tex_data = (const uint16_t *)tex->linePtr(0);
+    tex_stride = tex->stride / sizeof(uint16_t);
+    getUvMask(tex->width, &texMaskU, &texShiftU);
+    getUvMask(tex->height, &texMaskV, &texShiftV);
   }
 
   // rasterize the triangle using a scanline algorithm
@@ -311,10 +311,10 @@ void RasterizerClass::render_triangle(const baked_vertex_t &v0,
       std::swap(uva, uvb);
     }
 
-    uint32_t ua = (uint32_t)(uva.x * 0x1000000) >> tex_u_shift;
-    uint32_t va = (uint32_t)(uva.y * 0x1000000) >> tex_v_shift;
-    uint32_t ub = (uint32_t)(uvb.x * 0x1000000) >> tex_u_shift;
-    uint32_t vb = (uint32_t)(uvb.y * 0x1000000) >> tex_v_shift;
+    uint32_t ua = (uint32_t)(uva.x * 0x1000000) >> texShiftU;
+    uint32_t va = (uint32_t)(uva.y * 0x1000000) >> texShiftV;
+    uint32_t ub = (uint32_t)(uvb.x * 0x1000000) >> texShiftU;
+    uint32_t vb = (uint32_t)(uvb.y * 0x1000000) >> texShiftV;
 
     float zstep = 0;
     colorf cstep = {0, 0, 0, 0};
@@ -326,30 +326,30 @@ void RasterizerClass::render_triangle(const baked_vertex_t &v0,
       vstep = ((int32_t)vb - (int32_t)va) / (xb - xa);
     }
 
-    int ix_min = (int)ceilf(xa);
-    int ix_max = (int)floorf(xb);
-    if (ix_min < viewport.x) {
-      ix_min = viewport.x;
-      za += zstep * (ix_min - xa);
-      ca += cstep * (ix_min - xa);
-      ua += ustep * (ix_min - xa);
-      va += vstep * (ix_min - xa);
+    int ixMin = (int)ceilf(xa);
+    int ixMax = (int)floorf(xb);
+    if (ixMin < viewport.x) {
+      ixMin = viewport.x;
+      za += zstep * (ixMin - xa);
+      ca += cstep * (ixMin - xa);
+      ua += ustep * (ixMin - xa);
+      va += vstep * (ixMin - xa);
     }
-    if (ix_max >= viewport.right()) {
-      ix_max = viewport.right() - 1;
+    if (ixMax >= viewport.right()) {
+      ixMax = viewport.right() - 1;
     }
 
-    if (target->format() == pixel_format_t::RGB565) {
-      uint16_t *cptr = (uint16_t *)target->line_ptr(iy) + ix_min;
-      depth_t *zptr = depth_buff + iy * width + ix_min;
-      for (int x = ix_min; x <= ix_max; x++) {
+    if (target->format == pixel_format_t::RGB565) {
+      uint16_t *cptr = (uint16_t *)target->linePtr(iy) + ixMin;
+      depth_t *zptr = depthBuff + iy * width + ixMin;
+      for (int x = ixMin; x <= ixMax; x++) {
         if (0 <= za && za <= 255 && za < *zptr) {
           colorf col = ca;
           if (tex_data) {
             uint32_t u = ua >> 16;
             uint32_t v = va >> 16;
             uint16_t texel =
-                tex_data[(v & tex_v_mask) * tex_stride + (u & tex_u_mask)];
+                tex_data[(v & texMaskV) * tex_stride + (u & texMaskU)];
             col *= colorf::from4444(texel);
           }
           if (col.a >= 0.5f) {

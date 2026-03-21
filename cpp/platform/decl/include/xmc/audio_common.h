@@ -30,7 +30,7 @@ typedef enum {
  */
 typedef struct {
   xmc_audio_sample_format_t sample_format;
-  uint32_t sample_rate_hz;
+  uint32_t sampleRateHz;
 } xmc_audio_format_t;
 
 /**
@@ -40,7 +40,7 @@ typedef struct {
  * number of samples to write, and a context pointer that can be used to pass
  * user-defined data to the callback function.
  */
-typedef void (*xmc_stream_request_t)(void *buffer, uint32_t num_samples,
+typedef void (*xmc_stream_request_t)(void *buffer, uint32_t numSamples,
                                      void *context);
 
 /**
@@ -50,7 +50,7 @@ typedef void (*xmc_stream_request_t)(void *buffer, uint32_t num_samples,
  * data to the callback function.
  */
 typedef struct {
-  xmc_stream_request_t request_data;
+  xmc_stream_request_t requestData;
   void *context;
 } xmc_audio_source_port_t;
 

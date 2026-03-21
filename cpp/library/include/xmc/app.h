@@ -15,40 +15,40 @@ extern "C" {
 #endif
 
 typedef struct {
-  xmc_display_intf_format_t display_pixel_format;
-  xmc_audio_sample_format_t speaker_sample_format;
-  uint32_t speaker_sample_rate_hz;
-  uint32_t speaker_latency_samples;
+  xmc_display_intf_format_t displayPixelFormat;
+  xmc_audio_sample_format_t speakerSampleFormat;
+  uint32_t speakerSampleRateHz;
+  uint32_t speakerLatencySamples;
 
-} xmc_app_config_t;
+} AppConfig;
 
 /**
  * Get the default application configuration.
  * @return A default application configuration struct.
  */
-xmc_app_config_t xmc_get_default_app_config();
+AppConfig xmcGetDefaultAppConfig();
 
 /**
  * Get application configuration parameters. This function will be called before
- * xmc_app_setup, and the returned configuration will be used to initialize the
+ * xmc_appSetup, and the returned configuration will be used to initialize the
  * application. You can use this function to specify parameters such as speaker
  * sample rate, display resolution, etc.
  */
-xmc_app_config_t xmc_app_get_config();
+AppConfig xmc_appGetConfig();
 
 /**
  * User defined setup function. This will be called once at the beginning of the
  * program. You can use this function to initialize your application, set up
  * peripherals, etc.
  */
-void xmc_app_setup();
+void xmc_appSetup();
 
 /**
  * User defined loop function. This will be called repeatedly after
- * xmc_app_setup. You can use this function to implement the main logic of
+ * xmc_appSetup. You can use this function to implement the main logic of
  * your application.
  */
-void xmc_app_loop();
+void xmc_appLoop();
 
 #if defined(__cplusplus)
 }

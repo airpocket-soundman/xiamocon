@@ -39,14 +39,14 @@ struct mat4 {
    * @brief Load the identity matrix into this matrix
    * After calling this function, this matrix will be an identity matrix
    */
-  inline void load_identity() { *this = identity(); }
+  inline void loadIdentity() { *this = identity(); }
 
   /**
    * @brief Create a rotation matrix from a quaternion
    * @param q The quaternion representing the rotation
    * @return A 4x4 rotation matrix
    */
-  static mat4 from_quat(const quat &q) {
+  static mat4 fromQuat(const quat &q) {
     mat4 result;
     float xx = q.x * q.x;
     float yy = q.y * q.y;
@@ -126,14 +126,14 @@ struct mat4 {
     m[14] += z;
   }
 
-  inline void rotate(const quat &q) { *this = from_quat(q) * (*this); }
+  inline void rotate(const quat &q) { *this = fromQuat(q) * (*this); }
 
   inline void rotate(float pitch, float roll, float yaw) {
-    rotate(quat::from_euler(pitch, roll, yaw));
+    rotate(quat::fromEuler(pitch, roll, yaw));
   }
 
   inline void rotate(const vec3 &axis, float angle) {
-    rotate(quat::from_axis_angle(axis, angle));
+    rotate(quat::fromAxisAngle(axis, angle));
   }
 
   inline void scale(const vec3 &s) {
