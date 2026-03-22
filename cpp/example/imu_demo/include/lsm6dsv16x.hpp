@@ -1,9 +1,11 @@
 #ifndef LSM6DSV16X_HPP
 #define LSM6DSV16X_HPP
 
-#include <xmc/hw/i2c.h>
+#include <xmc/hw/i2c.hpp>
 
 namespace lsm6dsv16x {
+
+using namespace xmc;
 
 enum reg_t {
   REG_FUNC_CFG_ACCESS = 0x01,
@@ -155,7 +157,7 @@ class SensorI2C {
 
     for (int i = 10; i >= 0; i--) {
       uint8_t ctrl3;
-      xmc_sleepMs(100);
+      xmc::sleepMs(100);
       XmcStatus sts = read_reg(REG_CTRL3, &ctrl3);
       if (sts == XMC_OK && (ctrl3 & (CTRL3_BOOT | CTRL3_SW_RESET)) == 0) {
         break;
@@ -173,9 +175,9 @@ class SensorI2C {
     }
 
     // XMC_ERR_RET(write_reg(REG_FUNC_CFG_ACCESS, FUNC_CFG_ACCESS_SW_POR));
-    // xmc_sleepMs(100);
+    // xmc::sleepMs(100);
     // XMC_ERR_RET(write_reg(REG_CTRL3, CTRL3_SW_RESET));
-    // xmc_sleepMs(100);
+    // xmc::sleepMs(100);
     //  XMC_ERR_RET(write_reg(REG_CTRL3, CTRL3_IF_INC | CTRL3_BDU));
 
     // XMC_ERR_RET(write_reg(
@@ -209,7 +211,7 @@ class SensorI2C {
     //  write_reg((reg_t)0x10, 0x06);  // ACC ODR = 120 Hz
     //  write_reg((reg_t)0x11, 0x06);  // GYRO ODR = 120 Hz
 
-    // write_reg((reg_t) 0x12, 0x01); xmc_sleepMs(50);    // SW_RESET
+    // write_reg((reg_t) 0x12, 0x01); xmc::sleepMs(50);    // SW_RESET
     // write_reg((reg_t) 0x12, 0x44);                   // BDU + IF_INC
     // write_reg((reg_t) 0x17, 0x40);                   // ±4g, LPF2 = ODR/20
     // write_reg((reg_t) 0x18, 0x08);                   // LPF2_XL_EN
@@ -228,7 +230,7 @@ class SensorI2C {
     // in FIFO write_reg((reg_t) 0x0A, 0x06);                   // FIFO Stream
     // Mode
 
-    xmc_sleepMs(10);
+    xmc::sleepMs(10);
 
     inited = true;
 
@@ -288,15 +290,15 @@ class SensorI2C {
 
   XmcStatus read_reg(reg_t reg, uint8_t *value, uint32_t num_bytes = 1) {
     XmcStatus sts = XMC_OK;
-    XMC_ERR_RET(xmc_i2c_lock());
+    XMC_ERR_RET(i2c::lock());
     do {
-      XMC_ERR_BRK(sts, xmc_i2cSetBaudrate(baudrate_hz));
+      XMC_ERR_BRK(sts, i2c::setBaudrate(baudrate_hz));
       XMC_ERR_BRK(sts,
-                  xmc_i2cWriteBlocking(dev_addr, (uint8_t *)&reg, 1, false));
+                  i2c::writeBlocking(dev_addr, (uint8_t *)&reg, 1, false));
       XMC_ERR_BRK(sts,
-                  xmc_i2cReadBlocking(dev_addr, value, num_bytes, false));
+                  i2c::readBlocking(dev_addr, value, num_bytes, false));
     } while (0);
-    XMC_ERR_RET(xmc_i2cUnlock());
+    XMC_ERR_RET(i2c::unlock());
     return sts;
   }
 
@@ -306,18 +308,18 @@ class SensorI2C {
 
   XmcStatus write_reg(reg_t reg, const uint8_t *value, uint32_t num_bytes) {
     XmcStatus sts = XMC_OK;
-    XMC_ERR_RET(xmc_i2c_lock());
+    XMC_ERR_RET(i2c::lock());
     do {
-      XMC_ERR_BRK(sts, xmc_i2cSetBaudrate(baudrate_hz));
+      XMC_ERR_BRK(sts, i2c::setBaudrate(baudrate_hz));
       uint8_t buf[1 + num_bytes];
       buf[0] = (uint8_t)reg;
       for (uint32_t i = 0; i < num_bytes; i++) {
         buf[1 + i] = value[i];
       }
       XMC_ERR_BRK(sts,
-                  xmc_i2cWriteBlocking(dev_addr, buf, sizeof(buf), false));
+                  i2c::writeBlocking(dev_addr, buf, sizeof(buf), false));
     } while (0);
-    XMC_ERR_RET(xmc_i2cUnlock());
+    XMC_ERR_RET(i2c::unlock());
     return sts;
   }
 };

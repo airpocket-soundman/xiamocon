@@ -5,7 +5,7 @@
 #include "xmc/gfx/colorf.hpp"
 #include "xmc/gfx/gfx_common.hpp"
 #include "xmc/gfx/sprite.hpp"
-#include "xmc/hw/ram.h"
+#include "xmc/hw/ram.hpp"
 
 #include <memory>
 #include <vector>

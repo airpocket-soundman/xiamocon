@@ -1,12 +1,12 @@
 #include "xmc/audio/mixer.hpp"
 
-namespace xmc {
+namespace xmc::audio {
 
 static void xmc_mixerRequestData(void *buffer, uint32_t numSamples,
                                    void *context);
 
 Mixer::Mixer(int numSources) : numSources(numSources) {
-  sources = new xmc_audio_source_port_t *[numSources];
+  sources = new SourcePort *[numSources];
   for (int i = 0; i < numSources; i++) {
     sources[i] = nullptr;
   }
@@ -29,4 +29,4 @@ static void xmc_mixerRequestData(void *buffer, uint32_t numSamples,
   ((Mixer *)context)->render((int16_t *)buffer, numSamples);
 }
 
-}  // namespace xmc
+}  // namespace xmc::audio

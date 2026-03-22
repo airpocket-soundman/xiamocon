@@ -1,20 +1,21 @@
-#ifndef XMC_BATTERY_H
-#define XMC_BATTERY_H
+/**
+ * @file battery.hpp
+ * @brief Battery monitor interface for XMC library
+ */
 
-#include "xmc/xmc_common.h"
+#ifndef XMC_BATTERY_HPP
+#define XMC_BATTERY_HPP
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#include "xmc/xmc_common.hpp"
 
-XmcStatus xmc_batteryInit();
-XmcStatus xmc_batteryDeinit();
-XmcStatus xmc_batteryService();
-uint16_t xmc_batteryGetVoltageMv();
+namespace xmc::battery {
 
-#if defined(__cplusplus)
-}
-#endif
+XmcStatus init();
+XmcStatus deinit();
+XmcStatus service();
+uint16_t getVoltageMv();
 
-#endif  // XMC_BATTERY_H
+}  // namespace xmc::battery
+
+#endif 
 

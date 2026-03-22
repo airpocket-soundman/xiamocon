@@ -1,48 +1,66 @@
-#include "xmc/hw/timer.h"
+#include "xmc/hw/timer.hpp"
 
 #include <pico/stdlib.h>
 #include <stdlib.h>
 
-uint64_t xmc_getTimeMs() { return to_ms_since_boot(get_absolute_time()); }
-uint64_t xmc_getTimeUs() { return to_us_since_boot(get_absolute_time()); }
-void xmc_sleepMs(uint32_t ms) { sleep_ms(ms); }
-void xmc_sleepUs(uint32_t us) { sleep_us(us); }
+namespace xmc {
 
-typedef struct {
-  TimerTickCb cb;
+struct RepeatingTimerHw {
+  repeating_timer_t *timer;
+  TimerCallback cb;
   void *context;
-} RepeatingTimerHw;
+};
 
 static bool repeatingTimerCallback(repeating_timer_t *rt);
 
-XmcStatus xmc_timerAddRepeatingMs(RepeatingTimer *timer,
-                                        uint32_t interval_ms,
-                                        TimerTickCb cb, void *context) {
-  RepeatingTimerHw *hw = malloc(sizeof(RepeatingTimerHw));
+uint64_t getTimeMs() { return to_ms_since_boot(get_absolute_time()); }
+uint64_t getTimeUs() { return to_us_since_boot(get_absolute_time()); }
+void sleepMs(uint32_t ms) { sleep_ms(ms); }
+void sleepUs(uint32_t us) { sleep_us(us); }
+
+RepeatingTimer::RepeatingTimer() {
+  RepeatingTimerHw *hw = (RepeatingTimerHw *)malloc(sizeof(RepeatingTimerHw));
+  if (!hw) return;
+  handle = hw;
+  hw->timer = (repeating_timer_t *)malloc(sizeof(repeating_timer_t));
+}
+
+RepeatingTimer::~RepeatingTimer() {
+  if (handle) {
+    RepeatingTimerHw *hw = (RepeatingTimerHw *)handle;
+    if (hw->timer) {
+      cancel_repeating_timer(hw->timer);
+      free(hw->timer);
+    }
+    free(handle);
+    handle = nullptr;
+  }
+}
+
+XmcStatus RepeatingTimer ::startMs(uint32_t intervalMs, TimerCallback cb,
+                                   void *context) {
+  if (!handle) XMC_ERR_RET(XMC_ERR_NOT_INITIALIZED);
+  RepeatingTimerHw *hw = (RepeatingTimerHw *)handle;
   hw->cb = cb;
   hw->context = context;
-  repeating_timer_t *handle = malloc(sizeof(repeating_timer_t));
-  timer->handle = handle;
-  timer->tick = cb;
-  timer->context = hw;
-  if (!add_repeating_timer_ms(interval_ms, repeatingTimerCallback, hw,
-                              handle)) {
+  if (!add_repeating_timer_ms(intervalMs, repeatingTimerCallback, hw,
+                              hw->timer)) {
     free(handle);
     return XMC_ERR_TIMER_REPEATING_TIMER_INIT_FAILED;
   }
   return XMC_OK;
 }
 
-void xmc_timerCancelRepeating(RepeatingTimer *timer) {
-  if (timer && timer->handle) {
-    repeating_timer_t *handle = (repeating_timer_t *)timer->handle;
-    cancel_repeating_timer(handle);
-    free(handle);
-    timer->handle = NULL;
-  }
+void RepeatingTimer::cancel() {
+  if (!handle) return;
+  RepeatingTimerHw *hw = (RepeatingTimerHw *)handle;
+  if (!hw->timer) return;
+  cancel_repeating_timer(hw->timer);
 }
 
 static bool repeatingTimerCallback(repeating_timer_t *rt) {
   RepeatingTimerHw *hw = (RepeatingTimerHw *)rt->user_data;
   return hw->cb(hw->context);
 }
+
+}  // namespace xmc

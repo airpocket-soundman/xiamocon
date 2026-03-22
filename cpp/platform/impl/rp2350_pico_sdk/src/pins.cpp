@@ -1,4 +1,4 @@
-#include "xmc/hw/pins.h"
+#include "xmc/hw/pins.hpp"
 
 const int XMC_PIN_I2C_SDA = 6;
 const int XMC_PIN_I2C_SCL = 7;

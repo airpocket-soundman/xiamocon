@@ -1,24 +1,25 @@
-#ifndef XMC_HW_DMA_IRQ_H
-#define XMC_HW_DMA_IRQ_H
+/**
+ * @file dma_irq.hpp
+ * @brief DMA interrupt handling interface
+ */
 
-#include "xmc/hw/dma.h"
+#ifndef XMC_HW_DMA_IRQ_HPP
+#define XMC_HW_DMA_IRQ_HPP
 
-#if defined(__cplusplus)
+#include "xmc/hw/dma.hpp"
+
+namespace xmc::dma {
+
+typedef void (*IrqHandlerCb)(void *context);
+
+void registerIrqHandler(int dmaCh, IrqHandlerCb handlerFast,
+                        IrqHandlerCb handlerSlow, void *context);
+void unregisterIrqHandler(int dmaCh);
+
+}  // namespace xmc::dma
+
 extern "C" {
-#endif
-
-typedef void (*DmaIrqHandlerCb)(void *context);
-
-void xmc_dmaRegisterIrqHandler(int dmaCh,
-                                  DmaIrqHandlerCb handlerFast,
-                                  DmaIrqHandlerCb handlerSlow,
-                                  void *context);
-void xmc_dmaUnregisterIrqHandler(int dmaCh);
-
-void xmc_dmaIrqHandler(void);
-
-#if defined(__cplusplus)
+void xmcDmaIrqHandler(void);
 }
-#endif
 
 #endif

@@ -8,18 +8,14 @@
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace xmc {
 
 /**
  * Get the next random 32-bit unsigned integer.
  * @return A random 32-bit unsigned integer.
  */
-uint32_t xmc_randomNextU32();
+uint32_t randomU32();
 
-#ifdef __cplusplus
 }
-#endif
 
 #endif

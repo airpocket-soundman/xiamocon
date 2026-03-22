@@ -1,17 +1,25 @@
-#ifndef XMC_HW_DMA_H
-#define XMC_HW_DMA_H
+/**
+ * @file dma.hpp
+ * @brief DMA transfer configuration structure
+ */
+
+#ifndef XMC_HW_DMA_HPP
+#define XMC_HW_DMA_HPP
+
+namespace xmc::dma {
 
 /**
  * DMA transfer configuration.
  */
-typedef struct {
+struct Config {
   /** Pointer to the data buffer. */
   void *ptr;
   /** Size of each element in bytes. */
   int element_size;
   /** Number of elements to transfer. */
   int length;
-  
-} xmc_dma_config_t;
+};
+
+}  // namespace xmc::dma
 
 #endif

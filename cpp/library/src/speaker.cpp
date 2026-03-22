@@ -1,31 +1,33 @@
-#include "xmc/speaker.h"
-#include "xmc/hw/pins.h"
-#include "xmc/ioex.h"
+#include "xmc/speaker.hpp"
+#include "xmc/hw/pins.hpp"
+#include "xmc/ioex.hpp"
 
-SdacInst sdac;
+namespace xmc::speaker {
 
-XmcStatus xmc_speakerInit(xmc_audio_sample_format_t fmt, uint32_t rate,
-                              uint32_t latency, float *actualRateHz) {
-  xmc_audio_format_t sdac_fmt;
-  SdacConfig cfg;
-  sdac_fmt.sample_format = fmt;
-  sdac_fmt.sampleRateHz = rate;
-  cfg.format = sdac_fmt;
+audio::StreamingDac sdac(XMC_PIN_AUDIO_OUT);
+
+XmcStatus init(audio::SampleFormat fmt, uint32_t rate, uint32_t latency,
+               float *actualRateHz) {
+  audio::StreamFormat streamFmt;
+  audio::SdacConfig cfg;
+  streamFmt.sampleFormat = fmt;
+  streamFmt.rateHz = rate;
+  cfg.format = streamFmt;
   cfg.latencySamples = latency;
-  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_SPEAKER_MUTE, 1));
-  XMC_ERR_RET(xmc_ioexSetDir(XMC_IOEX_PIN_SPEAKER_MUTE, true));
-  XMC_ERR_RET(xmc_sdac_init(&sdac, XMC_PIN_AUDIO_OUT, &cfg, actualRateHz));
+  XMC_ERR_RET(ioex::write(ioex::Pin::SPEAKER_MUTE, 1));
+  XMC_ERR_RET(ioex::setDir(ioex::Pin::SPEAKER_MUTE, true));
+  XMC_ERR_RET(sdac.start(cfg, actualRateHz));
   return XMC_OK;
 }
 
-XmcStatus xmc_speakerDeinit(void) { return xmc_sdacDeinit(&sdac); }
+XmcStatus deinit(void) { return sdac.stop(); }
 
-XmcStatus xmc_speakerSetMuted(bool muted) {
-  return xmc_ioexWrite(XMC_IOEX_PIN_SPEAKER_MUTE, muted ? 1 : 0);
+XmcStatus setMuted(bool muted) {
+  return ioex::write(ioex::Pin::SPEAKER_MUTE, muted ? 1 : 0);
 }
 
-XmcStatus xmc_speakerSetSourcePort(xmc_audio_source_port_t *src) {
-  return xmc_sdac_set_source(&sdac, src);
-}
+XmcStatus setSourcePort(audio::SourcePort *src) { return sdac.setSource(src); }
 
-XmcStatus xmc_speakerService(void) { return xmc_sdac_service(&sdac); }
+XmcStatus service(void) { return sdac.service(); }
+
+}  // namespace xmc::speaker

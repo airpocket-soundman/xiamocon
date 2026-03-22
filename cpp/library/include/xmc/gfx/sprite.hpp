@@ -2,17 +2,28 @@
 #define XMC_SPRITE_HPP
 
 #include "gfxfont.h"
-#include "xmc/display.h"
+#include "xmc/display.hpp"
 #include "xmc/geo.hpp"
 #include "xmc/gfx/gfx_common.hpp"
-#include "xmc/hw/ram.h"
+#include "xmc/hw/ram.hpp"
 
 #include <memory>
+#include <string>
+
+#include "xmc/font/ShapoSansP_s08c07.h"
 
 namespace xmc {
 
 class SpriteClass;
 using Sprite = std::shared_ptr<SpriteClass>;
+
+struct TextState {
+  const GFXfont *font = nullptr;
+  int fontSize = 1;
+  uint16_t textColor = 0;
+  int cursorX = 0;
+  int cursorY = 0;
+};
 
 /**
  * Base class for sprites. This is a template class that takes a pixel format
@@ -34,11 +45,7 @@ class SpriteClass {
   const bool autoFree;
 
  protected:
-  const GFXfont *font = nullptr;
-  int fontSize = 1;
-  uint16_t textColor = 0;
-  int cursorX = 0;
-  int cursorY = 0;
+  TextState textState;
 
  public:
   SpriteClass(pixel_format_t format, int width, int height, uint32_t stride,
@@ -62,50 +69,48 @@ class SpriteClass {
     return (uint8_t *)data + stride * y;
   }
 
-  void set_pixel(int x, int y, raw_color color) {
+  void setPixel(int x, int y, raw_color color) {
     if (x < 0 || x >= width || y < 0 || y >= height) return;
     onSetPixel(x, y, color);
   }
-  raw_color get_pixel(int x, int y) const {
+  raw_color getPixel(int x, int y) const {
     if (x < 0 || x >= width || y < 0 || y >= height) return 0;
     return onGetPixel(x, y);
   }
 
-  void set_font(const GFXfont *font, int size = 1) {
-    this->font = font;
-    this->fontSize = size;
+  void setFont(const GFXfont *font, int size = 1) {
+    textState.font = font;
+    textState.fontSize = size;
   }
-  void set_cursor(int x, int y) {
-    this->cursorX = x;
-    this->cursorY = y;
+  void setCursor(int x, int y) {
+    textState.cursorX = x;
+    textState.cursorY = y;
   }
-  void set_text_color(raw_color color) { this->textColor = color; }
+  void setTextColor(raw_color color) { textState.textColor = color; }
 
-  void draw_string(const char *str) {
-    if (!font || !str) return;
-    int x = cursorX;
+  void drawString(const char *str) {
+    if (!textState.font || !str) return;
+    int x = textState.cursorX;
     for (const char *p = str; *p; p++) {
       if (*p == '\n') {
-        x = cursorX;
-        cursorY += font->yAdvance * fontSize;
+        x = textState.cursorX;
+        textState.cursorY += textState.font->yAdvance * textState.fontSize;
       } else {
-        x += on_draw_char(x, cursorY, *p);
+        x += onDrawChar(x, textState.cursorY, *p);
       }
     }
-    cursorX = x;
+    textState.cursorX = x;
   }
 
-  XmcStatus start_transfer_to_display(int dx, int dy) {
-    return on_start_transfer_to_display(dx, dy, 0, height);
+  XmcStatus startTransferToDisplay(int dx, int dy) {
+    return onStartTransferToDisplay(dx, dy, 0, height);
   }
 
-  XmcStatus complete_transfer() {
-    return xmc_displayWritePixelsComplete();
-  }
+  XmcStatus completeTransfer() { return display::writePixelsComplete(); }
 
   void clear(raw_color color) { onFillRect(0, 0, width, height, color); }
 
-  void fill_rect(int x, int y, int w, int h, raw_color color) {
+  void fillRect(int x, int y, int w, int h, raw_color color) {
     if (w < 0) {
       x += w;
       w = -w;
@@ -119,7 +124,7 @@ class SpriteClass {
     onFillRect(x, y, w, h, color);
   }
 
-  void draw_rect(int x, int y, int w, int h, raw_color color) {
+  void drawRect(int x, int y, int w, int h, raw_color color) {
     if (w < 0) {
       x += w;
       w = -w;
@@ -128,10 +133,10 @@ class SpriteClass {
       y += h;
       h = -h;
     }
-    fill_rect(x, y, w, 1, color);
-    fill_rect(x, y + h, w, 1, color);
-    fill_rect(x, y, 1, h - 1, color);
-    fill_rect(x + w, y, 1, h - 1, color);
+    fillRect(x, y, w, 1, color);
+    fillRect(x, y + h, w, 1, color);
+    fillRect(x, y, 1, h - 1, color);
+    fillRect(x + w, y, 1, h - 1, color);
   }
 
   // todo: delete
@@ -195,8 +200,8 @@ class SpriteClass {
     }
   }
 
-  inline void draw_image(const Sprite &image, int dx, int dy, int w, int h,
-                         int sx, int sy) {
+  inline void drawImage(const Sprite &image, int dx, int dy, int w, int h,
+                        int sx, int sy) {
     rect_t view = {0, 0, width, height};
     rect_t dst = {dx, dy, w, h};
     dst = dst.intersect(view);
@@ -218,23 +223,40 @@ class SpriteClass {
     onDrawImage(image, dx, dy, w, h, sx, sy);
   }
 
+  inline void drawLastError() {
+    XmcStatus err;
+    const char *file;
+    int line;
+    xmcGetLastError(&err, &file, &line);
+    char buf[64];
+    if (err != XMC_OK) {
+      TextState prevTextState = textState;
+      onFillRect(0, height - 10, width, 10, 0);
+      setFont(&ShapoSansP_s08c07, 1);
+      snprintf(buf, sizeof(buf), "ERR 0x%X: L%d in %s", err, line, file);
+      setCursor(0, height - 2);
+      setTextColor(0xFFFF);
+      drawString(buf);
+      textState = prevTextState;
+    }
+  }
+
  protected:
   virtual void onSetPixel(int x, int y, raw_color color) = 0;
   virtual raw_color onGetPixel(int x, int y) const = 0;
   virtual void onFillRect(int x, int y, int w, int h, raw_color color) = 0;
   virtual void onDrawImage(const Sprite &image, int dx, int dy, int w, int h,
-                             int sx, int sy) = 0;
-  virtual XmcStatus on_start_transfer_to_display(int dx, int dy, int sy,
-                                                    int h) = 0;
-  virtual int on_draw_char(int x, int y, char c) {
-    if (!font) return 0;
-    if (c < font->first || c > font->last) return 0;
-    GFXglyph *glyph = &font->glyph[c - font->first];
-    int x0 = x + glyph->xOffset * fontSize;
-    int y0 = y + glyph->yOffset * fontSize;
-    int w = glyph->width * fontSize;
-    int h = glyph->height * fontSize;
-    uint8_t *bitmap = font->bitmap + glyph->bitmapOffset;
+                           int sx, int sy) = 0;
+  virtual XmcStatus onStartTransferToDisplay(int dx, int dy, int sy, int h) = 0;
+  virtual int onDrawChar(int x, int y, char c) {
+    if (!textState.font) return 0;
+    if (c < textState.font->first || c > textState.font->last) return 0;
+    GFXglyph *glyph = &textState.font->glyph[c - textState.font->first];
+    int x0 = x + glyph->xOffset * textState.fontSize;
+    int y0 = y + glyph->yOffset * textState.fontSize;
+    int w = glyph->width * textState.fontSize;
+    int h = glyph->height * textState.fontSize;
+    uint8_t *bitmap = textState.font->bitmap + glyph->bitmapOffset;
     uint8_t byte = 0;
     int ibit = 0;
     for (int j = 0; j < h; j++) {
@@ -243,18 +265,19 @@ class SpriteClass {
           byte = *bitmap++;
         }
         if (byte & 0x80) {
-          if (fontSize == 1) {
-            set_pixel(x0 + i, y0 + j, textColor);
+          if (textState.fontSize == 1) {
+            setPixel(x0 + i, y0 + j, textState.textColor);
           } else {
-            fill_rect(x0 + i * fontSize, y0 + j * fontSize, fontSize, fontSize,
-                      textColor);
+            fillRect(x0 + i * textState.fontSize, y0 + j * textState.fontSize,
+                     textState.fontSize, textState.fontSize,
+                     textState.textColor);
           }
         }
         byte <<= 1;
         ibit = (ibit + 1) % 8;
       }
     }
-    return glyph->xAdvance * fontSize;
+    return glyph->xAdvance * textState.fontSize;
   }
 };
 

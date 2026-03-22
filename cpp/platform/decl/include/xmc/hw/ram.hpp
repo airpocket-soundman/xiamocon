@@ -1,10 +1,10 @@
 /**
- * @file ram.h
+ * @file ram.hpp
  * @brief RAM management interface
  */
 
-#ifndef XMC_HW_RAM_H
-#define XMC_HW_RAM_H
+#ifndef XMC_HW_RAM_HPP
+#define XMC_HW_RAM_HPP
 
 #include <stdbool.h>
 #include <stdlib.h>

@@ -1,26 +1,23 @@
 /**
- * @file speaker.h
+ * @file speaker.hpp
  * @brief Speaker driver.
  */
 
 #ifndef XMC_SPEAKER_H
 #define XMC_SPEAKER_H
 
-#include "xmc/hw/sdac.h"
+#include "xmc/hw/streaming_dac.hpp"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc::speaker {
 
 /**
  * Returns the supported audio sample formats for the speaker. This function is
- * a wrapper around xmc_sdacGetSupportedFormats() since the speaker uses the
- * SDAC as its underlying audio output.
+ * a wrapper around xmc::audio::sdacGetSupportedFormats() since the speaker uses
+ * the SDAC as its underlying audio output.
  * @return A bitmask of supported audio sample formats for the speaker.
  */
-static inline xmc_audio_sample_format_t xmc_speakerGetSupportedFormats(
-    void) {
-  return xmc_sdacGetSupportedFormats();
+static inline audio::SampleFormat xmc_speakerGetSupportedFormats(void) {
+  return audio::sdacGetSupportedFormats();
 }
 
 /**
@@ -29,22 +26,21 @@ static inline xmc_audio_sample_format_t xmc_speakerGetSupportedFormats(
  * specified configuration and prepare the speaker for use.
  * @param format The audio sample format to use for the speaker. This must be
  * one of the formats returned by xmc_speakerGetSupportedFormats().
- * @param sampleRateHz The sample rate in Hz to use for the speaker.
+ * @param rateHz The sample rate in Hz to use for the speaker.
  * @param latencySamples The latency in samples for the speaker.
  * @param actualRateHz A pointer to a variable that will receive the actual
  * sample rate in Hz that the speaker will use.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-XmcStatus xmc_speakerInit(xmc_audio_sample_format_t format,
-                              uint32_t sampleRateHz, uint32_t latencySamples,
-                              float *actualRateHz);
+XmcStatus init(audio::SampleFormat format, uint32_t rateHz,
+                          uint32_t latencySamples, float *actualRateHz);
 
 /**
  * Deinitializes the speaker. This function will free any resources allocated
  * during initialization and reset the speaker hardware to a safe state.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-XmcStatus xmc_speakerDeinit(void);
+XmcStatus deinit(void);
 
 /**
  * Sets the muted state of the speaker. This function will mute or unmute the
@@ -53,7 +49,7 @@ XmcStatus xmc_speakerDeinit(void);
  * (false) the speaker.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-XmcStatus xmc_speakerSetMuted(bool muted);
+XmcStatus setMuted(bool muted);
 
 /**
  * Sets the audio source port for the speaker. This function will configure the
@@ -61,7 +57,7 @@ XmcStatus xmc_speakerSetMuted(bool muted);
  * @param src A pointer to the audio source port to use for the speaker.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-XmcStatus xmc_speakerSetSourcePort(xmc_audio_source_port_t *src);
+XmcStatus setSourcePort(audio::SourcePort *src);
 
 /**
  * Services the speaker. This function should be called periodically to ensure
@@ -71,10 +67,8 @@ XmcStatus xmc_speakerSetSourcePort(xmc_audio_source_port_t *src);
  * audio output.
  * @return XMC_OK on success, or an appropriate error code on failure.
  */
-XmcStatus xmc_speakerService(void);
+XmcStatus service(void);
 
-#if defined(__cplusplus)
-}
-#endif
+}  // namespace xmc::speaker
 
 #endif

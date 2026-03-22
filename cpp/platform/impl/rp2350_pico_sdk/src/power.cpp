@@ -1,6 +1,6 @@
-#include "xmc/hw/power.h"
-#include "xmc/hw/i2c.h"
-#include "xmc/hw/pins.h"
+#include "xmc/hw/power.hpp"
+#include "xmc/hw/i2c.hpp"
+#include "xmc/hw/pins.hpp"
 
 #include <hardware/clocks.h>
 #include <hardware/powman.h>
@@ -11,15 +11,17 @@
 #include <pico/stdio_usb.h>
 #include <pico/stdlib.h>
 
+namespace xmc::power {
+
 static const int XIAO_PIN_BAT_ADC_EN = 19;
 static const int XIAO_PIN_NEO_PWR = 23;
 static const int XIAO_PIN_LED_Y = 25;
 
-XmcStatus xmc_powerInit() { return XMC_OK; }
+XmcStatus init() { return XMC_OK; }
 
-XmcStatus xmc_powerService() { return XMC_OK; }
+XmcStatus service() { return XMC_OK; }
 
-XmcStatus xmc_powerDeepSleep() {
+XmcStatus deepSleep() {
   multicore_reset_core1();
 
   stdio_flush();
@@ -70,10 +72,12 @@ XmcStatus xmc_powerDeepSleep() {
   return XMC_OK;
 }
 
-XmcStatus xmc_powerReset(xmc_reset_mode_t mode) {
+XmcStatus reset(ResetMode mode) {
   watchdog_reboot(0, 0, 0);
   while (true) {
     tight_loop_contents();
   }
   return XMC_ERR_POWER_RESET_FAILED;
 }
+
+}  // namespace xmc::power

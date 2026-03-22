@@ -1,7 +1,7 @@
-#include "xmc/hw/sdac.h"
-#include "xmc/hw/dma_irq.h"
-#include "xmc/hw/pins.h"
-#include "xmc/hw/ram.h"
+#include "xmc/hw/streaming_dac.hpp"
+#include "xmc/hw/dma_irq.hpp"
+#include "xmc/hw/pins.hpp"
+#include "xmc/hw/ram.hpp"
 
 #include <hardware/clocks.h>
 #include <hardware/dma.h>
@@ -10,11 +10,13 @@
 #include <pico/stdlib.h>
 #include <string.h>
 
+namespace xmc::audio {
+
 static const uint32_t PDM_MIN_PDM_FREQ_HZ = 3000000;
 
 typedef struct {
   SdacConfig cfg;
-  xmc_audio_source_port_t *source;
+  SourcePort *source;
   PIO pio;
   int pioSm;
   int pioOffset;
@@ -45,8 +47,8 @@ static const struct pio_program pioProgram = {
     .origin = -1,
 };
 
-static void startNextDma(SdacInst *inst);
-static void fillBuffer(SdacInst *inst);
+static void startNextDma(StreamingDac &inst);
+static void fillBuffer(StreamingDac &inst);
 static void dmaHandlerFast(void *context);
 static void dmaHandlerSlow(void *context);
 
@@ -57,26 +59,30 @@ static inline void updateLfsr(uint32_t *lfsr) {
 }
 
 #define SUPPORTED_FORMATS \
-  (XMC_SAMPLE_LINEAR_PCM_U8_MONO | XMC_SAMPLE_LINEAR_PCM_S16_MONO)
+  (SampleFormat::LINEAR_PCM_U8_MONO | SampleFormat::LINEAR_PCM_S16_MONO)
 
-xmc_audio_sample_format_t xmc_sdacGetSupportedFormats(void) {
-  return SUPPORTED_FORMATS;
+SampleFormat sdacGetSupportedFormats(void) { return SUPPORTED_FORMATS; }
+
+StreamingDac::StreamingDac(int pin) : pin(pin) {
+  handle = malloc(sizeof(SdacHw));
 }
 
-XmcStatus xmc_sdac_init(SdacInst *inst, int pin, const SdacConfig *cfg,
-                        float *actualRateHz) {
-  // todo: calculate actualRateHz based on cfg->format.sampleRateHz and
-  // hardware capabilities
-  *actualRateHz = cfg->format.sampleRateHz;
-
-  SdacHw *hw = malloc(sizeof(SdacHw));
-  if (!hw) {
-    return XMC_ERR_RAM_ALLOC_FAILED;
+StreamingDac::~StreamingDac() {
+  if (handle) {
+    free(handle);
+    handle = nullptr;
   }
-  inst->hw = hw;
-  inst->pin = pin;
+}
 
-  hw->cfg = *cfg;
+XmcStatus StreamingDac::start(const SdacConfig &cfg, float *actualRateHz) {
+  if (!handle) XMC_ERR_RET(XMC_ERR_NOT_INITIALIZED);
+
+  // todo: calculate actualRateHz based on cfg.format.rateHz and
+  // hardware capabilities
+  *actualRateHz = cfg.format.rateHz;
+
+  SdacHw *hw = (SdacHw *)handle;
+  hw->cfg = cfg;
   hw->pdmWork0 = 0;
   hw->pdmWork1 = 0;
   // hw->pdmWork2 = 0;
@@ -85,46 +91,46 @@ XmcStatus xmc_sdac_init(SdacInst *inst, int pin, const SdacConfig *cfg,
   hw->pdmLfsr = 0xFFFFFFFF;
 
   uint32_t sysClkFreq = clock_get_hz(clk_sys);
-  uint32_t pdmClkFreq = hw->cfg.format.sampleRateHz * 32;
+  uint32_t pdmClkFreq = hw->cfg.format.rateHz * 32;
   hw->extraOversample = (PDM_MIN_PDM_FREQ_HZ + pdmClkFreq - 1) / pdmClkFreq;
   if (hw->extraOversample < 1) hw->extraOversample = 1;
   pdmClkFreq *= hw->extraOversample;
 
-  if ((cfg->format.sample_format & SUPPORTED_FORMATS) == 0) {
+  if (!(cfg.format.sampleFormat & SUPPORTED_FORMATS)) {
     XMC_ERR_RET(XMC_ERR_SPEAKER_UNSUPPORTED_FORMAT);
   }
 
-  if (cfg->format.sample_format != XMC_SAMPLE_LINEAR_PCM_S16_MONO) {
-    int bytes_per_sample =
-        xmc_audio_get_bytes_per_sample(hw->cfg.format.sample_format);
-    hw->srcFmtBuff = malloc(hw->cfg.latencySamples * bytes_per_sample);
+  if (cfg.format.sampleFormat != SampleFormat::LINEAR_PCM_S16_MONO) {
+    int bytes_per_sample = getBytesPerSample(hw->cfg.format.sampleFormat);
+    hw->srcFmtBuff =
+        (uint8_t *)malloc(hw->cfg.latencySamples * bytes_per_sample);
     if (!hw->srcFmtBuff) {
-      xmc_sdacDeinit(inst);
+      stop();
       return XMC_ERR_RAM_ALLOC_FAILED;
     }
   } else {
     hw->srcFmtBuff = NULL;
   }
 
-  hw->s16Buff = malloc(hw->cfg.latencySamples * sizeof(int16_t));
+  hw->s16Buff = (int16_t *)malloc(hw->cfg.latencySamples * sizeof(int16_t));
   if (!hw->s16Buff) {
-    xmc_sdacDeinit(inst);
+    stop();
     return XMC_ERR_RAM_ALLOC_FAILED;
   }
 
   uint32_t dmaBuffSize =
       hw->cfg.latencySamples * hw->extraOversample * sizeof(uint32_t) * 2;
-  hw->dmaBuff = xmcMalloc(dmaBuffSize, XMC_RAM_CAP_DMA);
+  hw->dmaBuff = (uint32_t *)xmcMalloc(dmaBuffSize, XMC_RAM_CAP_DMA);
   if (!hw->dmaBuff) {
-    xmc_sdacDeinit(inst);
+    stop();
     return XMC_ERR_RAM_ALLOC_FAILED;
   }
 
   hw->nextWriteBank = 0;
   hw->nextReadBank = 0;
 
-  gpio_set_function(inst->pin, GPIO_FUNC_PWM);
-  gpio_set_dir(inst->pin, GPIO_OUT);
+  gpio_set_function(pin, GPIO_FUNC_PWM);
+  gpio_set_dir(pin, GPIO_OUT);
 
   hw->pio = pio0;
   hw->pioOffset = pio_add_program(hw->pio, &pioProgram);
@@ -144,13 +150,13 @@ XmcStatus xmc_sdac_init(SdacInst *inst, int pin, const SdacConfig *cfg,
 
   hw->dmaCh = dma_claim_unused_channel(true);
   if (hw->dmaCh < 0) {
-    xmc_sdacDeinit(inst);
+    stop();
     return XMC_ERR_DMA_INIT_FAILED;
   }
   dma_channel_set_irq0_enabled(hw->dmaCh, true);
-  xmc_dmaRegisterIrqHandler(hw->dmaCh, dmaHandlerFast, dmaHandlerSlow, inst);
-  irq_set_exclusive_handler(DMA_IRQ_0, xmc_dmaIrqHandler);
-  // irq_add_shared_handler(DMA_IRQ_0, xmc_dmaIrqHandler,
+  dma::registerIrqHandler(hw->dmaCh, dmaHandlerFast, dmaHandlerSlow, this);
+  irq_set_exclusive_handler(DMA_IRQ_0, xmcDmaIrqHandler);
+  // irq_add_shared_handler(DMA_IRQ_0, dma::xmcDmaIrqHandler,
   // PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
   irq_set_enabled(DMA_IRQ_0, true);
 
@@ -163,21 +169,21 @@ XmcStatus xmc_sdac_init(SdacInst *inst, int pin, const SdacConfig *cfg,
                         hw->dmaBuff,
                         hw->cfg.latencySamples * hw->extraOversample, false);
 
-  fillBuffer(inst);
-  fillBuffer(inst);
-  startNextDma(inst);
+  fillBuffer(*this);
+  fillBuffer(*this);
+  startNextDma(*this);
 
   return XMC_OK;
 }
 
-XmcStatus xmc_sdacDeinit(SdacInst *inst) {
-  SdacHw *hw = (SdacHw *)inst->hw;
-  if (hw) {
+XmcStatus StreamingDac::stop() {
+  if (handle) {
+    SdacHw *hw = (SdacHw *)handle;
     if (hw->dmaCh >= 0) {
       dma_channel_wait_for_finish_blocking(hw->dmaCh);
       dma_channel_unclaim(hw->dmaCh);
       dma_channel_set_irq0_enabled(hw->dmaCh, false);
-      xmc_dmaUnregisterIrqHandler(hw->dmaCh);
+      dma::unregisterIrqHandler(hw->dmaCh);
       irq_set_enabled(DMA_IRQ_0, false);
       hw->dmaCh = -1;
     }
@@ -196,64 +202,59 @@ XmcStatus xmc_sdacDeinit(SdacInst *inst) {
     pio_sm_set_enabled(hw->pio, hw->pioSm, false);
     pio_sm_unclaim(hw->pio, hw->pioSm);
     pio_remove_program(hw->pio, &pioProgram, hw->pioOffset);
-    free(hw);
-    inst->hw = NULL;
   }
 
   // drain charge from pin
-  gpio_init(inst->pin);
-  gpio_set_dir(inst->pin, GPIO_OUT);
-  gpio_put(inst->pin, 0);
+  gpio_init(pin);
+  gpio_set_dir(pin, GPIO_OUT);
+  gpio_put(pin, 0);
 
   // disable pin
-  gpio_deinit(inst->pin);
+  gpio_deinit(pin);
   return XMC_OK;
 }
 
-XmcStatus xmc_sdac_set_source(SdacInst *inst, xmc_audio_source_port_t *src) {
-  inst->source = *src;
+XmcStatus StreamingDac::setSource(SourcePort *src) {
+  this->source = *src;
   return XMC_OK;
 }
 
-XmcStatus xmc_sdac_service(SdacInst *inst) {
-  SdacHw *hw = (SdacHw *)inst->hw;
+XmcStatus StreamingDac::service() {
+  SdacHw *hw = (SdacHw *)handle;
   if (hw->nextReadBank == hw->nextWriteBank) {
-    fillBuffer(inst);
+    fillBuffer(*this);
   }
   return XMC_OK;
 }
 
 static void dmaHandlerFast(void *context) {
-  SdacInst *inst = (SdacInst *)context;
-  startNextDma(inst);
+  startNextDma(*(StreamingDac *)context);
 }
 
 static void dmaHandlerSlow(void *context) {
-  SdacInst *inst = (SdacInst *)context;
-  fillBuffer(inst);
+  fillBuffer(*(StreamingDac *)context);
 }
 
-static void fillBuffer(SdacInst *inst) {
-  SdacHw *hw = (SdacHw *)inst->hw;
+static void fillBuffer(StreamingDac &inst) {
+  SdacHw *hw = (SdacHw *)inst.handle;
 
   uint32_t dstSamples = hw->cfg.latencySamples * hw->extraOversample;
   uint32_t *dst = hw->dmaBuff + (hw->nextWriteBank * dstSamples);
 
-  if (inst->source.requestData) {
+  if (inst.source.requestData) {
     uint32_t buff_size_bytes =
-        hw->cfg.latencySamples *
-        xmc_audio_get_bytes_per_sample(hw->cfg.format.sample_format);
-    switch (hw->cfg.format.sample_format) {
+        hw->cfg.latencySamples * getBytesPerSample(hw->cfg.format.sampleFormat);
+    switch (hw->cfg.format.sampleFormat) {
       default:
-      case XMC_SAMPLE_LINEAR_PCM_S16_MONO:
+      case SampleFormat::LINEAR_PCM_S16_MONO:
         memset(hw->s16Buff, 0x00, buff_size_bytes);
-        inst->source.requestData(hw->s16Buff, hw->cfg.latencySamples,
-                                 inst->source.context);
+        inst.source.requestData(hw->s16Buff, hw->cfg.latencySamples,
+                                inst.source.context);
         break;
-      case XMC_SAMPLE_LINEAR_PCM_U8_MONO:
+      case SampleFormat::LINEAR_PCM_U8_MONO:
         memset(hw->srcFmtBuff, 0x80, buff_size_bytes);
-        inst->source.requestData(hw->srcFmtBuff, hw->cfg.latencySamples,
-                                 inst->source.context);
+        inst.source.requestData(hw->srcFmtBuff, hw->cfg.latencySamples,
+                                inst.source.context);
         for (int i = 0; i < hw->cfg.latencySamples; i++) {
           hw->s16Buff[i] = ((int16_t)hw->srcFmtBuff[i] - 128) << 8;
         }
@@ -335,11 +336,13 @@ static void fillBuffer(SdacInst *inst) {
   hw->nextWriteBank = (hw->nextWriteBank + 1) % 2;
 }
 
-static void startNextDma(SdacInst *inst) {
-  SdacHw *hw = (SdacHw *)inst->hw;
+static void startNextDma(StreamingDac &inst) {
+  SdacHw *hw = (SdacHw *)inst.handle;
 
   uint32_t dstSamples = hw->cfg.latencySamples * hw->extraOversample;
   dma_channel_set_read_addr(
       hw->dmaCh, hw->dmaBuff + (hw->nextReadBank * dstSamples), true);
   hw->nextReadBank = (hw->nextReadBank + 1) % 2;
 }
+
+}  // namespace xmc::audio

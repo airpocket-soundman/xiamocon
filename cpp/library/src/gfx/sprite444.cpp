@@ -1,5 +1,5 @@
 #include "xmc/gfx/sprite444.hpp"
-#include "xmc/display.h"
+#include "xmc/display.hpp"
 #include "xmc/geo.hpp"
 #include "xmc/gfx/sprite4444.hpp"
 
@@ -63,7 +63,7 @@ void Sprite444Class::onDrawImage(const Sprite &image, int dx, int dy, int w,
       // todo: optimize
       for (int j = 0; j < h; j++) {
         for (int i = 0; i < w; i++) {
-          uint16_t c = image->get_pixel(sx + i, sy + j);
+          uint16_t c = image->getPixel(sx + i, sy + j);
           if ((c & 0xF000) == 0) continue;
           onSetPixel(dx + i, dy + j, c);
         }
@@ -76,10 +76,10 @@ void Sprite444Class::onDrawImage(const Sprite &image, int dx, int dy, int w,
   }
 }
 
-XmcStatus Sprite444Class::on_start_transfer_to_display(int dx, int dy,
-                                                          int sy, int h) {
-  XMC_ERR_RET(xmc_displaySetWindow(dx, dy, width, h));
-  XMC_ERR_RET(xmc_displayWritePixelsStart(linePtr(sy), stride * h, false));
+XmcStatus Sprite444Class::onStartTransferToDisplay(int dx, int dy, int sy,
+                                                   int h) {
+  XMC_ERR_RET(display::setWindow(dx, dy, width, h));
+  XMC_ERR_RET(display::writePixelsStart(linePtr(sy), stride * h, false));
   return XMC_OK;
 }
 

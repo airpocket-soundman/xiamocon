@@ -6,13 +6,11 @@
 #ifndef XMC_DISPLAY_HPP
 #define XMC_DISPLAY_HPP
 
-#include "xmc/xmc_common.h"
+#include "xmc/xmc_common.hpp"
 
 #include <stddef.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc::display {
 
 /**
  * Display interface formats. This is used to specify the pixel format of the
@@ -20,17 +18,17 @@ extern "C" {
  * but this allows the library to know how to format pixel data when writing to
  * the display.
  */
-typedef enum {
-  XMC_DISP_INTF_FORMAT_RGB444,
-  XMC_DISP_INTF_FORMAT_RGB565,
-  XMC_DISP_INTF_FORMAT_RGB666,
-} xmc_display_intf_format_t;
+enum class InterfaceFormat {
+  RGB444,
+  RGB565,
+  RGB666,
+};
 
 /** Display width in pixels */
-#define XMC_DISPLAY_WIDTH 240
+static constexpr int WIDTH = 240;
 
 /** Display height in pixels */
-#define XMC_DISPLAY_HEIGHT 240
+static constexpr int HEIGHT = 240;
 
 /**
  * Initialize the display. This will set up the GPIO pins, reset the display,
@@ -42,14 +40,14 @@ typedef enum {
  * @param rotation The rotation of the display.
  * @return XMC_OK if the display was successfully initialized.
  */
-XmcStatus xmc_displayInit(xmc_display_intf_format_t format, int rotation);
+XmcStatus init(InterfaceFormat format, int rotation);
 
 /**
  * Deinitialize the display. This will reset the GPIO pins and put the display
  * into a low-power state.
  * @return XMC_OK if the display was successfully deinitialized.
  */
-XmcStatus xmc_displayDeinit();
+XmcStatus deinit();
 
 /**
  * Clear the display to a specific color.
@@ -57,7 +55,7 @@ XmcStatus xmc_displayDeinit();
  *              display interface.
  * @return XMC_OK if the display was successfully cleared.
  */
-XmcStatus xmc_displayClear(uint32_t color);
+XmcStatus clear(uint32_t color);
 
 /**
  * Fill a rectangle on the display with a specific color.
@@ -69,8 +67,7 @@ XmcStatus xmc_displayClear(uint32_t color);
  *              display interface.
  * @return XMC_OK if the rectangle was successfully filled.
  */
-XmcStatus xmc_displayFillRect(int x, int y, int width, int height,
-                                uint32_t color);
+XmcStatus fillRect(int x, int y, int width, int height, uint32_t color);
 
 /**
  * Set the active window on the display for subsequent pixel writes. The window
@@ -81,7 +78,7 @@ XmcStatus xmc_displayFillRect(int x, int y, int width, int height,
  * @param height The height of the window.
  * @return XMC_OK if the window was successfully set.
  */
-XmcStatus xmc_displaySetWindow(int x, int y, int width, int height);
+XmcStatus setWindow(int x, int y, int width, int height);
 
 /**
  * Start writing pixel data to the display. This should be called after setting
@@ -95,16 +92,15 @@ XmcStatus xmc_displaySetWindow(int x, int y, int width, int height);
  * bytes have been written.
  * @return XMC_OK if the pixel data was successfully written to the display.
  */
-XmcStatus xmc_displayWritePixelsStart(const void *data, uint32_t num_bytes,
-                                        bool repeated);
+XmcStatus writePixelsStart(const void *data, uint32_t num_bytes, bool repeated);
 
 /**
- * Complete a pixel write operation started by xmc_displayWritePixelsStart.
+ * Complete a pixel write operation started by writePixelsStart.
  * This should be called after starting a pixel write operation to wait for it
  * to finish.
  * @return XMC_OK if the pixel write operation was successfully completed.
  */
-XmcStatus xmc_displayWritePixelsComplete();
+XmcStatus writePixelsComplete();
 
 /**
  * Write a command to the display. This is a low-level function that sends a
@@ -116,66 +112,61 @@ XmcStatus xmc_displayWritePixelsComplete();
  * @param num_params The number of parameter bytes to send.
  * @return XMC_OK if the command was successfully written to the display.
  */
-XmcStatus xmc_displayWriteCommand(const uint8_t cmd, const uint8_t *params,
-                                    uint32_t num_params);
+XmcStatus writeCommand(const uint8_t cmd, const uint8_t *params,
+                       uint32_t num_params);
 
 /**
  * Convenience functions for writing commands with a specific number of
- * parameters. These functions call xmc_displayWriteCommand with the
+ * parameters. These functions call writeCommand with the
  * appropriate parameters.
  */
-static inline XmcStatus xmc_displayWriteCommandNoParam(uint8_t cmd) {
-  return xmc_displayWriteCommand(cmd, NULL, 0);
+static inline XmcStatus writeCommandNoParam(uint8_t cmd) {
+  return writeCommand(cmd, NULL, 0);
 }
 
 /**
  * Convenience functions for writing commands with a specific number of
- * parameters. These functions call xmc_displayWriteCommand with the
+ * parameters. These functions call writeCommand with the
  * appropriate parameters.
  */
-static inline XmcStatus xmc_displayWriteCommand1Param(uint8_t cmd,
-                                                        uint8_t data0) {
-  return xmc_displayWriteCommand(cmd, &data0, 1);
+static inline XmcStatus writeCommand1Param(uint8_t cmd, uint8_t data0) {
+  return writeCommand(cmd, &data0, 1);
 }
 
 /**
  * Convenience functions for writing commands with a specific number of
- * parameters. These functions call xmc_displayWriteCommand with the
+ * parameters. These functions call writeCommand with the
  * appropriate parameters.
  */
-static inline XmcStatus xmc_displayWriteCommand2Params(uint8_t cmd,
-                                                         uint8_t data0,
-                                                         uint8_t data1) {
+static inline XmcStatus writeCommand2Params(uint8_t cmd, uint8_t data0,
+                                            uint8_t data1) {
   uint8_t params[2] = {data0, data1};
-  return xmc_displayWriteCommand(cmd, params, 2);
+  return writeCommand(cmd, params, 2);
 }
 
 /**
  * Convenience functions for writing commands with a specific number of
- * parameters. These functions call xmc_displayWriteCommand with the
+ * parameters. These functions call writeCommand with the
  * appropriate parameters.
  */
-static inline XmcStatus xmc_displayWriteCommand3Params(uint8_t cmd,
-                                                         uint8_t data0,
-                                                         uint8_t data1,
-                                                         uint8_t data2) {
+static inline XmcStatus writeCommand3Params(uint8_t cmd, uint8_t data0,
+                                            uint8_t data1, uint8_t data2) {
   uint8_t params[3] = {data0, data1, data2};
-  return xmc_displayWriteCommand(cmd, params, 3);
+  return writeCommand(cmd, params, 3);
 }
 
 /**
  * Convenience functions for writing commands with a specific number of
- * parameters. These functions call xmc_displayWriteCommand with the
+ * parameters. These functions call writeCommand with the
  * appropriate parameters.
  */
-static inline XmcStatus xmc_displayWriteCommand4Params(
-    uint8_t cmd, uint8_t data0, uint8_t data1, uint8_t data2, uint8_t data3) {
+static inline XmcStatus writeCommand4Params(uint8_t cmd, uint8_t data0,
+                                            uint8_t data1, uint8_t data2,
+                                            uint8_t data3) {
   uint8_t params[4] = {data0, data1, data2, data3};
-  return xmc_displayWriteCommand(cmd, params, 4);
+  return writeCommand(cmd, params, 4);
 }
 
-#if defined(__cplusplus)
-}
-#endif
+}  // namespace xmc::display
 
 #endif

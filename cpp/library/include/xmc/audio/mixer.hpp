@@ -6,14 +6,14 @@
 #ifndef XMC_AUDIO_MIXER_HPP
 #define XMC_AUDIO_MIXER_HPP
 
-#include "xmc/audio_common.h"
+#include "xmc/audio_common.hpp"
 
-namespace xmc {
+namespace xmc::audio {
 class Mixer {
  private:
   const int numSources;
-  xmc_audio_source_port_t **sources;
-  xmc_audio_source_port_t output;
+  SourcePort **sources;
+  SourcePort output;
 
  public:
   /**
@@ -30,7 +30,7 @@ class Mixer {
    * specified in the constructor. The source must remain valid as long as it is
    * set on the mixer.
    */
-  inline void setSource(int index, xmc_audio_source_port_t *source) {
+  inline void setSource(int index, SourcePort *source) {
     sources[index] = source;
   }
 
@@ -48,7 +48,7 @@ class Mixer {
    * Returns the output audio source port of the mixer. The mixer will call the
    * requestData callback of the output port when it needs more audio data.
    */
-  inline xmc_audio_source_port_t *getOutputPort() { return &output; }
+  inline SourcePort *getOutputPort() { return &output; }
 };
 
 }  // namespace xmc

@@ -6,24 +6,12 @@
 #ifndef XMC_HW_I2C_H
 #define XMC_HW_I2C_H
 
-#include "xmc/hw/hw_common.h"
+#include "xmc/hw/hw_common.hpp"
 
 #include <stdbool.h>
 #include <stdint.h>
 
-/**
- * I2C device identifiers for getting preferred baud rates.
- */
-typedef enum {
-  /** IO Expander */
-  XMC_I2C_DEV_IOEX = (1 << 1),
-  /** Battery Monitor */
-  XMC_I2C_DEV_BAT_MON = (1 << 2),
-} xmc_i2c_device_t;
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc::i2c {
 
 /**
  * Get the preferred I2C frequency for a given device. This can be used to set
@@ -31,18 +19,18 @@ extern "C" {
  * @param device The I2C device identifier.
  * @return The preferred I2C frequency in Hz.
  */
-uint32_t xmc_i2cGetPreferredFrequency(xmc_i2c_device_t device);
+uint32_t getPreferredFrequency(Chipset device);
 
 /**
  * Initialize the I2C peripheral and configure the GPIO pins for I2C
  * functionality. This must be called before any other I2C functions except
- * xmc_i2cGetPreferredFrequency.
+ * getPreferredFrequency.
  * @return XMC_OK if the I2C peripheral was successfully initialized.
  */
-XmcStatus xmc_i2cInit();
+XmcStatus init();
 
 /** Deinitialize the I2C peripheral and release any resources. */
-void xmc_i2cDeinit();
+void deinit();
 
 /**
  * Try to start an I2C transaction without blocking. This can be used in
@@ -53,20 +41,20 @@ void xmc_i2cDeinit();
  * operations.
  * @return true if the transaction was successfully started, false otherwise.
  */
-bool xmc_i2cTryLock();
+bool tryLock();
 
 /**
  * Start an I2C transaction.
  *
  * This function must be called before accessing I2C devices or changing I2C
  * peripheral settings. I2C transactions from other tasks will be blocked until
- * xmc_i2cUnlock is called.
+ * unlock is called.
  *
  * @return XMC_OK if the transaction was successfully started.
  */
-static inline XmcStatus xmc_i2c_lock() {
-  while (!xmc_i2cTryLock()) {
-    xmc_tightLoopContents();
+static inline XmcStatus lock() {
+  while (!tryLock()) {
+    tightLoopContents();
   }
   return XMC_OK;
 }
@@ -76,17 +64,15 @@ static inline XmcStatus xmc_i2c_lock() {
  *
  * This function must be called after accessing I2C devices or changing I2C
  * peripheral settings.
- *
- * @return XMC_OK if the transaction was successfully ended.
  */
-XmcStatus xmc_i2cUnlock();
+XmcStatus unlock();
 
 /**
  * Set the I2C baud rate.
  * @param baudrate The desired I2C baud rate in Hz. The actual baud rate may be
  * adjusted to the nearest supported value.
  */
-XmcStatus xmc_i2cSetBaudrate(uint32_t baudrate);
+XmcStatus setBaudrate(uint32_t baudrate);
 
 /**
  * Write data to an I2C device in a blocking manner.
@@ -95,8 +81,8 @@ XmcStatus xmc_i2cSetBaudrate(uint32_t baudrate);
  * @param size The number of bytes to write from the data buffer.
  * @param nostop If true, do not send a STOP condition after the write.
  */
-XmcStatus xmc_i2cWriteBlocking(uint8_t dev_addr, const uint8_t *data,
-                                    uint32_t size, bool nostop);
+XmcStatus writeBlocking(uint8_t dev_addr, const uint8_t *data, uint32_t size,
+                        bool nostop);
 
 /**
  * Read data from an I2C device in a blocking manner.
@@ -105,11 +91,9 @@ XmcStatus xmc_i2cWriteBlocking(uint8_t dev_addr, const uint8_t *data,
  * @param size The number of bytes to read into the data buffer.
  * @param nostop If true, do not send a STOP condition after the read.
  */
-XmcStatus xmc_i2cReadBlocking(uint8_t dev_addr, uint8_t *data,
-                                   uint32_t size, bool nostop);
+XmcStatus readBlocking(uint8_t dev_addr, uint8_t *data, uint32_t size,
+                       bool nostop);
 
-#if defined(__cplusplus)
-}
-#endif
+}  // namespace xmc::i2c
 
 #endif

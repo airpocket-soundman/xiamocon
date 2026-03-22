@@ -1,9 +1,9 @@
-#include "xmc/random.h"
+#include "xmc/random.hpp"
 
 #include <stdlib.h>
 
-uint32_t xmc_randomNextU32() {
-  return (uint32_t)rand();
-}
+namespace xmc {
 
+uint32_t randomU32() { return (uint32_t)rand(); }
 
+}  // namespace xmc

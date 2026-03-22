@@ -1,6 +1,10 @@
-#ifndef XMC_APP_ENTRY_H
-#define XMC_APP_ENTRY_H
+#ifndef XMC_APP_ENTRY_HPP
+#define XMC_APP_ENTRY_HPP
 
-void xmc_appMain();
+namespace xmc {
+
+void appMain();
+
+}
 
 #endif

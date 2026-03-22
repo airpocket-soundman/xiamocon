@@ -1,5 +1,5 @@
 #include "xmc/gfx/sprite4444.hpp"
-#include "xmc/display.h"
+#include "xmc/display.hpp"
 
 #include <string.h>
 
@@ -16,7 +16,7 @@ uint16_t Sprite4444Class::onGetPixel(int x, int y) const {
 }
 
 void Sprite4444Class::onFillRect(int x, int y, int width, int height,
-                              uint16_t color) {
+                                 uint16_t color) {
   if (width <= 0 || height <= 0) return;
   for (int j = 0; j < height; j++) {
     uint16_t *line = (uint16_t *)linePtr(y + j);
@@ -27,7 +27,7 @@ void Sprite4444Class::onFillRect(int x, int y, int width, int height,
 }
 
 void Sprite4444Class::onDrawImage(const Sprite &image, int dx, int dy, int w,
-                                   int h, int sx, int sy) {
+                                  int h, int sx, int sy) {
   switch (image->format) {
     default:
       // todo: implement
@@ -35,8 +35,8 @@ void Sprite4444Class::onDrawImage(const Sprite &image, int dx, int dy, int w,
   }
 }
 
-XmcStatus Sprite4444Class::on_start_transfer_to_display(int dx, int dy, int sy,
-                                                      int h) {
+XmcStatus Sprite4444Class::onStartTransferToDisplay(int dx, int dy, int sy,
+                                                        int h) {
   return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
 }
 

@@ -1,9 +1,11 @@
-#include "xmc/display.h"
-#include "xmc/hw/gpio.h"
-#include "xmc/hw/pins.h"
-#include "xmc/hw/spi.h"
-#include "xmc/hw/timer.h"
-#include "xmc/ioex.h"
+#include "xmc/display.hpp"
+#include "xmc/hw/gpio.hpp"
+#include "xmc/hw/pins.hpp"
+#include "xmc/hw/spi.hpp"
+#include "xmc/hw/timer.hpp"
+#include "xmc/ioex.hpp"
+
+namespace xmc::display {
 
 typedef enum {
   XMC_ST7789_NOP = 0x00,
@@ -102,44 +104,44 @@ typedef enum {
   XMC_ST7789_ADJUST_CONTROL_7 = 0xFF,
 } xmc_st7789_command_t;
 
-static xmc_display_intf_format_t current_format = XMC_DISP_INTF_FORMAT_RGB444;
-static bool in_transaction = false;
+static InterfaceFormat currentFormat = InterfaceFormat::RGB444;
+static bool inTransaction = false;
 
 // max 3 bytes per pixel for RGB666
-static uint8_t line_buffer[XMC_DISPLAY_WIDTH * 3];
+static uint8_t lineBuffer[WIDTH * 3];
 
 static XmcStatus begin_command(uint8_t cmd);
 static void end_command();
 static XmcStatus write_data(const uint8_t *data, uint32_t size);
 
-XmcStatus xmc_displayInit(xmc_display_intf_format_t format, int rotation) {
-  current_format = format;
+XmcStatus init(InterfaceFormat format, int rotation) {
+  currentFormat = format;
 
-  xmc_gpioSetDir(XMC_PIN_DISPLAY_CS, true);
-  xmc_gpioSetDir(XMC_PIN_DISPLAY_DC, true);
-  xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 1);
-  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
+  gpio::setDir(XMC_PIN_DISPLAY_CS, true);
+  gpio::setDir(XMC_PIN_DISPLAY_DC, true);
+  gpio::write(XMC_PIN_DISPLAY_CS, 1);
+  gpio::write(XMC_PIN_DISPLAY_DC, 1);
 
-  XMC_ERR_RET(xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, true));
-  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 0));
-  xmc_sleepMs(100);
-  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 1));
-  xmc_sleepMs(100);
+  XMC_ERR_RET(ioex::setDir(ioex::Pin::DISPLAY_RESET, true));
+  XMC_ERR_RET(ioex::write(ioex::Pin::DISPLAY_RESET, 0));
+  sleepMs(100);
+  XMC_ERR_RET(ioex::write(ioex::Pin::DISPLAY_RESET, 1));
+  sleepMs(100);
 
-  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_SOFTWARE_RESET));
-  xmc_sleepMs(200);
+  XMC_ERR_RET(writeCommandNoParam(XMC_ST7789_SOFTWARE_RESET));
+  sleepMs(200);
 
-  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_SLEEP_OUT));
-  xmc_sleepMs(200);
+  XMC_ERR_RET(writeCommandNoParam(XMC_ST7789_SLEEP_OUT));
+  sleepMs(200);
 
   uint8_t intf_format;
-  switch (current_format) {
-    case XMC_DISP_INTF_FORMAT_RGB444: intf_format = 0x53; break;
-    case XMC_DISP_INTF_FORMAT_RGB565: intf_format = 0x55; break;
+  switch (currentFormat) {
+    case InterfaceFormat::RGB444: intf_format = 0x53; break;
+    case InterfaceFormat::RGB565: intf_format = 0x55; break;
     default: return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
   }
-  XMC_ERR_RET(xmc_displayWriteCommand1Param(XMC_ST7789_INTERFACE_PIXEL_FORMAT,
-                                           intf_format));
+  XMC_ERR_RET(
+      writeCommand1Param(XMC_ST7789_INTERFACE_PIXEL_FORMAT, intf_format));
 
   // todo: support rotation
   // #if 0
@@ -158,8 +160,8 @@ XmcStatus xmc_displayInit(xmc_display_intf_format_t format, int rotation) {
     for (int i = 0; i < 14; i++) {
       params[i] = (params0[i] + params1[i]) / 2;
     }
-    XMC_ERR_RET(xmc_displayWriteCommand(XMC_ST7789_POSITIVE_GAMMA_CORRECTION,
-                                          params, sizeof(params)));
+    XMC_ERR_RET(writeCommand(XMC_ST7789_POSITIVE_GAMMA_CORRECTION, params,
+                             sizeof(params)));
   }
 
   if (1) {
@@ -171,44 +173,41 @@ XmcStatus xmc_displayInit(xmc_display_intf_format_t format, int rotation) {
     for (int i = 0; i < 14; i++) {
       params[i] = (params0[i] + params1[i]) / 2;
     }
-    XMC_ERR_RET(xmc_displayWriteCommand(XMC_ST7789_NEGATIVE_GAMMA_CORRECTION,
-                                          params, sizeof(params)));
+    XMC_ERR_RET(writeCommand(XMC_ST7789_NEGATIVE_GAMMA_CORRECTION, params,
+                             sizeof(params)));
   }
 
-  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_DISP_INVERSION_ON));
+  XMC_ERR_RET(writeCommandNoParam(XMC_ST7789_DISP_INVERSION_ON));
 
-  XMC_ERR_RET(xmc_displayFillRect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
-                                    0x0000));
+  XMC_ERR_RET(fillRect(0, 0, WIDTH, HEIGHT, 0x0000));
 
-  XMC_ERR_RET(xmc_displayWriteCommandNoParam(XMC_ST7789_DISPLAY_ON));
-  xmc_sleepMs(25);
+  XMC_ERR_RET(writeCommandNoParam(XMC_ST7789_DISPLAY_ON));
+  sleepMs(25);
   return XMC_OK;
 }
 
-XmcStatus xmc_displayDeinit() {
-  xmc_gpioSetPullup(XMC_PIN_DISPLAY_CS, true);
-  xmc_gpioSetPullup(XMC_PIN_DISPLAY_DC, true);
-  xmc_gpioSetDir(XMC_PIN_DISPLAY_CS, false);
-  xmc_gpioSetDir(XMC_PIN_DISPLAY_DC, false);
-  XMC_ERR_RET(xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, 0));
+XmcStatus deinit() {
+  gpio::setPullup(XMC_PIN_DISPLAY_CS, true);
+  gpio::setPullup(XMC_PIN_DISPLAY_DC, true);
+  gpio::setDir(XMC_PIN_DISPLAY_CS, false);
+  gpio::setDir(XMC_PIN_DISPLAY_DC, false);
+  XMC_ERR_RET(ioex::write(ioex::Pin::DISPLAY_RESET, 0));
   return XMC_OK;
 }
 
-XmcStatus xmc_displayClear(uint32_t color) {
-  XMC_ERR_RET(xmc_displayFillRect(0, 0, XMC_DISPLAY_WIDTH, XMC_DISPLAY_HEIGHT,
-                                    color));
+XmcStatus clear(uint32_t color) {
+  XMC_ERR_RET(fillRect(0, 0, WIDTH, HEIGHT, color));
   return XMC_OK;
 }
 
-XmcStatus xmc_displayFillRect(int x, int y, int width, int height,
-                                   uint32_t color) {
+XmcStatus fillRect(int x, int y, int width, int height, uint32_t color) {
   if (x < 0) {
     width += x;
     x = 0;
     if (width <= 0) return XMC_OK;
   }
-  if (x + width > XMC_DISPLAY_WIDTH) {
-    width = XMC_DISPLAY_WIDTH - x;
+  if (x + width > WIDTH) {
+    width = WIDTH - x;
     if (width <= 0) return XMC_OK;
   }
   if (y < 0) {
@@ -216,92 +215,91 @@ XmcStatus xmc_displayFillRect(int x, int y, int width, int height,
     y = 0;
     if (height <= 0) return XMC_OK;
   }
-  if (y + height > XMC_DISPLAY_HEIGHT) {
-    height = XMC_DISPLAY_HEIGHT - y;
+  if (y + height > HEIGHT) {
+    height = HEIGHT - y;
     if (height <= 0) return XMC_OK;
   }
 
-  int line_bytes;
-  switch (current_format) {
-    case XMC_DISP_INTF_FORMAT_RGB444: {
-      line_bytes = width * 3 / 2;
-      for (int i = 0; i < line_bytes; i += 3) {
-        line_buffer[i + 0] = (color >> 4) & 0xFF;
-        line_buffer[i + 1] = ((color & 0x0F) << 4) | ((color >> 8) & 0x0F);
-        line_buffer[i + 2] = color & 0xFF;
+  int lineBytes;
+  switch (currentFormat) {
+    case InterfaceFormat::RGB444: {
+      lineBytes = width * 3 / 2;
+      for (int i = 0; i < lineBytes; i += 3) {
+        lineBuffer[i + 0] = (color >> 4) & 0xFF;
+        lineBuffer[i + 1] = ((color & 0x0F) << 4) | ((color >> 8) & 0x0F);
+        lineBuffer[i + 2] = color & 0xFF;
       }
     } break;
-    case XMC_DISP_INTF_FORMAT_RGB565: {
-      line_bytes = width * 2;
-      uint16_t *line_buffer_565 = (uint16_t *)line_buffer;
+    case InterfaceFormat::RGB565: {
+      lineBytes = width * 2;
+      uint16_t *lineBuffer565 = (uint16_t *)lineBuffer;
       for (int i = 0; i < width; i++) {
-        line_buffer_565[i] = color;
+        lineBuffer565[i] = color;
       }
     } break;
     default: return XMC_ERR_DISPLAY_UNSUPPORTED_FORMAT;
   }
 
   for (int i = 0; i < height; i++) {
-    XMC_ERR_RET(xmc_displaySetWindow(x, y + i, width, 1));
-    XMC_ERR_RET(xmc_displayWritePixelsStart(line_buffer, line_bytes, false));
-    XMC_ERR_RET(xmc_displayWritePixelsComplete());
+    XMC_ERR_RET(setWindow(x, y + i, width, 1));
+    XMC_ERR_RET(writePixelsStart(lineBuffer, lineBytes, false));
+    XMC_ERR_RET(writePixelsComplete());
   }
   return XMC_OK;
 }
 
-XmcStatus xmc_displaySetWindow(int x, int y, int width, int height) {
+XmcStatus setWindow(int x, int y, int width, int height) {
   int x_end = x + width - 1;
   int y_end = y + height - 1;
-  XMC_ERR_RET(xmc_displayWriteCommand4Params(XMC_ST7789_COLUMN_ADDRESS_SET,
-                                           x >> 8, x & 0xFF, x_end >> 8,
-                                           x_end & 0xFF));
-  XMC_ERR_RET(xmc_displayWriteCommand4Params(XMC_ST7789_PAGE_ADDRESS_SET, y >> 8,
-                                           y & 0xFF, y_end >> 8, y_end & 0xFF));
+  XMC_ERR_RET(writeCommand4Params(XMC_ST7789_COLUMN_ADDRESS_SET, x >> 8,
+                                  x & 0xFF, x_end >> 8, x_end & 0xFF));
+  XMC_ERR_RET(writeCommand4Params(XMC_ST7789_PAGE_ADDRESS_SET, y >> 8, y & 0xFF,
+                                  y_end >> 8, y_end & 0xFF));
   return XMC_OK;
 }
 
-XmcStatus xmc_displayWritePixelsStart(const void *data,
-                                            uint32_t num_bytes, bool repeated) {
+XmcStatus writePixelsStart(const void *data, uint32_t num_bytes,
+                           bool repeated) {
   XMC_ERR_RET(begin_command(XMC_ST7789_MEMORY_WRITE));
-  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
-  xmc_dma_config_t cfg = {
+  gpio::write(XMC_PIN_DISPLAY_DC, 1);
+  dma::Config cfg = {
       .ptr = (void *)data,
       .element_size = 1,
       .length = num_bytes,
   };
-  XmcStatus sts = xmc_spiDmaWriteStart(&cfg, XMC_PIN_DISPLAY_CS);
+  XmcStatus sts = spi::dmaWriteStart(&cfg, XMC_PIN_DISPLAY_CS);
   if (sts != XMC_OK) {
     end_command();
   }
   return sts;
 }
 
-XmcStatus xmc_displayWritePixelsComplete() {
-  XmcStatus sts = xmc_spiDmaComplete();
+XmcStatus writePixelsComplete() {
+  XmcStatus sts = spi::dmaComplete();
   end_command();
   return sts;
 }
 
-XmcStatus xmc_displayWriteCommand(const uint8_t cmd, const uint8_t *params,
-                                       uint32_t num_params) {
+XmcStatus writeCommand(const uint8_t cmd, const uint8_t *params,
+                       uint32_t numParams) {
   XMC_ERR_RET(begin_command(cmd));
   XmcStatus sts = XMC_OK;
-  if (num_params > 0) {
-    sts = write_data(params, num_params);
+  if (numParams > 0) {
+    sts = write_data(params, numParams);
   }
   end_command();
   return sts;
 }
 
 static XmcStatus begin_command(uint8_t cmd) {
-  XMC_ERR_RET(xmc_spi_lock());
-  in_transaction = true;
-  xmc_spiSetBaudrate(xmc_spiGetPreferredFrequency(XMC_SPI_DEV_DISPLAY));
+  XMC_ERR_RET(spi::lock());
+  inTransaction = true;
+  spi::setBaudrate(spi::getPreferredFrequency(Chipset::DISPLAY));
   XmcStatus sts = XMC_OK;
   do {
-    xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 0);
-    xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 0);
-    XMC_ERR_BRK(sts, xmc_spiWriteBlocking(&cmd, 1));
+    gpio::write(XMC_PIN_DISPLAY_DC, 0);
+    gpio::write(XMC_PIN_DISPLAY_CS, 0);
+    XMC_ERR_BRK(sts, spi::writeBlocking(&cmd, 1));
   } while (0);
   if (sts != XMC_OK) {
     end_command();
@@ -310,14 +308,16 @@ static XmcStatus begin_command(uint8_t cmd) {
 }
 
 static void end_command() {
-  if (!in_transaction) return;
-  in_transaction = false;
-  xmc_gpioWrite(XMC_PIN_DISPLAY_CS, 1);
-  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
-  xmc_spiUnlock();
+  if (!inTransaction) return;
+  inTransaction = false;
+  gpio::write(XMC_PIN_DISPLAY_CS, 1);
+  gpio::write(XMC_PIN_DISPLAY_DC, 1);
+  spi::unlock();
 }
 
 static XmcStatus write_data(const uint8_t *data, uint32_t size) {
-  xmc_gpioWrite(XMC_PIN_DISPLAY_DC, 1);
-  return xmc_spiWriteBlocking(data, size);
+  gpio::write(XMC_PIN_DISPLAY_DC, 1);
+  return spi::writeBlocking(data, size);
 }
+
+}  // namespace xmc::display

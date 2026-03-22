@@ -1,32 +1,36 @@
-#include "xmc/app.h"
-#include "xmc/app_entry.h"
-#include "xmc/hw/timer.h"
-#include "xmc/input.h"
-#include "xmc/speaker.h"
-#include "xmc/system.h"
+#include "xmc/app.hpp"
+#include "xmc/app_entry.hpp"
+#include "xmc/hw/timer.hpp"
+#include "xmc/input.hpp"
+#include "xmc/speaker.hpp"
+#include "xmc/system.hpp"
 
 #include <stddef.h>
 
-AppConfig xmcGetDefaultAppConfig() {
+namespace xmc {
+
+AppConfig getDefaultAppConfig() {
   AppConfig config = {
-      .displayPixelFormat = XMC_DISP_INTF_FORMAT_RGB565,
-      .speakerSampleFormat = XMC_SAMPLE_LINEAR_PCM_S16_MONO,
+      .displayPixelFormat = display::InterfaceFormat::RGB565,
+      .speakerSampleFormat = audio::SampleFormat::LINEAR_PCM_S16_MONO,
       .speakerSampleRateHz = 22050,
       .speakerLatencySamples = 1024,
   };
   return config;
 }
 
-void xmc_appMain() {
-  AppConfig cfg = xmc_appGetConfig();
-  xmc_sysInit();
-  xmc_displayInit(cfg.displayPixelFormat, 0);
-  xmc_inputInit();
-  xmc_speakerInit(cfg.speakerSampleFormat, cfg.speakerSampleRateHz,
-                  cfg.speakerLatencySamples, NULL);
-  xmc_appSetup();
+void appMain() {
+  AppConfig cfg = appGetConfig();
+  system::init();
+  display::init(cfg.displayPixelFormat, 0);
+  input::init();
+  speaker::init(cfg.speakerSampleFormat, cfg.speakerSampleRateHz,
+                cfg.speakerLatencySamples, NULL);
+  appSetup();
   while (1) {
-    xmc_sysService();
-    xmc_appLoop();
+    system::Service();
+    appLoop();
   }
 }
+
+}  // namespace xmc

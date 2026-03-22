@@ -1,4 +1,4 @@
-#include "xmc/app_entry.h"
+#include "xmc/app_entry.hpp"
 
 #include <hardware/clocks.h>
 #include <hardware/vreg.h>
@@ -14,6 +14,6 @@ int main() {
   clock_configure(clk_peri, 0, CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLKSRC_PLL_SYS,
                   SYS_CLK_FREQ, SYS_CLK_FREQ);
 #endif
-  xmc_appMain();
+  xmc::appMain();
   return 0;
 }

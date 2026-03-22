@@ -30,7 +30,7 @@ class Sprite4444Class : public SpriteClass {
   void onFillRect(int x, int y, int w, int h, uint16_t color) override;
   void onDrawImage(const Sprite &image, int dx, int dy, int w, int h,
                      int sx, int sy) override;
-  XmcStatus on_start_transfer_to_display(int dx, int dy, int sy,
+  XmcStatus onStartTransferToDisplay(int dx, int dy, int sy,
                                             int h) override;
 };
 

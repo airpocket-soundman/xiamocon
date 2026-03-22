@@ -1,30 +1,34 @@
-#include "xmc/hw/dma_irq.h"
+#include "xmc/hw/dma_irq.hpp"
 
 #include <hardware/dma.h>
 #include <stddef.h>
 
-typedef struct {
-  DmaIrqHandlerCb handlerFast;
-  DmaIrqHandlerCb handlerSlow;
+namespace xmc::dma {
+
+struct HandlerEntry {
+  IrqHandlerCb handlerFast;
+  IrqHandlerCb handlerSlow;
   void *context;
-} DmaHandlerEntry;
+};
 
-DmaHandlerEntry contexts[16] = {0};
+HandlerEntry contexts[16] = {0};
 
-void xmc_dmaRegisterIrqHandler(int dmaCh,
-                                  DmaIrqHandlerCb handlerFast,
-                                  DmaIrqHandlerCb handlerSlow,
-                                  void *context) {
+void registerIrqHandler(int dmaCh, IrqHandlerCb handlerFast,
+                        IrqHandlerCb handlerSlow, void *context) {
   contexts[dmaCh].handlerFast = handlerFast;
   contexts[dmaCh].handlerSlow = handlerSlow;
   contexts[dmaCh].context = context;
 }
 
-void xmc_dmaUnregisterIrqHandler(int dmaCh) {
-  contexts[dmaCh] = (DmaHandlerEntry){0};
-}
+void unregisterIrqHandler(int dmaCh) { contexts[dmaCh] = (HandlerEntry){0}; }
 
-void xmc_dmaIrqHandler(void) {
+}  // namespace xmc::dma
+
+extern "C" {
+
+using namespace xmc::dma;
+
+void xmcDmaIrqHandler(void) {
   uint32_t ints0 = dma_hw->ints0;
   uint32_t tmp = ints0;
 
@@ -36,7 +40,7 @@ void xmc_dmaIrqHandler(void) {
     }
     tmp &= ~(1u << dmaCh);
 
-    DmaHandlerEntry *entry = &contexts[dmaCh];
+    HandlerEntry *entry = &contexts[dmaCh];
     if (entry->handlerFast) {
       entry->handlerFast(entry->context);
     }
@@ -50,11 +54,12 @@ void xmc_dmaIrqHandler(void) {
     }
     tmp &= ~(1u << dmaCh);
 
-    DmaHandlerEntry *entry = &contexts[dmaCh];
+    HandlerEntry *entry = &contexts[dmaCh];
     if (entry->handlerSlow) {
       entry->handlerSlow(entry->context);
     }
   } while (tmp);
 
   dma_hw->ints0 = ints0;
+}
 }

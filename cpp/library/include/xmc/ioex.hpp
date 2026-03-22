@@ -1,128 +1,125 @@
 /**
- * @file ioex.h
+ * @file ioex.hpp
  * @brief IO Expander interface for XMC library
  */
 
 #ifndef XMC_IOEX_H
 #define XMC_IOEX_H
 
-#include "xmc/xmc_common.h"
+#include "xmc/xmc_common.hpp"
 
 #include <stdint.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc::ioex {
 
 /**
  * IO Expander pin definitions. These correspond to the pins on the IO expander
  * chip.
  */
-typedef enum {
+enum class Pin {
   /**
    * User-defined pin 0
    * @details This pin is connected to the expansion board. It is not used in
    * the Xiamocon main board.
    */
-  XMC_IOEX_PIN_USER_0 = 0,
+  USER_0 = 0,
   /**
    * User-defined pin 1
    * @details This pin is connected to the expansion board. It is not used in
    * the Xiamocon main board.
    */
-  XMC_IOEX_PIN_USER_1 = 1,
+  USER_1 = 1,
 
   /**
    * User-defined pin 2
    * @details This pin is connected to the expansion board. It is not used in
    * the Xiamocon main board.
    */
-  XMC_IOEX_PIN_USER_2 = 2,
+  USER_2 = 2,
 
   /**
    * User-defined pin 3
    * @details This pin is connected to the expansion board. It is not used in
    * the Xiamocon main board.
    */
-  XMC_IOEX_PIN_USER_3 = 3,
+  USER_3 = 3,
 
   /**
    * Low-active signal that controls power to various devices on the Xiamocon
    * board. Normally controlled by the system API.
    */
-  XMC_IOEX_PIN_PERI_EN = 4,
+  PERI_EN = 4,
 
   /**
    * Low-active signal that controls hardware reset of the display.
    * Normally controlled by the display API.
    */
-  XMC_IOEX_PIN_DISPLAY_RESET = 5,
+  DISPLAY_RESET = 5,
 
   /**
    * High-active signal that controls speaker mute. Normally controlled by the
    * audio API.
    */
-  XMC_IOEX_PIN_SPEAKER_MUTE = 6,
+  SPEAKER_MUTE = 6,
 
   /**
    * Low-active signal that receives the pressed state of the function button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_FUNC = 7,
+  BTN_FUNC = 7,
 
   /**
    * Low-active signals that receive the pressed state of the A button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_A = 8,
+  BTN_A = 8,
 
   /**
    * Low-active signals that receive the pressed state of the B button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_B = 9,
+  BTN_B = 9,
 
   /**
    * Low-active signals that receive the pressed state of the X button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_X = 10,
+  BTN_X = 10,
 
   /**
    * Low-active signals that receive the pressed state of the Y button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_Y = 11,
+  BTN_Y = 11,
 
   /**
    * Low-active signals that receive the pressed state of the Up button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_UP = 12,
+  BTN_UP = 12,
 
   /**
    * Low-active signals that receive the pressed state of the Down button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_DOWN = 13,
+  BTN_DOWN = 13,
 
   /**
    * Low-active signals that receive the pressed state of the Left button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_LEFT = 14,
+  BTN_LEFT = 14,
 
   /**
    * Low-active signals that receive the pressed state of the Right button.
    * Normally readed by the input API.
    */
-  XMC_IOEX_PIN_BTN_RIGHT = 15,
-} xmc_ioex_pin_t;
+  BTN_RIGHT = 15,
+};
 
-static const xmc_ioex_pin_t XMC_IOEX_GAME_BUTTON_PINS[] = {
-    XMC_IOEX_PIN_BTN_A,    XMC_IOEX_PIN_BTN_B,     XMC_IOEX_PIN_BTN_X,
-    XMC_IOEX_PIN_BTN_Y,    XMC_IOEX_PIN_BTN_UP,    XMC_IOEX_PIN_BTN_DOWN,
-    XMC_IOEX_PIN_BTN_LEFT, XMC_IOEX_PIN_BTN_RIGHT,
+static const Pin GAME_BUTTON_PINS[] = {
+    Pin::BTN_A,  Pin::BTN_B,    Pin::BTN_X,    Pin::BTN_Y,
+    Pin::BTN_UP, Pin::BTN_DOWN, Pin::BTN_LEFT, Pin::BTN_RIGHT,
 };
 
 /**
@@ -130,14 +127,14 @@ static const xmc_ioex_pin_t XMC_IOEX_GAME_BUTTON_PINS[] = {
  * other IO expander functions.
  * @return XMC_OK if the IO expander was successfully initialized.
  */
-XmcStatus xmc_ioexInit();
+XmcStatus init();
 
 /**
  * Deinitialize the IO expander. This will reset the pin directions and output
  * values to their default states.
  * @return XMC_OK if the IO expander was successfully deinitialized.
  */
-XmcStatus xmc_ioexDeinit();
+XmcStatus deinit();
 
 /**
  * Set the direction of the specified pins on the IO expander. The mask
@@ -150,7 +147,7 @@ XmcStatus xmc_ioexDeinit();
  * output, 0 for input).
  * @return XMC_OK if the pin directions were successfully set.
  */
-XmcStatus xmc_ioexSetDirMasked(int port, uint8_t mask, uint8_t value);
+XmcStatus setDirMasked(int port, uint8_t mask, uint8_t value);
 
 /**
  * Write values to the specified pins on the IO expander. The mask parameter
@@ -163,7 +160,7 @@ XmcStatus xmc_ioexSetDirMasked(int port, uint8_t mask, uint8_t value);
  * for high, 0 for low).
  * @return XMC_OK if the pin values were successfully written.
  */
-XmcStatus xmc_ioexWriteMasked(int port, uint8_t mask, uint8_t value);
+XmcStatus writeMasked(int port, uint8_t mask, uint8_t value);
 
 /**
  * Read values from the specified pins on the IO expander. The mask parameter
@@ -175,11 +172,11 @@ XmcStatus xmc_ioexWriteMasked(int port, uint8_t mask, uint8_t value);
  * specified pins (1 for high, 0 for low).
  * @return XMC_OK if the pin values were successfully read.
  */
-XmcStatus xmc_ioexReadMasked(int port, uint8_t mask, uint8_t *value);
+XmcStatus readMasked(int port, uint8_t mask, uint8_t *value);
 
 /**
  * Convenience functions for setting the direction of a single pin. These
- * functions call xmc_ioexSetDirMasked with the appropriate parameters for
+ * functions call setDirMasked with the appropriate parameters for
  * the specified pin. The pin parameter specifies which pin to modify, and the
  * output parameter specifies the direction for that pin (true for output, false
  * for input).
@@ -188,15 +185,16 @@ XmcStatus xmc_ioexReadMasked(int port, uint8_t mask, uint8_t *value);
  * input).
  * @return XMC_OK if the pin direction was successfully set.
  */
-static inline XmcStatus xmc_ioexSetDir(xmc_ioex_pin_t pin, bool output) {
-  int port = pin / 8;
-  int bit = pin % 8;
-  return xmc_ioexSetDirMasked(port, 1 << bit, output ? (1 << bit) : 0);
+static inline XmcStatus setDir(Pin pin, bool output) {
+  int i = static_cast<int>(pin);
+  int port = i / 8;
+  int bit = i % 8;
+  return setDirMasked(port, 1 << bit, output ? (1 << bit) : 0);
 }
 
 /**
  * Convenience functions for writing a single pin. These functions call
- * xmc_ioexWriteMasked with the appropriate parameters for the specified pin.
+ * writeMasked with the appropriate parameters for the specified pin.
  * The pin parameter specifies which pin to modify, and the value parameter
  * specifies the output value for that pin (true for high, false for low).
  * @param pin The IO expander pin to modify.
@@ -204,15 +202,16 @@ static inline XmcStatus xmc_ioexSetDir(xmc_ioex_pin_t pin, bool output) {
  * low).
  * @return XMC_OK if the pin value was successfully written.
  */
-static inline XmcStatus xmc_ioexWrite(xmc_ioex_pin_t pin, bool value) {
-  int port = pin / 8;
-  int bit = pin % 8;
-  return xmc_ioexWriteMasked(port, 1 << bit, value ? (1 << bit) : 0);
+static inline XmcStatus write(Pin pin, bool value) {
+  int i = static_cast<int>(pin);
+  int port = i / 8;
+  int bit = i % 8;
+  return writeMasked(port, 1 << bit, value ? (1 << bit) : 0);
 }
 
 /**
  * Convenience functions for reading a single pin. These functions call
- * xmc_ioexReadMasked with the appropriate parameters for the specified pin.
+ * readMasked with the appropriate parameters for the specified pin.
  * The pin parameter specifies which pin to read, and the value parameter will
  * be set to the current state of that pin (true for high, false for low).
  * @param pin The IO expander pin to read.
@@ -220,11 +219,12 @@ static inline XmcStatus xmc_ioexWrite(xmc_ioex_pin_t pin, bool value) {
  * specified pin (true for high, false for low).
  * @return XMC_OK if the pin value was successfully read.
  */
-static inline XmcStatus xmc_ioexRead(xmc_ioex_pin_t pin, bool *value) {
-  int port = pin / 8;
-  int bit = pin % 8;
+static inline XmcStatus read(Pin pin, bool *value) {
+  int i = static_cast<int>(pin);
+  int port = i / 8;
+  int bit = i % 8;
   uint8_t temp;
-  XmcStatus status = xmc_ioexReadMasked(port, 1 << bit, &temp);
+  XmcStatus status = readMasked(port, 1 << bit, &temp);
   if (status == XMC_OK) {
     *value = (temp != 0);
   }
@@ -240,7 +240,7 @@ static inline XmcStatus xmc_ioexRead(xmc_ioex_pin_t pin, bool *value) {
  * the IO expander (1 for high, 0 for low).
  * @return XMC_OK if the pin values were successfully read.
  */
-XmcStatus xmc_ioexReadAll(uint16_t *value);
+XmcStatus readAll(uint16_t *value);
 
 /**
  * Try to read the state of all pins on the IO expander without blocking. If the
@@ -255,10 +255,8 @@ XmcStatus xmc_ioexReadAll(uint16_t *value);
  * @return true if the pin values were successfully read, false if the IO
  * expander is currently busy and the read could not be performed.
  */
-bool xmc_ioexTryReadAll(uint16_t *value);
+bool tryReadAll(uint16_t *value);
 
-#if defined(__cplusplus)
-}
-#endif
+}  // namespace xmc::ioex
 
 #endif

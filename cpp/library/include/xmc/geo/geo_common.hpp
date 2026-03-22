@@ -6,7 +6,7 @@
 #ifndef XMC_GEO_GEO_COMMON_HPP
 #define XMC_GEO_GEO_COMMON_HPP
 
-#include "xmc/xmc_common.h"
+#include "xmc/xmc_common.hpp"
 
 namespace xmc {
 

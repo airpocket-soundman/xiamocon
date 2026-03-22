@@ -5,12 +5,12 @@
 #ifndef XMC_AUDIO_TONE_HPP
 #define XMC_AUDIO_TONE_HPP
 
-#include "xmc/audio_common.h"
+#include "xmc/audio_common.hpp"
 
 #include <math.h>
 #include <stdint.h>
 
-namespace xmc {
+namespace xmc::audio {
 
 /**
  * The waveform of the tone. This determines the shape of the sound wave and
@@ -58,7 +58,7 @@ static constexpr uint32_t TONE_LENGTH_INFINITE = 0xFFFFFFFF;
  */
 class Tone {
  private:
-  uint32_t sampleRateHz = 44100;
+  uint32_t rateHz = 44100;
   uint32_t tickPhaseStep = 0;
 
   Waveform waveform = Waveform::SQUARE;
@@ -81,16 +81,16 @@ class Tone {
   uint32_t sweepPeriodMs = 0;
   uint32_t sweepCounter = 0;
 
-  xmc_audio_source_port_t outputPort;
+  SourcePort outputPort;
 
  public:
   Tone();
 
   /**
    * Initializes the tone generator with the given sample rate.
-   * @param sampleRateHz The sample rate in Hz.
+   * @param rateHz The sample rate in Hz.
    */
-  void init(uint32_t sampleRateHz);
+  void init(uint32_t rateHz);
 
   /**
    * Sets the waveform of the tone.
@@ -209,7 +209,7 @@ class Tone {
    * connected to the speaker or to a mixer for further processing.
    * @return A pointer to the output port of the tone.
    */
-  xmc_audio_source_port_t *getOutputPort() { return &outputPort; }
+  SourcePort *getOutputPort() { return &outputPort; }
 
  private:
   void tick();

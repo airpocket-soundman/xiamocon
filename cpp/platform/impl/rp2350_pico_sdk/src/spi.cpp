@@ -1,32 +1,34 @@
-#include "xmc/hw/spi.h"
-#include "xmc/hw/gpio.h"
-#include "xmc/hw/lock.h"
-#include "xmc/hw/pins.h"
+#include "xmc/hw/spi.hpp"
+#include "xmc/hw/gpio.hpp"
+#include "xmc/hw/pins.hpp"
+#include "xmc/hw/semaphore.hpp"
 
 #include <hardware/dma.h>
 #include <hardware/spi.h>
 #include <pico/stdlib.h>
 
+namespace xmc::spi {
+
 static uint dma_tx;
 static dma_channel_config dma_cfg;
 
 static spi_inst_t *const spiBusInst = spi0;
-static Semaphore semaphore;
+static Semaphore *semaphore = nullptr;
 
 static int csPin = -1;
 static uint32_t baudrate = 10000000;
 
 static bool isSpiShiftBusy();
 
-uint32_t xmc_spiGetPreferredFrequency(xmc_spi_device_t device) {
+uint32_t getPreferredFrequency(Chipset device) {
   switch (device) {
-    case XMC_SPI_DEV_DISPLAY: return 62500000;
-    case XMC_SPI_DEV_TFCARD: return 10000000;
+    case Chipset::DISPLAY: return 62500000;
+    case Chipset::MEMORY_CARD: return 10000000;
     default: return 1000000;
   }
 }
 
-XmcStatus xmc_spiInit() {
+XmcStatus init() {
   // SPI init
   spi_init(spiBusInst, baudrate);
   gpio_set_function(XMC_PIN_SPI_MOSI, GPIO_FUNC_SPI);
@@ -54,12 +56,19 @@ XmcStatus xmc_spiInit() {
   channel_config_set_write_increment(&dma_cfg, false);
   channel_config_set_dreq(&dma_cfg, spi_get_dreq(spiBusInst, true));
 
-  XMC_ERR_RET(xmc_semaphoreInit(&semaphore));
+  if (!semaphore) {
+    semaphore = new Semaphore();
+    if (!semaphore->isInitialized()) {
+      delete semaphore;
+      semaphore = nullptr;
+      XMC_ERR_RET(XMC_ERR_SEMAPHORE_INIT_FAILED);
+    }
+  }
 
   return XMC_OK;
 }
 
-void xmc_spiDeinit() {
+void deinit() {
   dma_channel_unclaim(dma_tx);
   spi_deinit(spiBusInst);
 
@@ -79,27 +88,33 @@ void xmc_spiDeinit() {
     gpio_deinit(pins[i]);
   }
 
-  xmc_semaphoreDeinit(&semaphore);
+  if (semaphore) {
+    delete semaphore;
+    semaphore = nullptr;
+  }
 }
 
-bool xmc_spiTryLock() { return xmc_semaphoreTryTake(&semaphore); }
+bool tryLock() {
+  if (!semaphore) return true;
+  return semaphore->tryTake();
+}
 
-XmcStatus xmc_spiUnlock() {
-  XmcStatus ret = xmc_spiDmaComplete();
-  xmc_semaphoreGive(&semaphore);
+XmcStatus unlock() {
+  XmcStatus ret = dmaComplete();
+  if (semaphore) semaphore->give();
   return ret;
 }
 
-XmcStatus xmc_spiSetBaudrate(uint32_t baud) {
+XmcStatus setBaudrate(uint32_t baud) {
   if (baud == baudrate) return XMC_OK;
-  xmc_spiDmaComplete();
+  dmaComplete();
   baudrate = baud;
   spi_set_baudrate(spiBusInst, baudrate);
   return XMC_OK;
 }
 
-XmcStatus xmc_spiWriteBlocking(const uint8_t *data, uint32_t size) {
-  xmc_spiDmaComplete();
+XmcStatus writeBlocking(const uint8_t *data, uint32_t size) {
+  dmaComplete();
   int n = spi_write_blocking(spiBusInst, data, size);
   if (n != (int)size) {
     XMC_ERR_RET(XMC_ERR_SPI_WRITE_FAILED);
@@ -107,9 +122,8 @@ XmcStatus xmc_spiWriteBlocking(const uint8_t *data, uint32_t size) {
   return XMC_OK;
 }
 
-XmcStatus xmc_spiReadBlocking(uint8_t repeated_byte, uint8_t *data,
-                                   uint32_t size) {
-  xmc_spiDmaComplete();
+XmcStatus readBlocking(uint8_t repeated_byte, uint8_t *data, uint32_t size) {
+  dmaComplete();
   int n = spi_read_blocking(spiBusInst, repeated_byte, data, size);
   if (n != (int)size) {
     XMC_ERR_RET(XMC_ERR_SPI_READ_FAILED);
@@ -117,8 +131,8 @@ XmcStatus xmc_spiReadBlocking(uint8_t repeated_byte, uint8_t *data,
   return XMC_OK;
 }
 
-XmcStatus xmc_spiDmaWriteStart(const xmc_dma_config_t *cfg, int cs) {
-  xmc_spiDmaComplete();
+XmcStatus dmaWriteStart(const dma::Config *cfg, int cs) {
+  dmaComplete();
 
   dma_channel_transfer_size_t tx_size;
   switch (cfg->element_size) {
@@ -131,29 +145,29 @@ XmcStatus xmc_spiDmaWriteStart(const xmc_dma_config_t *cfg, int cs) {
   channel_config_set_read_increment(&dma_cfg, true);
 
   if (cs >= 0) {
-    xmc_gpioWrite(cs, 0);
+    gpio::write(cs, 0);
   }
   csPin = cs;
-  dma_channel_configure(dma_tx, &dma_cfg, &spi_get_hw(spiBusInst)->dr,
-                        cfg->ptr, cfg->length, true);
+  dma_channel_configure(dma_tx, &dma_cfg, &spi_get_hw(spiBusInst)->dr, cfg->ptr,
+                        cfg->length, true);
   return XMC_OK;
 }
 
-XmcStatus xmc_spiDmaComplete() {
-  while (xmc_spiDmaIsBusy()) {
+XmcStatus dmaComplete() {
+  while (dmaIsBusy()) {
     tight_loop_contents();
   }
   if (csPin >= 0) {
-    xmc_gpioWrite(csPin, 1);
+    gpio::write(csPin, 1);
     csPin = -1;
   }
   return XMC_OK;
 }
 
-bool xmc_spiDmaIsBusy() {
-  return dma_channel_is_busy(dma_tx) || isSpiShiftBusy();
-}
+bool dmaIsBusy() { return dma_channel_is_busy(dma_tx) || isSpiShiftBusy(); }
 
 static bool isSpiShiftBusy() {
   return (spi_get_hw(spiBusInst)->sr & SPI_SSPSR_BSY_BITS) != 0;
 }
+
+}  // namespace xmc::spi

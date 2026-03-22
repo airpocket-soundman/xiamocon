@@ -1,62 +1,66 @@
-#include "xmc/system.h"
-#include "xmc/display.h"
-#include "xmc/hw/gpio.h"
-#include "xmc/hw/i2c.h"
-#include "xmc/hw/pins.h"
-#include "xmc/hw/power.h"
-#include "xmc/hw/spi.h"
-#include "xmc/hw/timer.h"
-#include "xmc/input.h"
-#include "xmc/ioex.h"
-#include "xmc/battery.h"
+#include "xmc/system.hpp"
+#include "xmc/battery.hpp"
+#include "xmc/display.hpp"
+#include "xmc/hw/gpio.hpp"
+#include "xmc/hw/i2c.hpp"
+#include "xmc/hw/pins.hpp"
+#include "xmc/hw/power.hpp"
+#include "xmc/hw/spi.hpp"
+#include "xmc/hw/timer.hpp"
+#include "xmc/input.hpp"
+#include "xmc/ioex.hpp"
 
-XmcStatus xmc_sysInit() {
-  xmc_gpioSetDir(XMC_PIN_POWER_BUTTON, false);
+namespace xmc::system {
 
-  xmc_i2cInit();
-  xmc_spiInit();
-  
-  xmc_ioexInit();
-  xmc_ioexSetDirMasked(0, 0xFF, 0xFF);
-  xmc_ioexSetDirMasked(1, 0xFF, 0xFF);
+XmcStatus init() {
+  gpio::setDir(XMC_PIN_POWER_BUTTON, false);
 
-  xmc_batteryInit();
+  i2c::init();
+  spi::init();
+
+  ioex::init();
+  ioex::setDirMasked(0, 0xFF, 0xFF);
+  ioex::setDirMasked(1, 0xFF, 0xFF);
+
+  battery::init();
 
   // Mute speaker during initialization to avoid noise
-  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioexSetDir(XMC_IOEX_PIN_SPEAKER_MUTE, true);
+  ioex::write(ioex::Pin::PERI_EN, true);
+  ioex::setDir(ioex::Pin::SPEAKER_MUTE, true);
 
   // Reset LCD
-  xmc_ioexWrite(XMC_IOEX_PIN_DISPLAY_RESET, false);
-  xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, true);
+  ioex::write(ioex::Pin::DISPLAY_RESET, false);
+  ioex::setDir(ioex::Pin::DISPLAY_RESET, true);
 
   // Power on peripherals
-  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioexSetDir(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_sleepMs(100);
-  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, false);
-  xmc_sleepMs(100);
+  ioex::write(ioex::Pin::PERI_EN, true);
+  ioex::setDir(ioex::Pin::PERI_EN, true);
+  xmc::sleepMs(100);
+  ioex::write(ioex::Pin::PERI_EN, false);
+  xmc::sleepMs(100);
 
   return XMC_OK;
 }
 
-XmcStatus xmc_sysService() {
-  xmc_batteryService();
-  xmc_inputService();
+XmcStatus Service() {
+  battery::service();
+  input::service();
   return XMC_OK;
 }
 
-XmcStatus xmc_sysRequestShutdown() {
-  xmc_displayDeinit();
-  xmc_inputDeinit();
-  xmc_batteryDeinit();
-  xmc_ioexSetDir(XMC_IOEX_PIN_DISPLAY_RESET, false);
-  xmc_ioexSetDir(XMC_IOEX_PIN_SPEAKER_MUTE, false);
-  xmc_ioexWrite(XMC_IOEX_PIN_PERI_EN, true);
-  xmc_ioexDeinit();
-  xmc_i2cDeinit();
-  xmc_spiDeinit();
-  XMC_ERR_RET(xmc_powerDeepSleep());
-  XMC_ERR_RET(xmc_powerReset(XMC_RESET_MODE_NORMAL));
+XmcStatus requestShutdown() {
+  display::deinit();
+  input::deinit();
+  battery::deinit();
+  ioex::setDir(ioex::Pin::DISPLAY_RESET, false);
+  ioex::setDir(ioex::Pin::SPEAKER_MUTE, false);
+  ioex::write(ioex::Pin::PERI_EN, true);
+  ioex::deinit();
+  i2c::deinit();
+  spi::deinit();
+  XMC_ERR_RET(power::deepSleep());
+  XMC_ERR_RET(power::reset(power::ResetMode::NORMAL));
   return XMC_OK;
 }
+
+}  // namespace xmc::system

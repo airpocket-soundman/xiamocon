@@ -1,32 +1,34 @@
-#include "xmc/input.h"
-#include "xmc/hw/timer.h"
-#include "xmc/ioex.h"
+#include "xmc/input.hpp"
+#include "xmc/hw/timer.hpp"
+#include "xmc/ioex.hpp"
 
 #include <stddef.h>
 #include <stdint.h>
 
+namespace xmc::input {
+
 static uint64_t nextUpdateMs = 0;
-static xmc_button_t curr_state = 0;
-static xmc_button_t last_state = 0;
+static Button curr_state = Button::NONE;
+static Button last_state = Button::NONE;
 
-void xmc_inputInit() {
+void init() {
   int num_game_buttons =
-      sizeof(XMC_IOEX_GAME_BUTTON_PINS) / sizeof(XMC_IOEX_GAME_BUTTON_PINS[0]);
+      sizeof(ioex::GAME_BUTTON_PINS) / sizeof(ioex::GAME_BUTTON_PINS[0]);
   for (size_t i = 0; i < num_game_buttons; i++) {
-    xmc_ioexSetDir(XMC_IOEX_GAME_BUTTON_PINS[i], false);
+    ioex::setDir(ioex::GAME_BUTTON_PINS[i], false);
   }
-  xmc_ioexSetDir(XMC_IOEX_PIN_BTN_FUNC, false);
-  curr_state = 0;
-  last_state = 0;
+  ioex::setDir(ioex::Pin::BTN_FUNC, false);
+  curr_state = Button::NONE;
+  last_state = Button::NONE;
 }
 
-void xmc_inputDeinit() {
-  curr_state = 0;
-  last_state = 0;
+void deinit() {
+  curr_state = Button::NONE;
+  last_state = Button::NONE;
 }
 
-XmcStatus xmc_inputService() {
-  uint64_t now_ms = xmc_getTimeMs();
+XmcStatus service() {
+  uint64_t now_ms = xmc::getTimeMs();
   if (now_ms < nextUpdateMs) {
     return XMC_OK;
   }
@@ -36,23 +38,23 @@ XmcStatus xmc_inputService() {
   }
 
   uint16_t tmp;
-  if (xmc_ioexTryReadAll(&tmp)) {
+  if (ioex::tryReadAll(&tmp)) {
     last_state = curr_state;
-    curr_state = ~tmp & XMC_BUTTON_ALL;
+    curr_state = ((Button)~tmp) & Button::ANY;
   }
   return XMC_OK;
 }
 
-xmc_button_t xmc_inputGetState() { return curr_state; }
+Button getState() { return curr_state; }
 
-bool xmc_inputIsPressed(xmc_button_t button) {
-  return (curr_state & button) != 0;
+bool isPressed(Button button) { return !!(curr_state & button); }
+
+bool wasPressed(Button button) {
+  return !!(curr_state & button) && !(last_state & button);
 }
 
-bool xmc_inputWasPressed(xmc_button_t button) {
-  return ((curr_state & button) != 0) && ((last_state & button) == 0);
+bool wasReleased(Button button) {
+  return !(curr_state & button) && !!(last_state & button);
 }
 
-bool xmc_inputWasReleased(xmc_button_t button) {
-  return ((curr_state & button) == 0) && ((last_state & button) != 0);
-}
+}  // namespace xmc::input

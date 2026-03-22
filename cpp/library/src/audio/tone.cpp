@@ -1,6 +1,6 @@
 #include "xmc/audio/tone.hpp"
 
-namespace xmc {
+namespace xmc::audio {
 
 static void xmc_tone_request_data(void *buffer, uint32_t size_bytes,
                                   void *context);
@@ -11,8 +11,8 @@ Tone::Tone() {
 }
 
 void Tone::init(uint32_t rate_hz) {
-  sampleRateHz = rate_hz;
-  tickPhaseStep = 0x10000UL * 1000 / sampleRateHz;
+  rateHz = rate_hz;
+  tickPhaseStep = 0x10000UL * 1000 / rateHz;
 
   waveform = Waveform::SQUARE;
   velocity = 64;
@@ -44,7 +44,7 @@ void Tone::noteOnWithFreq(uint32_t freq, uint32_t lenMs) {
     return;
   }
 
-  tonePhaseStep = (uint64_t)freq * 0x10000 / sampleRateHz;
+  tonePhaseStep = (uint64_t)freq * 0x10000 / rateHz;
   lengthCounter = lenMs;
   tickPhaseCounter = 0;
   tonePhaseCounter = 0;

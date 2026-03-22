@@ -6,52 +6,48 @@
 #ifndef XMC_APP_H
 #define XMC_APP_H
 
-#include "xmc/audio_common.h"
-#include "xmc/display.h"
-#include "xmc/xmc_common.h"
+#include "xmc/audio_common.hpp"
+#include "xmc/display.hpp"
+#include "xmc/xmc_common.hpp"
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc {
 
-typedef struct {
-  xmc_display_intf_format_t displayPixelFormat;
-  xmc_audio_sample_format_t speakerSampleFormat;
+struct AppConfig {
+  display::InterfaceFormat displayPixelFormat;
+  audio::SampleFormat speakerSampleFormat;
   uint32_t speakerSampleRateHz;
   uint32_t speakerLatencySamples;
-
-} AppConfig;
+};
 
 /**
  * Get the default application configuration.
  * @return A default application configuration struct.
  */
-AppConfig xmcGetDefaultAppConfig();
+AppConfig getDefaultAppConfig();
 
 /**
  * Get application configuration parameters. This function will be called before
- * xmc_appSetup, and the returned configuration will be used to initialize the
+ * appSetup, and the returned configuration will be used to initialize the
  * application. You can use this function to specify parameters such as speaker
  * sample rate, display resolution, etc.
  */
-AppConfig xmc_appGetConfig();
+AppConfig appGetConfig();
 
 /**
  * User defined setup function. This will be called once at the beginning of the
  * program. You can use this function to initialize your application, set up
  * peripherals, etc.
  */
-void xmc_appSetup();
+void appSetup();
 
 /**
  * User defined loop function. This will be called repeatedly after
- * xmc_appSetup. You can use this function to implement the main logic of
+ * appSetup. You can use this function to implement the main logic of
  * your application.
  */
-void xmc_appLoop();
+void appLoop();
 
-#if defined(__cplusplus)
 }
-#endif
 
 #endif
+

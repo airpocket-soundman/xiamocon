@@ -1,4 +1,4 @@
-#include "xmc/hw/ram.h"
+#include "xmc/hw/ram.hpp"
 
 #include <pico/stdlib.h>
 

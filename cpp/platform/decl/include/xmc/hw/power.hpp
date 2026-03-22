@@ -1,24 +1,22 @@
 /**
- * @file power.h
+ * @file power.hpp
  * @brief Power management interface
  */
 
-#ifndef XMC_HW_POWER_H
-#define XMC_HW_POWER_H
+#ifndef XMC_HW_POWER_HPP
+#define XMC_HW_POWER_HPP
 
-#include "xmc/hw/hw_common.h"
+#include "xmc/hw/hw_common.hpp"
 
 #include <stdint.h>
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+namespace xmc::power {
 
-/** Reset modes for xmc_powerReset. */
+/** Reset modes for reset. */
 typedef enum {
   /** Normal reset mode */
-  XMC_RESET_MODE_NORMAL = 0,
-} xmc_reset_mode_t;
+  NORMAL = 0,
+} ResetMode;
 
 /**
  * Initialize the power management functionality.
@@ -26,7 +24,7 @@ typedef enum {
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-XmcStatus xmc_powerInit();
+XmcStatus init();
 
 /**
  * Service the power management functionality.
@@ -34,24 +32,22 @@ XmcStatus xmc_powerInit();
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-XmcStatus xmc_powerService();
+XmcStatus service();
 
 /** Enter deep sleep mode.
  *
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-XmcStatus xmc_powerDeepSleep();
+XmcStatus deepSleep();
 
 /** Reset entire system.
  *
  * @warning This function is used internally by the System API. It should not
  * be called from user applications.
  */
-XmcStatus xmc_powerReset(xmc_reset_mode_t mode);
+XmcStatus reset(ResetMode mode);
 
-#if defined(__cplusplus)
-}
-#endif
+}  // namespace xmc::power
 
 #endif
