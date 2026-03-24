@@ -11,6 +11,7 @@
 
 #include "bmp_earth.hpp"
 #include "lsm6dsv16x.hpp"
+#include "r_gray1.hpp"
 #include "xmc/font/ShapoSansP_s08c07.h"
 
 namespace xmc {
@@ -23,6 +24,7 @@ static Mesh cube = createColoredCube();
 static Mesh sphere = createSphere(1.0f, 18, 9);
 static Sprite earth_texture =
     createSprite4444(256, 128, 0, (void *)bmp_earth_data);
+static Mesh r_gray1 = R_GRAY1_mesh0_create();
 static Rasterizer rasterizer =
     createRasterizer(display::WIDTH, display::HEIGHT);
 static uint32_t frame_count = 0;
@@ -46,8 +48,9 @@ void appSetup() {
   screen->clear(0);
   imu.init();
   imu_pos = {1, 0, 0, 0};
-  sphere->material = createMaterial();
-  sphere->material->colorTexture = earth_texture;
+  Material earthMat = createMaterial();
+  earthMat->colorTexture = earth_texture;
+  sphere->setMaterial(earthMat);
 }
 
 void appLoop() {
@@ -94,7 +97,7 @@ void appLoop() {
   screen->setTextColor(0xFFF);
   screen->setFont(&ShapoSansP_s08c07, 1);
 
-  if (true) {
+  if (false) {
     char buf[64];
     screen->setCursor(10, 20);
     snprintf(buf, sizeof(buf), "Frame: %lu\n", frame_count);
@@ -249,7 +252,7 @@ void appLoop() {
 
     vec3 light_dir = {0, 0.5f, 1.0f};
     light_dir = imu_pos.conjugate().rotate(light_dir);
-    rasterizer->setParallelLight(light_dir, colorf(1.5f, 1.5f, 1.5f, 1));
+    rasterizer->setParallelLight(light_dir, colorf(2.0f, 2.0f, 2.0f, 1));
 
     rasterizer->setProjection(proj);
     rasterizer->loadIdentity();
@@ -285,10 +288,13 @@ void appLoop() {
     // }
 
     rasterizer->pushMatrix();
-    rasterizer->scale(0.009f);
+    // rasterizer->scale(0.009f);
+    rasterizer->scale(0.002f);
+    //  rasterizer->scale(vec3(-0.002f, 0.002f, 0.002f));
     rasterizer->rotate(0, M_PI / 2, 0);
     rasterizer->rotate(pitch, 0, yaw);
-    rasterizer->renderMesh(sphere);
+    // rasterizer->renderMesh(sphere);
+    rasterizer->renderMesh(r_gray1);
     rasterizer->popMatrix();
 
     // rasterizer->pushMatrix();
@@ -392,7 +398,7 @@ static void create_projection_matrix(mat4 *M, const quat *Q, const vec3 *E,
   result.m[0] = e.z * px_per_m_x;
 
   // Column 1 (coefficient of vy)
-  result.m[5] = e.z * px_per_m_y;
+  result.m[5] = -e.z * px_per_m_y;
 
   // Column 2 (coefficient of vz)
   result.m[8] = -e.x * px_per_m_x - hw;

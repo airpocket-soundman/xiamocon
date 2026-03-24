@@ -38,14 +38,14 @@ Mesh createColoredCube(float s) {
       c3, c3, c3, c3, c4, c4, c4, c4, c5, c5, c5, c5,
   };
   uint16_t *idxs = new uint16_t[]{
-      0,  1,  2,  2,  1,  3,  4,  5,  6,  6,  5,  7,  8,  9,  10, 10, 9,  11,
-      12, 13, 14, 14, 13, 15, 16, 17, 18, 18, 17, 19, 20, 21, 22, 22, 21, 23,
+      2,  1,  0,  1,  2,  3,  6,  5,  4,  5,  6,  7,  10, 9,  8,  9,  10, 11,
+      14, 13, 12, 13, 14, 15, 18, 17, 16, 17, 18, 19, 22, 21, 20, 21, 22, 23,
   };
 
   return createMesh({createPrimitive(
       PrimitiveMode::TRIANGLES, createVec3Buffer(poses, 24, true),
       createVec3Buffer(norms, 24, true), createColorBuffer(cols, 24, true),
-      nullptr, nullptr, createIndexBuffer(idxs, 36, true))});
+      nullptr, createIndexBuffer(idxs, 36, true), nullptr)});
 }
 
 Mesh createSphere(float radius, int segments, int rings, colorf col) {
@@ -62,7 +62,7 @@ Mesh createSphere(float radius, int segments, int rings, colorf col) {
       float u = (float)j / segments;
       float theta = u * M_PI * 2;
       vec3 pos = {radius * sinf(phi) * cosf(theta), radius * cosf(phi),
-                  radius * sinf(phi) * sinf(theta)};
+                  radius * sinf(phi) * -sinf(theta)};
       vec3 norm = pos.normalized();
       poses->data[i * (segments + 1) + j] = pos;
       norms->data[i * (segments + 1) + j] = norm;
@@ -88,7 +88,7 @@ Mesh createSphere(float radius, int segments, int rings, colorf col) {
 
   return createMesh({createPrimitive(
       PrimitiveMode::TRIANGLES, std::move(poses), std::move(norms),
-      std::move(cols), std::move(uvs), nullptr, std::move(idxs))});
+      std::move(cols), std::move(uvs), std::move(idxs), nullptr)});
 }
 
 }  // namespace xmc

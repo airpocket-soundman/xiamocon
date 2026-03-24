@@ -45,7 +45,7 @@ static inline Vec2Buffer createVec2Buffer(int size) {
   return std::make_shared<AttributeBufferClass<vec2>>(size);
 }
 static inline Vec2Buffer createVec2Buffer(vec2 *data, int size,
-                                            bool autoFree = false) {
+                                          bool autoFree = false) {
   return std::make_shared<AttributeBufferClass<vec2>>(data, size, autoFree);
 }
 
@@ -54,7 +54,7 @@ static inline Vec3Buffer createVec3Buffer(int size) {
   return std::make_shared<AttributeBufferClass<vec3>>(size);
 }
 static inline Vec3Buffer createVec3Buffer(vec3 *data, int size,
-                                            bool autoFree = false) {
+                                          bool autoFree = false) {
   return std::make_shared<AttributeBufferClass<vec3>>(data, size, autoFree);
 }
 
@@ -63,7 +63,7 @@ static inline ColorBuffer createColorBuffer(int size) {
   return std::make_shared<AttributeBufferClass<colorf>>(size);
 }
 static inline ColorBuffer createColorBuffer(colorf *data, int size,
-                                              bool autoFree = false) {
+                                            bool autoFree = false) {
   return std::make_shared<AttributeBufferClass<colorf>>(data, size, autoFree);
 }
 
@@ -100,7 +100,7 @@ static inline IndexBuffer createIndexBuffer(int size) {
 }
 
 static inline IndexBuffer createIndexBuffer(uint16_t *data, int size,
-                                              bool autoFree = false) {
+                                            bool autoFree = false) {
   return std::make_shared<IndexBufferClass>(data, size, autoFree);
 }
 
@@ -124,18 +124,18 @@ class PrimitiveClass {
   Vec3Buffer normal;
   ColorBuffer color;
   Vec2Buffer uv;
-  Material material;
   IndexBuffer indexes;
+  Material material;
   PrimitiveClass(PrimitiveMode mode, Vec3Buffer pos, Vec3Buffer norm,
-                 ColorBuffer col, Vec2Buffer uv, Material mat,
-                 IndexBuffer idx = nullptr)
+                 ColorBuffer col, Vec2Buffer uv,
+                 IndexBuffer idx = nullptr, Material mat = nullptr)
       : mode(mode),
         position(pos),
         normal(norm),
         color(col),
         uv(uv),
-        material(mat),
-        indexes(idx) {}
+        indexes(idx),
+        material(mat) {}
 
   inline int numVertices() {
     if (indexes) {
@@ -162,28 +162,26 @@ class PrimitiveClass {
 };
 using Primitive = std::shared_ptr<PrimitiveClass>;
 static inline Primitive createPrimitive(PrimitiveMode mode, Vec3Buffer pos,
-                                         Vec3Buffer norm, ColorBuffer col,
-                                         Vec2Buffer uv = nullptr,
-                                         Material mat = nullptr,
-                                         IndexBuffer idx = nullptr) {
-  return std::make_shared<PrimitiveClass>(mode, pos, norm, col, uv, mat, idx);
+                                        Vec3Buffer norm, ColorBuffer col,
+                                        Vec2Buffer uv = nullptr,
+                                        IndexBuffer idx = nullptr,
+                                        Material mat = nullptr) {
+  return std::make_shared<PrimitiveClass>(mode, pos, norm, col, uv, idx, mat);
 }
 
 class MeshClass {
  public:
   std::vector<Primitive> primitives;
-  Material material;
-  MeshClass(std::vector<Primitive> &&prims)
-      : primitives(std::move(prims)), material(nullptr) {}
-  MeshClass(std::vector<Primitive> &&prims, Material &mat)
-      : primitives(std::move(prims)), material(mat) {}
+  MeshClass(std::vector<Primitive> &&prims) : primitives(std::move(prims)) {}
+  void setMaterial(Material mat) {
+    for (Primitive &prim : primitives) {
+      prim->material = mat;
+    }
+  }
 };
 using Mesh = std::shared_ptr<MeshClass>;
 static inline Mesh createMesh(std::vector<Primitive> &&prims) {
   return std::make_shared<MeshClass>(std::move(prims));
-}
-static inline Mesh createMesh(std::vector<Primitive> &&prims, Material mat) {
-  return std::make_shared<MeshClass>(std::move(prims), mat);
 }
 
 /**
@@ -203,7 +201,7 @@ Mesh createColoredCube(float s = 1.0f);
  * @return A Mesh object representing the sphere
  */
 Mesh createSphere(float radius = 1.0f, int segments = 12, int rings = 6,
-                   colorf col = {1.0f, 1.0f, 1.0f, 1.0f});
+                  colorf col = {1.0f, 1.0f, 1.0f, 1.0f});
 
 }  // namespace xmc
 

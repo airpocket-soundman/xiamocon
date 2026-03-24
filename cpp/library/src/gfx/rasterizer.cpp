@@ -49,7 +49,7 @@ void RasterizerClass::clearDepth(depth_t value) {
 
 void RasterizerClass::renderMesh(const Mesh &mesh) {
   for (const Primitive &prim : mesh->primitives) {
-    renderPrimitive(prim, mesh->material);
+    renderPrimitive(prim, prim->material);
   }
 }
 
