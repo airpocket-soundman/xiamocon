@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where pio:*)",
+      "Bash(where pio.exe)",
+      "Bash(where platformio:*)",
+      "Bash(for dir:*)",
+      "Bash(do echo:*)",
+      "Read(//d/workspace/github/xiamocon/cpp/example/atoms3_demo/$dir/src/**)",
+      "Bash(done)",
+      "Bash(find D:workspacegithubxiamoconcppexampleimu_demo -type f -name *)",
+      "Bash(find D:workspacegithubxiamoconcpp -type f -name *.hpp -o -name *.h)"
+    ]
+  }
+}

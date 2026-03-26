@@ -25,10 +25,16 @@ enum class InterfaceFormat {
 };
 
 /** Display width in pixels */
-static constexpr int WIDTH = 240;
+#ifndef XMC_DISPLAY_WIDTH
+#define XMC_DISPLAY_WIDTH 240
+#endif
+static constexpr int WIDTH = XMC_DISPLAY_WIDTH;
 
 /** Display height in pixels */
-static constexpr int HEIGHT = 240;
+#ifndef XMC_DISPLAY_HEIGHT
+#define XMC_DISPLAY_HEIGHT 240
+#endif
+static constexpr int HEIGHT = XMC_DISPLAY_HEIGHT;
 
 /**
  * Initialize the display. This will set up the GPIO pins, reset the display,
